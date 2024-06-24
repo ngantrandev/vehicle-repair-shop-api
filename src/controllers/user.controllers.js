@@ -1,4 +1,4 @@
-const { tableNames } = require('../configs/constants.config');
+const { TABLE_NAMES } = require('../configs/constants.config');
 const {
     selectData,
     convertDateToGMT7,
@@ -6,7 +6,7 @@ const {
 } = require('../ultil.lib');
 
 const getAllUser = async (req, res) => {
-    const query = `SELECT * FROM ${tableNames.users}`;
+    const query = `SELECT * FROM ${TABLE_NAMES.users}`;
 
     const users = await selectData(query, []);
 

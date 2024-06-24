@@ -1,4 +1,4 @@
-const { tableNames, userRoles } = require('../configs/constants.config');
+const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
 const {
     selectData,
     comparePassWord,
@@ -36,7 +36,7 @@ const register = async (req, res) => {
         return;
     }
 
-    const selectQuery = `SELECT * FROM ${tableNames.users} WHERE username = ?`;
+    const selectQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?`;
     const users = await selectData(selectQuery, [inputUsername]);
 
     if (users.length > 0) {
@@ -49,10 +49,10 @@ const register = async (req, res) => {
 
     const hashPassword = await hashPassWord(inputPassword);
 
-    const insertQuery = `INSERT INTO ${tableNames.users} VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const insertQuery = `INSERT INTO ${TABLE_NAMES.users} VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const imageUrl = '';
-    const role = userRoles.customer;
+    const role = USER_ROLES.customer;
     const address = null;
     const timeCreated = getCurrentTimeInGMT7();
 
@@ -99,7 +99,46 @@ const signin = async (req, res) => {
             return;
         }
 
-        const query = `SELECT * FROM ${tableNames.users} WHERE username = ?`;
+        const queryFindStaff = `
+        SELECT ${TABLE_NAMES.staffs}.*, ${TABLE_NAMES.service_stations}.name AS service_station_name, ${TABLE_NAMES.service_stations}.address AS service_station_adress
+            FROM ${TABLE_NAMES.staffs}
+            JOIN ${TABLE_NAMES.service_stations}
+            ON ${TABLE_NAMES.staffs}.station_id = ${TABLE_NAMES.service_stations}.id
+            WHERE username = ?
+        `;
+
+        const staffs = await selectData(queryFindStaff, [inputUsername]);
+
+        // staffs length > 0 => user is a staff
+        if (staffs.length > 0) {
+            const result = await comparePassWord(
+                inputPassword,
+                staffs[0].password
+            );
+
+            if (result) {
+                const { password, ...newStaffInfo } = staffs[0];
+
+                newStaffInfo.created_at = convertTimeToGMT7(
+                    newStaffInfo.created_at
+                );
+                newStaffInfo.birthday = convertDateToGMT7(
+                    newStaffInfo.birthday
+                );
+
+                const token = generateJWT(inputUsername, USER_ROLES.staff);
+
+                res.status(200).json({
+                    success: true,
+                    message: 'Sign in successfully!',
+                    token: token,
+                    data: newStaffInfo,
+                });
+                return;
+            }
+        }
+
+        const query = `SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?`;
 
         const users = await selectData(query, [inputUsername]);
 
@@ -128,7 +167,7 @@ const signin = async (req, res) => {
         newUserInfo.created_at = convertTimeToGMT7(newUserInfo.created_at);
         newUserInfo.birthday = convertDateToGMT7(newUserInfo.birthday);
 
-        const token = generateJWT(inputUsername, newUserInfo.phone);
+        const token = generateJWT(inputUsername, newUserInfo.role);
 
         res.status(200).json({
             success: true,
