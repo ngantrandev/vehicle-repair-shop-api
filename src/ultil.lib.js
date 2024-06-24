@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const moment = require('moment-timezone');
+const jwt = require('jsonwebtoken');
 
 const connection = require('./configs/db.config');
 
@@ -46,10 +47,37 @@ const getCurrentTimeInGMT7 = () => {
     return moment.tz('Asia/Bangkok').format('YYYY-MM-DD HH:mm:ss');
 };
 
+const convertTimeToGMT7 = (time) => {
+    const localDateTime = moment.utc(time).tz('Asia/Bangkok');
+
+    return localDateTime.format('YYYY-MM-DD HH:mm:ss');
+};
+
+const convertDateToGMT7 = (date) => {
+    const localDate = moment.utc(date).tz('Asia/Bangkok');
+    return localDate.format('YYYY-MM-DD');
+};
+
+const generateJWT = (username, phone) => {
+    const tokent = jwt.sign(
+        {
+            username,
+            phone,
+        },
+        process.env.JWT_ACCESS_TOKEN,
+        { expiresIn: '1d' }
+    );
+
+    return tokent;
+};
+
 module.exports = {
     excuteQuery,
     selectData,
     hashPassWord,
     comparePassWord,
     getCurrentTimeInGMT7,
+    convertTimeToGMT7,
+    convertDateToGMT7,
+    generateJWT,
 };

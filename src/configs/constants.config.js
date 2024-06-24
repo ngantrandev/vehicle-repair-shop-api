@@ -4,4 +4,9 @@ const tableNames = {
     users: 'users',
 };
 
-module.exports = { APP_NAME, tableNames };
+const userRoles = {
+    admin: 'admin',
+    customer: 'customer',
+};
+
+module.exports = { APP_NAME, tableNames, userRoles };
