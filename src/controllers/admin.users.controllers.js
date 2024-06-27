@@ -6,16 +6,19 @@ const {
 } = require('../ultil.lib');
 
 const getAllUser = async (req, res) => {
+    console.log(req.tokenPayload.username);
     const query = `SELECT * FROM ${TABLE_NAMES.users}`;
 
     const users = await selectData(query, []);
 
-    const newUsers = users.map(({ password, ...other }) => {
-        other.birthday = convertDateToGMT7(other.birthday);
-        other.created_at = convertTimeToGMT7(other.created_at);
+    const newUsers = users
+        .filter(({ username }) => req.tokenPayload.username !== username)
+        .map(({ password, ...other }) => {
+            other.birthday = convertDateToGMT7(other.birthday);
+            other.created_at = convertTimeToGMT7(other.created_at);
 
-        return other;
-    });
+            return other;
+        });
 
     res.status(200).json({
         success: true,

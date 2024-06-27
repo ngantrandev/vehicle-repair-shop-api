@@ -36,8 +36,12 @@ const register = async (req, res) => {
         return;
     }
 
-    const selectQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?`;
-    const users = await selectData(selectQuery, [inputUsername]);
+    const selectQuery = `
+        SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?
+        UNION
+        SELECT * FROM ${TABLE_NAMES.staffs} WHERE username = ?
+    `;
+    const users = await selectData(selectQuery, [inputUsername, inputUsername]);
 
     if (users.length > 0) {
         res.status(409).json({

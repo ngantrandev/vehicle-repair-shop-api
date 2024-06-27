@@ -1,11 +1,11 @@
 const router = require('express').Router();
-const userController = require('../controllers/user.controllers');
+const adminUsersController = require('../controllers/admin.users.controllers');
 const middlewareControllers = require('../middlewares/verify.middlewares');
 
 router.get(
     '/',
-    middlewareControllers.verifyStaffRole,
-    userController.getAllUser
+    middlewareControllers.verifyAdminRole,
+    adminUsersController.getAllUser
 );
 
 module.exports = router;
