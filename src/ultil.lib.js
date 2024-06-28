@@ -71,6 +71,16 @@ const generateJWT = (username, role) => {
     return tokent;
 };
 
+const isValidInteger = (value) => {
+    const trimmedValue = value.trim();
+
+    return (
+        !isNaN(trimmedValue) &&
+        Number.isInteger(Number(trimmedValue)) &&
+        trimmedValue.length > 0
+    );
+};
+
 module.exports = {
     excuteQuery,
     selectData,
@@ -80,4 +90,5 @@ module.exports = {
     convertTimeToGMT7,
     convertDateToGMT7,
     generateJWT,
+    isValidInteger,
 };

@@ -6,6 +6,11 @@ const middlewareControllers = require('../middlewares/verify.middlewares');
 const apiRoute = express();
 
 apiRoute.use('/auth', authRoutes);
-apiRoute.use('/admin/users', middlewareControllers.verifyToken, adminUsersRoutes);
+apiRoute.use(
+    '/admin/users',
+    middlewareControllers.verifyToken,
+    middlewareControllers.verifyAdminRole,
+    adminUsersRoutes
+);
 
 module.exports = apiRoute;

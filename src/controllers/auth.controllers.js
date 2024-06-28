@@ -11,37 +11,34 @@ const {
 } = require('../ultil.lib');
 
 const register = async (req, res) => {
-    const inputUsername = req.body.username;
-    const inputPassword = req.body.password;
-    const inputFirstName = req.body.firstname;
-    const inputLastName = req.body.lastname;
-    const inputBirthday = req.body.birthday;
-    const inputEmail = req.body.email;
-    const inputPhone = req.body.phone;
+    const requiredFields = [
+        'username',
+        'password',
+        'firstname',
+        'lastname',
+        'email',
+    ];
 
-    if (
-        !inputUsername ||
-        !inputPassword ||
-        !inputFirstName ||
-        !inputLastName ||
-        !inputBirthday ||
-        !inputEmail ||
-        !inputPhone
-    ) {
-        res.status(400).json({
-            success: false,
-            message: 'Missing value',
-        });
-
-        return;
+    for (const field of requiredFields) {
+        if (!req.body[field]) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing required field: ${field}`,
+            });
+        }
     }
+
+    /* FIND USER */
 
     const selectQuery = `
         SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?
         UNION
         SELECT * FROM ${TABLE_NAMES.staffs} WHERE username = ?
     `;
-    const users = await selectData(selectQuery, [inputUsername, inputUsername]);
+    const users = await selectData(selectQuery, [
+        req.body.username,
+        req.body.username,
+    ]);
 
     if (users.length > 0) {
         res.status(409).json({
@@ -51,33 +48,35 @@ const register = async (req, res) => {
         return;
     }
 
-    const hashPassword = await hashPassWord(inputPassword);
+    /* CREATE USER */
 
-    const insertQuery = `INSERT INTO ${TABLE_NAMES.users} VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const fields = requiredFields.map((field) => ` ${field}`);
 
-    const imageUrl = '';
-    const role = USER_ROLES.customer;
-    const address = null;
-    const timeCreated = getCurrentTimeInGMT7();
+    const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
-    const result = await excuteQuery(insertQuery, [
-        inputUsername,
-        hashPassword,
-        inputFirstName,
-        inputLastName,
-        inputBirthday,
-        imageUrl,
-        inputEmail,
-        address,
-        inputPhone,
-        role,
-        timeCreated,
-    ]);
+    const values = [];
+
+    for (const field of requiredFields) {
+        const value = req.body[field];
+        if (field === 'password') {
+            const hash = await hashPassWord(value);
+            values.push(hash);
+        } else {
+            values.push(value);
+        }
+    }
+
+    // add role value
+    values.push(USER_ROLES.customer);
+    // add time created account
+    values.push(getCurrentTimeInGMT7());
+
+    const result = await excuteQuery(insertQuery, values);
 
     if (!result) {
         res.status(500).json({
             success: false,
-            message: 'Somthing went wrongs!',
+            message: 'cannot create account at this time!',
         });
 
         return;
