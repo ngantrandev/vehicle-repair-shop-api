@@ -81,6 +81,10 @@ const isValidInteger = (value) => {
     );
 };
 
+const isValidTime = (time) => {
+    return moment(time, 'HH:mm:ss', true).isValid();
+};
+
 module.exports = {
     excuteQuery,
     selectData,
@@ -91,4 +95,5 @@ module.exports = {
     convertDateToGMT7,
     generateJWT,
     isValidInteger,
+    isValidTime,
 };

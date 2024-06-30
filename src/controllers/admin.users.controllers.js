@@ -6,7 +6,6 @@ const {
 } = require('../ultil.lib');
 
 const getAllUser = async (req, res) => {
-    console.log(req.tokenPayload.username);
     const query = `SELECT * FROM ${TABLE_NAMES.users}`;
 
     const users = await selectData(query, []);
