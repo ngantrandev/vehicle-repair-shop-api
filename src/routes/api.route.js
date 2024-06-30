@@ -1,7 +1,7 @@
 const express = require('express');
-const authRoutes = require('./auth.routes');
+const authRoutes = require('./auth.route');
 
-const middlewareControllers = require('../middlewares/verify.middlewares');
+const middlewareControllers = require('../middlewares/verify.middleware');
 const adminRoutes = require('./admin.route');
 
 const apiRoute = express();

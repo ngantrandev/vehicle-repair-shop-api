@@ -1,7 +1,6 @@
 const servicesControllers = require('../controllers/services.controller');
 const serviceControllers = require('../controllers/service.controller');
 const adminServiceControllers = require('../controllers/admin.service.controller');
-const { route } = require('./auth.routes');
 
 const router = require('express').Router();
 
