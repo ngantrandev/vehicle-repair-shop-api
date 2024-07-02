@@ -12,6 +12,8 @@ const TABLE_NAMES = {
     spare_parts_services: 'spare_parts_services',
     staffs: 'staffs',
     addresses: 'google_map_addresses',
+    motorcycle_brands: 'motorcycle_brands',
+    motorcycles: 'motorcycles',
 };
 
 const USER_ROLES = {
