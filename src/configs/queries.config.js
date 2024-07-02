@@ -8,4 +8,14 @@ const QUERY_SELECT_SERVICE_BY_ID = `
             WHERE ${TABLE_NAMES.services}.id = ?
         `;
 
-module.exports = { QUERY_SELECT_SERVICE_BY_ID };
+const QUERY_SELECT_STAFF_BY_ID = `
+    SELECT
+        s.*,
+        ss.name AS service_station_name
+    FROM ${TABLE_NAMES.staffs} AS s
+    JOIN ${TABLE_NAMES.service_stations} AS ss
+        ON s.station_id = ss.id
+    WHERE s.id = ?
+`;
+
+module.exports = { QUERY_SELECT_SERVICE_BY_ID, QUERY_SELECT_STAFF_BY_ID };

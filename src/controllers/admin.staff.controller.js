@@ -1,15 +1,16 @@
-const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
+const { TABLE_NAMES, ACCOUNT_STATE } = require('../configs/constants.config');
+const { QUERY_SELECT_STAFF_BY_ID } = require('../configs/queries.config');
 const {
     selectData,
-    excuteQuery,
+    isValidInteger,
     convertDateToGMT7,
     convertTimeToGMT7,
-    getCurrentTimeInGMT7,
     hashPassWord,
-    isValidInteger,
+    getCurrentTimeInGMT7,
+    excuteQuery,
 } = require('../ultil.lib');
 
-const getUserById = async (req, res) => {
+const getStaffById = async (req, res) => {
     if (!req.params.id) {
         return res.status(400).json({
             success: false,
@@ -25,36 +26,37 @@ const getUserById = async (req, res) => {
         return;
     }
 
-    const query = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
+    const query = QUERY_SELECT_STAFF_BY_ID;
 
-    const users = await selectData(query, [req.params.id]);
+    const staffs = await selectData(query, [req.params.id]);
 
-    if (users.length === 0) {
+    if (staffs.length === 0) {
         res.status(404).json({
             success: false,
-            message: 'User not found!',
+            message: 'Staff not found!',
         });
         return;
     }
 
-    const { password, ...newUser } = users[0];
-    newUser.birthday = convertDateToGMT7(newUser.birthday);
-    newUser.created_at = convertTimeToGMT7(newUser.created_at);
+    const { password, station_id, ...other } = staffs[0];
+    other.birthday = convertDateToGMT7(other.birthday);
+    other.created_at = convertTimeToGMT7(other.created_at);
 
     res.status(200).json({
         success: true,
-        message: 'Find user successfully!',
-        data: newUser,
+        message: 'Find staff successfully!',
+        data: other,
     });
 };
 
-const createUser = async (req, res) => {
+const createStaff = async (req, res) => {
     const requiredFields = [
         'username',
         'password',
         'firstname',
         'lastname',
         'email',
+        'station_id',
     ];
 
     for (const field of requiredFields) {
@@ -64,6 +66,15 @@ const createUser = async (req, res) => {
                 message: `Missing required field: ${field}`,
             });
         }
+    }
+
+    /**VALIDATE VALUE */
+    if (!isValidInteger(req.body.station_id)) {
+        res.status(400).json({
+            success: false,
+            message: 'station id must be interger',
+        });
+        return;
     }
 
     /* FIND USER*/
@@ -89,26 +100,28 @@ const createUser = async (req, res) => {
 
     /** CREATE USER */
 
-    const insertedFields = requiredFields.map((field) => ` ${field}`);
-
-    const queryCreate = `INSERT INTO ${TABLE_NAMES.users} (${insertedFields}, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-
+    const insertedFields = [];
     const insertedValues = [];
 
     for (const field of requiredFields) {
         const value = req.body[field];
+
         if (field === 'password') {
             const hash = await hashPassWord(value);
             insertedValues.push(hash);
         } else {
             insertedValues.push(value);
         }
+
+        insertedFields.push(`${field} `);
     }
 
-    // add role value
-    insertedValues.push(USER_ROLES.customer);
+    const queryCreate = `INSERT INTO ${TABLE_NAMES.staffs} (${insertedFields}, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
     // add time created
     insertedValues.push(getCurrentTimeInGMT7());
+    // set account state: active state
+    insertedValues.push(ACCOUNT_STATE.active);
 
     const result = await excuteQuery(queryCreate, insertedValues);
 
@@ -123,11 +136,11 @@ const createUser = async (req, res) => {
 
     res.status(200).json({
         success: true,
-        message: 'Created account successfully!',
+        message: 'Created staff account successfully!',
     });
 };
 
-const updateUser = async (req, res) => {
+const updateStaff = async (req, res) => {
     if (!req.params.id) {
         res.status(400).json({
             success: false,
@@ -145,13 +158,15 @@ const updateUser = async (req, res) => {
     }
 
     /**FIND USER */
-    const findUserQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
-    const usersFound = await selectData(findUserQuery, [req.params.id]);
+    const findStaffQuery = `
+        SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
+    `;
+    const staffsFound = await selectData(findStaffQuery, [req.params.id]);
 
-    if (usersFound.length === 0) {
+    if (staffsFound.length === 0) {
         res.status(404).json({
             success: false,
-            message: 'User not found!',
+            message: 'Staff not found!',
         });
         return;
     }
@@ -166,7 +181,8 @@ const updateUser = async (req, res) => {
         'email',
         'address',
         'phone',
-        'role',
+        'station_id',
+        'active',
     ];
 
     const updateFields = [];
@@ -177,7 +193,18 @@ const updateUser = async (req, res) => {
             continue;
         }
 
-        if (field === 'password') {
+        if (field === 'username') {
+            if (await isUsernameExist(req.body[field], req.params.id)) {
+                res.status(409).json({
+                    success: false,
+                    message: 'username already exist!',
+                });
+                return;
+            }
+
+            updateFields.push(`${field} = ?`);
+            updateValues.push(req.body[field]);
+        } else if (field === 'password') {
             if (req.body[field].trim().length === 0) {
                 res.status(400).json({
                     success: false,
@@ -209,8 +236,8 @@ const updateUser = async (req, res) => {
 
     try {
         const updateQuery = `
-            UPDATE ${TABLE_NAMES.users}
-            SET ${updateFields.join(', ')}
+            UPDATE ${TABLE_NAMES.staffs}
+            SET ${updateFields}
             WHERE id = ?
         `;
 
@@ -222,21 +249,21 @@ const updateUser = async (req, res) => {
         if (!result) {
             return res.status(500).json({
                 success: false,
-                message: 'Cannot update user info at this time!',
+                message: 'Cannot update staff info at this time!',
             });
         }
 
-        const querySelect = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
-        const updatedUsers = await selectData(querySelect, [req.params.id]);
+        const querySelect = QUERY_SELECT_STAFF_BY_ID;
+        const updatedStaffs = await selectData(querySelect, [req.params.id]);
 
-        const { password, ...otherUserInfo } = updatedUsers[0];
-        otherUserInfo.created_at = convertTimeToGMT7(otherUserInfo.created_at);
-        otherUserInfo.birthday = convertDateToGMT7(otherUserInfo.birthday);
+        const { password, station_id, ...other } = updatedStaffs[0];
+        other.created_at = convertTimeToGMT7(other.created_at);
+        other.birthday = convertDateToGMT7(other.birthday);
 
         res.status(200).json({
             success: true,
             message: 'Updated user info successfully!',
-            data: otherUserInfo,
+            data: other,
         });
     } catch (error) {
         res.status(500).json({
@@ -246,7 +273,7 @@ const updateUser = async (req, res) => {
     }
 };
 
-const deleteUser = async (req, res) => {
+const deleteStaff = async (req, res) => {
     if (!req.params.id) {
         return res.status(400).json({
             success: false,
@@ -263,7 +290,7 @@ const deleteUser = async (req, res) => {
     }
 
     /**DELETE USER */
-    const deleteQuery = `DELETE FROM ${TABLE_NAMES.users} WHERE id = ?`;
+    const deleteQuery = `DELETE FROM ${TABLE_NAMES.staffs} WHERE id = ?`;
     const result = await excuteQuery(deleteQuery, [req.params.id]);
 
     if (!result) {
@@ -276,7 +303,7 @@ const deleteUser = async (req, res) => {
     } else if (result.affectedRows === 0) {
         res.status(404).json({
             success: false,
-            message: 'user not found!',
+            message: 'Staff not found!',
         });
 
         return;
@@ -284,15 +311,32 @@ const deleteUser = async (req, res) => {
 
     res.status(200).json({
         success: true,
-        message: 'Deleted account successfully!',
+        message: 'Deleted staff account successfully!',
     });
 };
 
-const adminUserControllers = {
-    getUserById,
-    createUser,
-    deleteUser,
-    updateUser,
+const isUsernameExist = async (username, id) => {
+    /**FIND USERNAME EXIST */
+    const query = `
+        SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?
+        UNION
+        SELECT * FROM ${TABLE_NAMES.staffs} WHERE username = ? AND id != ?
+    `;
+
+    const staffsFound = await selectData(query, [username, username, id]);
+
+    if (staffsFound.length > 0) {
+        return true;
+    }
+
+    return false;
 };
 
-module.exports = adminUserControllers;
+const adminStaffController = {
+    getStaffById,
+    createStaff,
+    updateStaff,
+    deleteStaff,
+};
+
+module.exports = adminStaffController;
