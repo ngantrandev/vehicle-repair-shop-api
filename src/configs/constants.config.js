@@ -14,6 +14,7 @@ const TABLE_NAMES = {
     addresses: 'google_map_addresses',
     motorcycle_brands: 'motorcycle_brands',
     motorcycles: 'motorcycles',
+    carts: 'carts',
 };
 
 const USER_ROLES = {

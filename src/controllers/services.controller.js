@@ -12,7 +12,7 @@ const getAllServices = async (req, res) => {
     const services = await selectData(query, []);
 
     res.status(200).json({
-        success: false,
+        success: true,
         message: 'Get all services successfully!',
         data: services,
     });

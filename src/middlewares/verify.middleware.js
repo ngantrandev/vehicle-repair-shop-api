@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { USER_ROLES } = require('../configs/constants.config');
+const { USER_ROLES, TABLE_NAMES } = require('../configs/constants.config');
+const { selectData } = require('../ultil.lib');
 
 const verifyToken = (req, res, next) => {
     const token = req.headers.token;
@@ -57,10 +58,45 @@ const verifyStaffRole = (req, res, next) => {
     next();
 };
 
+const verifyOwner = async (req, res, next) => {
+    if (!req.params.user_id) {
+        res.status(400).json({
+            success: false,
+            message: 'missing user id param',
+        });
+
+        return;
+    }
+
+    const query = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
+    const users = await selectData(query, [req.params.user_id]);
+
+    // not found this user with id
+    if (users.length === 0) {
+        res.status(404).json({
+            success: false,
+            message: 'Not found this user',
+        });
+        return;
+    }
+
+    // difference user
+    if (users[0].username != req.tokenPayload.username) {
+        res.status(403).json({
+            success: false,
+            message: 'You are not allowed to do this action',
+        });
+        return;
+    }
+
+    next();
+};
+
 const middlewareControllers = {
     verifyToken,
     verifyAdminRole,
     verifyStaffRole,
+    verifyOwner,
 };
 
 module.exports = middlewareControllers;

@@ -6,6 +6,7 @@ const adminRoutes = require('./admin.route');
 const motorcycleBrandsRoute = require('../routes/motorcycle.brands.route');
 const servicesRoute = require('../routes/services.route');
 const motorcyclesRoute = require('../routes/motorcycles.route');
+const usersRoutes = require('../routes/users.route');
 
 const apiRoute = express();
 
@@ -16,6 +17,8 @@ apiRoute.use(
     middlewareControllers.verifyAdminRole,
     adminRoutes
 );
+
+apiRoute.use('/users', usersRoutes);
 
 apiRoute.use('/motorcycle_brands', motorcycleBrandsRoute);
 
