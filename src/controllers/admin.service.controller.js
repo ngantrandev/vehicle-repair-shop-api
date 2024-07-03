@@ -1,10 +1,12 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
 const { QUERY_SELECT_SERVICE_BY_ID } = require('../configs/queries.config');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     isValidInteger,
     isValidTime,
     excuteQuery,
     selectData,
+    sendResponse,
 } = require('../ultil.lib');
 
 const createService = async (req, res) => {
@@ -18,34 +20,38 @@ const createService = async (req, res) => {
 
     for (const field of requiredFields) {
         if (!req.body[field]) {
-            return res.status(400).json({
-                success: false,
-                message: `Missing required field: ${field}`,
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `Missing required field: ${field}`
+            );
+            return;
         }
     }
 
     /** VALIDATE VALUE TYPE */
 
     if (!isValidInteger(req.body.category_id)) {
-        return res.status(400).json({
-            success: false,
-            message: `category_id must be integer`,
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            `category_id must be integer`
+        );
+        return;
     }
 
     if (!isValidTime(req.body.estimated_time)) {
-        return res.status(400).json({
-            success: false,
-            message: `estimated_time must be format like HH:mm:ss`,
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            `estimated_time must be format like HH:mm:ss`
+        );
+        return;
     }
 
     if (!isValidInteger(req.body.price)) {
-        return res.status(400).json({
-            success: false,
-            message: `price must be integer`,
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, `price must be integer`);
+        return;
     }
 
     /** CREATE SERVICE */
@@ -62,49 +68,41 @@ const createService = async (req, res) => {
     const result = await excuteQuery(queryCreate, insertedValues);
 
     if (!result) {
-        res.status(500).json({
-            success: false,
-            message: 'Somthing went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Cannot create service at this time!'
+        );
 
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Created service successfully!',
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Created service successfully!');
 };
 
 const updateService = async (req, res) => {
     if (!req.params.id) {
-        res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
         return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
     if (req.body.estimated_time && !isValidTime(req.body.estimated_time)) {
-        return res.status(400).json({
-            success: false,
-            message: `estimated_time must be format like HH:mm:ss`,
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            `estimated_time must be format like HH:mm:ss`
+        );
+        return;
     }
 
     if (req.body.price && !isValidInteger(req.body.price)) {
-        return res.status(400).json({
-            success: false,
-            message: `price must be integer`,
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, `price must be integer`);
+        return;
     }
 
     /**FIND SERVICE */
@@ -112,10 +110,7 @@ const updateService = async (req, res) => {
     const servicesFound = await selectData(findQuery, [req.params.id]);
 
     if (servicesFound.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'service not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
         return;
     }
 
@@ -149,10 +144,7 @@ const updateService = async (req, res) => {
     }
 
     if (updateFields.length === 0) {
-        res.status(400).json({
-            success: false,
-            message: 'No fields to update',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
         return;
     }
 
@@ -169,42 +161,42 @@ const updateService = async (req, res) => {
         ]);
 
         if (!result) {
-            return res.status(500).json({
-                success: false,
-                message: 'Cannot update service info at this time!',
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'Cannot update service info at this time!'
+            );
+            return;
         }
 
         // response updated service
         const querySelect = QUERY_SELECT_SERVICE_BY_ID;
         const updatedServices = await selectData(querySelect, [req.params.id]);
 
-        res.status(200).json({
-            success: true,
-            message: 'Updated service info successfully!',
-            data: updatedServices[0],
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Updated service info successfully!',
+            updatedServices[0]
+        );
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'something went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrongs!'
+        );
     }
 };
 
 const deleteService = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -213,10 +205,7 @@ const deleteService = async (req, res) => {
     const servicesFound = await selectData(findQuery, [req.params.id]);
 
     if (servicesFound.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'service not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
         return;
     }
 
@@ -225,18 +214,16 @@ const deleteService = async (req, res) => {
     const result = await excuteQuery(deleteQuery, [req.params.id]);
 
     if (!result) {
-        res.status(500).json({
-            success: false,
-            message: 'Somthing went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Cannot delete service at this time!'
+        );
 
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Deleted service successfully!',
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Deleted service successfully!');
 };
 
 const adminServiceController = {

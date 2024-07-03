@@ -1,20 +1,16 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
 const { QUERY_SELECT_SERVICE_BY_ID } = require('../configs/queries.config');
-const { selectData, isValidInteger } = require('../ultil.lib');
+const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getServiceById = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -23,18 +19,16 @@ const getServiceById = async (req, res) => {
     const servicesFound = await selectData(selectQuery, [req.params.id]);
 
     if (servicesFound.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'Service not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Service not found!');
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Get service by id successfully!',
-        data: servicesFound[0],
-    });
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'Get service by id successfully!',
+        servicesFound[0]
+    );
 };
 
 const serviceControllers = {

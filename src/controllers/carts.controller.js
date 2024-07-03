@@ -1,34 +1,19 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
-const { selectData, isValidInteger } = require('../ultil.lib');
+const { STATUS_CODE } = require('../configs/status.codes.config');
+const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
 
 const getAllUserCarts = async (req, res) => {
-    if (!req.params.user_id) {
-        return res.status(400).json({
-            success: false,
-            message: 'user id is required',
-        });
-    }
-
-    if (!isValidInteger(req.params.user_id)) {
-        res.status(400).json({
-            success: false,
-            message: 'user id must be interger',
-        });
-        return;
-    }
-
     /**NO NEED TO FIND USER
      * BECAUSE JUST DONE ON THE MIDDLEWARE BEFORE
      */
+    // if (!isValidInteger(req.params.user_id)) {
+    //     rn;
+    // }
     // const findQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
     // const usersFound = await selectData(findQuery, [req.params.user_id]);
 
     // if (usersFound.length === 0) {
-    //     res.status(404).json({
-    //         success: false,
-    //         message: 'user not found!',
-    //     });
-    //     return;
+    //     rn;
     // }
 
     const query = `
@@ -46,11 +31,12 @@ const getAllUserCarts = async (req, res) => {
 
     const userCarts = await selectData(query, [req.params.user_id]);
 
-    res.status(200).json({
-        success: true,
-        message: 'Get all services successfully!',
-        data: userCarts,
-    });
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'Get all user carts successfully!',
+        userCarts
+    );
 };
 
 const cartsController = {

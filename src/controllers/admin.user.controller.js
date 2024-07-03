@@ -1,4 +1,5 @@
 const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     selectData,
     excuteQuery,
@@ -7,21 +8,17 @@ const {
     getCurrentTimeInGMT7,
     hashPassWord,
     isValidInteger,
+    sendResponse,
 } = require('../ultil.lib');
 
 const getUserById = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -30,22 +27,15 @@ const getUserById = async (req, res) => {
     const users = await selectData(query, [req.params.id]);
 
     if (users.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'User not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
         return;
     }
 
-    const { password, ...newUser } = users[0];
-    newUser.birthday = convertDateToGMT7(newUser.birthday);
-    newUser.created_at = convertTimeToGMT7(newUser.created_at);
+    const { password, ...other } = users[0];
+    other.birthday = convertDateToGMT7(other.birthday);
+    other.created_at = convertTimeToGMT7(other.created_at);
 
-    res.status(200).json({
-        success: true,
-        message: 'Find user successfully!',
-        data: newUser,
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Find user successfullly!', other);
 };
 
 const createUser = async (req, res) => {
@@ -59,10 +49,13 @@ const createUser = async (req, res) => {
 
     for (const field of requiredFields) {
         if (!req.body[field]) {
-            return res.status(400).json({
-                success: false,
-                message: `Missing required field: ${field}`,
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `Missing required field: ${field}`
+            );
+
+            return;
         }
     }
 
@@ -80,10 +73,11 @@ const createUser = async (req, res) => {
     ]);
 
     if (usersExist.length > 0) {
-        res.status(409).json({
-            success: false,
-            message: 'This username already exists!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.CONFLICT,
+            'This username already exists!'
+        );
         return;
     }
 
@@ -113,34 +107,26 @@ const createUser = async (req, res) => {
     const result = await excuteQuery(queryCreate, insertedValues);
 
     if (!result) {
-        res.status(500).json({
-            success: false,
-            message: 'Somthing went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Somthing went wrongs!'
+        );
 
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Created account successfully!',
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Created account successfully!');
 };
 
 const updateUser = async (req, res) => {
     if (!req.params.id) {
-        res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
         return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -149,10 +135,7 @@ const updateUser = async (req, res) => {
     const usersFound = await selectData(findUserQuery, [req.params.id]);
 
     if (usersFound.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'User not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
         return;
     }
 
@@ -179,10 +162,11 @@ const updateUser = async (req, res) => {
 
         if (field === 'password') {
             if (req.body[field].trim().length === 0) {
-                res.status(400).json({
-                    success: false,
-                    message: 'password connot empty',
-                });
+                sendResponse(
+                    res,
+                    STATUS_CODE.BAD_REQUEST,
+                    'password connot empty'
+                );
                 return;
             }
 
@@ -200,10 +184,7 @@ const updateUser = async (req, res) => {
     }
 
     if (updateFields.length === 0) {
-        res.status(400).json({
-            success: false,
-            message: 'No fields to update',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
         return;
     }
 
@@ -220,10 +201,12 @@ const updateUser = async (req, res) => {
         ]);
 
         if (!result) {
-            return res.status(500).json({
-                success: false,
-                message: 'Cannot update user info at this time!',
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'Cannot update user info at this time!'
+            );
+            return;
         }
 
         const querySelect = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
@@ -233,32 +216,30 @@ const updateUser = async (req, res) => {
         otherUserInfo.created_at = convertTimeToGMT7(otherUserInfo.created_at);
         otherUserInfo.birthday = convertDateToGMT7(otherUserInfo.birthday);
 
-        res.status(200).json({
-            success: true,
-            message: 'Updated user info successfully!',
-            data: otherUserInfo,
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Updated user info successfully!',
+            otherUserInfo
+        );
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'something went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!'
+        );
     }
 };
 
 const deleteUser = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -267,25 +248,20 @@ const deleteUser = async (req, res) => {
     const result = await excuteQuery(deleteQuery, [req.params.id]);
 
     if (!result) {
-        res.status(500).json({
-            success: false,
-            message: 'Somthing went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Somthing went wrongs!'
+        );
 
         return;
     } else if (result.affectedRows === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'user not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'user not found!');
 
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Deleted account successfully!',
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Deleted account successfully!');
 };
 
 const adminUserControllers = {

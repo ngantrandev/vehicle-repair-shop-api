@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { USER_ROLES, TABLE_NAMES } = require('../configs/constants.config');
-const { selectData } = require('../ultil.lib');
+const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const verifyToken = (req, res, next) => {
     const token = req.headers.token;
@@ -13,10 +14,11 @@ const verifyToken = (req, res, next) => {
             process.env.JWT_ACCESS_TOKEN,
             (err, tokenPayload) => {
                 if (err) {
-                    res.status(403).json({
-                        success: false,
-                        message: 'Token is not valid',
-                    });
+                    sendResponse(
+                        res,
+                        STATUS_CODE.FORBIDDEN,
+                        'Token is not valid'
+                    );
                     return;
                 }
                 req.tokenPayload = tokenPayload;
@@ -24,10 +26,7 @@ const verifyToken = (req, res, next) => {
             }
         );
     } else {
-        res.status(401).json({
-            success: false,
-            message: 'Not authenticated!',
-        });
+        sendResponse(res, STATUS_CODE.UNAUTHORIZED, 'Token is not provided');
         return;
     }
 };
@@ -36,10 +35,11 @@ const verifyAdminRole = (req, res, next) => {
     const role = req.tokenPayload.role;
 
     if (!role || role !== USER_ROLES.admin) {
-        res.status(403).json({
-            success: false,
-            message: 'You are not allowed to do this action',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.FORBIDDEN,
+            'You are not allowed to do this action'
+        );
         return;
     }
     next();
@@ -49,10 +49,11 @@ const verifyStaffRole = (req, res, next) => {
     const role = req.tokenPayload.role;
 
     if (!role || (role !== USER_ROLES.admin && role !== USER_ROLES.staff)) {
-        res.status(403).json({
-            success: false,
-            message: 'You are not allowed to do this action',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.FORBIDDEN,
+            'You are not allowed to do this action'
+        );
         return;
     }
     next();
@@ -60,11 +61,13 @@ const verifyStaffRole = (req, res, next) => {
 
 const verifyOwner = async (req, res, next) => {
     if (!req.params.user_id) {
-        res.status(400).json({
-            success: false,
-            message: 'missing user id param',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'missing user_id param');
 
+        return;
+    }
+
+    if (!isValidInteger(req.params.user_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user id must be interger');
         return;
     }
 
@@ -73,19 +76,17 @@ const verifyOwner = async (req, res, next) => {
 
     // not found this user with id
     if (users.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'Not found this user',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'not found this user');
         return;
     }
 
     // difference user
     if (users[0].username != req.tokenPayload.username) {
-        res.status(403).json({
-            success: false,
-            message: 'You are not allowed to do this action',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.FORBIDDEN,
+            'You are not allowed to do this action'
+        );
         return;
     }
 

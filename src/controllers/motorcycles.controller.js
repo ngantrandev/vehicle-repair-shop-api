@@ -1,5 +1,6 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
-const { selectData } = require('../ultil.lib');
+const { selectData, sendResponse } = require('../ultil.lib');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getAllMotorcycles = async (req, res) => {
     const query = `
@@ -16,11 +17,12 @@ const getAllMotorcycles = async (req, res) => {
 
     const newList = motorcycles.map(({ brand_id, ...other }) => other);
 
-    res.status(200).json({
-        success: true,
-        message: 'Get all motorcycles successfully!',
-        data: newList,
-    });
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'Get all motorcycles successfully!',
+        newList
+    );
 };
 
 const motorcycleBrandsController = {

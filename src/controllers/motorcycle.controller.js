@@ -1,19 +1,19 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
-const { selectData, isValidInteger } = require('../ultil.lib');
+const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getAllServicesByMotorcycleId = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'motorcycle id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'motorcycle id is required');
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'motorcycle id must be interger',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            'motorcycle id must be interger'
+        );
         return;
     }
 
@@ -40,11 +40,12 @@ const getAllServicesByMotorcycleId = async (req, res) => {
 
     const newList = motorcycles.map(({ category_id, ...other }) => other);
 
-    res.status(200).json({
-        success: true,
-        message: 'get services by motorcycle id successfully!',
-        data: newList,
-    });
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'get services by motorcycle id successfully!',
+        newList
+    );
 };
 
 const motorcycleBrandController = {

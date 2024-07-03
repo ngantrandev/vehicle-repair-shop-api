@@ -1,8 +1,10 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     selectData,
     convertDateToGMT7,
     convertTimeToGMT7,
+    sendResponse,
 } = require('../ultil.lib');
 
 const getAllUser = async (req, res) => {
@@ -19,11 +21,7 @@ const getAllUser = async (req, res) => {
             return other;
         });
 
-    res.status(200).json({
-        success: true,
-        message: 'Get all users successfully!',
-        data: newUsers,
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Get all users successfully!', newUsers);
 };
 
 const userController = {

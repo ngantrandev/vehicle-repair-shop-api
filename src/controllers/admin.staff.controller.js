@@ -1,5 +1,6 @@
 const { TABLE_NAMES, ACCOUNT_STATE } = require('../configs/constants.config');
 const { QUERY_SELECT_STAFF_BY_ID } = require('../configs/queries.config');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     selectData,
     isValidInteger,
@@ -8,21 +9,17 @@ const {
     hashPassWord,
     getCurrentTimeInGMT7,
     excuteQuery,
+    sendResponse,
 } = require('../ultil.lib');
 
 const getStaffById = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -31,10 +28,7 @@ const getStaffById = async (req, res) => {
     const staffs = await selectData(query, [req.params.id]);
 
     if (staffs.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'Staff not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
         return;
     }
 
@@ -42,11 +36,7 @@ const getStaffById = async (req, res) => {
     other.birthday = convertDateToGMT7(other.birthday);
     other.created_at = convertTimeToGMT7(other.created_at);
 
-    res.status(200).json({
-        success: true,
-        message: 'Find staff successfully!',
-        data: other,
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Find staff successfully!', other);
 };
 
 const createStaff = async (req, res) => {
@@ -61,19 +51,22 @@ const createStaff = async (req, res) => {
 
     for (const field of requiredFields) {
         if (!req.body[field]) {
-            return res.status(400).json({
-                success: false,
-                message: `Missing required field: ${field}`,
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `Missing required field: ${field}`
+            );
+            return;
         }
     }
 
     /**VALIDATE VALUE */
     if (!isValidInteger(req.body.station_id)) {
-        res.status(400).json({
-            success: false,
-            message: 'station id must be interger',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            `station id must be interger`
+        );
         return;
     }
 
@@ -91,10 +84,11 @@ const createStaff = async (req, res) => {
     ]);
 
     if (usersExist.length > 0) {
-        res.status(409).json({
-            success: false,
-            message: 'This username already exists!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.CONFLICT,
+            'This username already exists!'
+        );
         return;
     }
 
@@ -126,34 +120,26 @@ const createStaff = async (req, res) => {
     const result = await excuteQuery(queryCreate, insertedValues);
 
     if (!result) {
-        res.status(500).json({
-            success: false,
-            message: 'Somthing went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Cannot create staff at this time!'
+        );
 
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Created staff account successfully!',
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Created staff account successfully!');
 };
 
 const updateStaff = async (req, res) => {
     if (!req.params.id) {
-        res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
         return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -164,10 +150,7 @@ const updateStaff = async (req, res) => {
     const staffsFound = await selectData(findStaffQuery, [req.params.id]);
 
     if (staffsFound.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'Staff not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
         return;
     }
 
@@ -195,10 +178,11 @@ const updateStaff = async (req, res) => {
 
         if (field === 'username') {
             if (await isUsernameExist(req.body[field], req.params.id)) {
-                res.status(409).json({
-                    success: false,
-                    message: 'username already exist!',
-                });
+                sendResponse(
+                    res,
+                    STATUS_CODE.CONFLICT,
+                    'username already exist!'
+                );
                 return;
             }
 
@@ -206,10 +190,11 @@ const updateStaff = async (req, res) => {
             updateValues.push(req.body[field]);
         } else if (field === 'password') {
             if (req.body[field].trim().length === 0) {
-                res.status(400).json({
-                    success: false,
-                    message: 'password connot empty',
-                });
+                sendResponse(
+                    res,
+                    STATUS_CODE.BAD_REQUEST,
+                    'password connot empty'
+                );
                 return;
             }
 
@@ -227,10 +212,7 @@ const updateStaff = async (req, res) => {
     }
 
     if (updateFields.length === 0) {
-        res.status(400).json({
-            success: false,
-            message: 'No fields to update',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
         return;
     }
 
@@ -247,10 +229,12 @@ const updateStaff = async (req, res) => {
         ]);
 
         if (!result) {
-            return res.status(500).json({
-                success: false,
-                message: 'Cannot update staff info at this time!',
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'Cannot update staff info at this time!'
+            );
+            return;
         }
 
         const querySelect = QUERY_SELECT_STAFF_BY_ID;
@@ -260,32 +244,29 @@ const updateStaff = async (req, res) => {
         other.created_at = convertTimeToGMT7(other.created_at);
         other.birthday = convertDateToGMT7(other.birthday);
 
-        res.status(200).json({
-            success: true,
-            message: 'Updated user info successfully!',
-            data: other,
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Updated staff info successfully!',
+            other
+        );
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'something went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrongs!'
+        );
     }
 };
 
 const deleteStaff = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -294,25 +275,20 @@ const deleteStaff = async (req, res) => {
     const result = await excuteQuery(deleteQuery, [req.params.id]);
 
     if (!result) {
-        res.status(500).json({
-            success: false,
-            message: 'Somthing went wrongs!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrongs!'
+        );
 
         return;
     } else if (result.affectedRows === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'Staff not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
 
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Deleted staff account successfully!',
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Deleted staff account successfully!');
 };
 
 const isUsernameExist = async (username, id) => {

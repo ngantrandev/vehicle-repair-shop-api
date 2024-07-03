@@ -1,19 +1,15 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
-const { selectData, isValidInteger } = require('../ultil.lib');
+const { STATUS_CODE } = require('../configs/status.codes.config');
+const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
 
 const getBrandById = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'brand id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'brand id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
@@ -22,33 +18,27 @@ const getBrandById = async (req, res) => {
     const brandsFound = await selectData(selectQuery, [req.params.id]);
 
     if (brandsFound.length === 0) {
-        res.status(404).json({
-            success: false,
-            message: 'Motorcycle brand not found!',
-        });
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Motorcycle brand not found!');
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Get motorcycle brand by id successfully!',
-        data: brandsFound[0],
-    });
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'Get motorcycle brand by id successfully!',
+        brandsFound[0]
+    );
 };
 
 const getAllServicesByBrandId = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'brand id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand id is required');
+
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'brand id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand id must be interger');
         return;
     }
 
@@ -75,26 +65,22 @@ const getAllServicesByBrandId = async (req, res) => {
 
     const newList = motorcycles.map(({ category_id, ...other }) => other);
 
-    res.status(200).json({
-        success: true,
-        message: 'get services by brand id successfully!',
-        data: newList,
-    });
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'get services by brand id successfully!',
+        newList
+    );
 };
 
 const getAllMotorcyclesByBrandId = async (req, res) => {
     if (!req.params.id) {
-        return res.status(400).json({
-            success: false,
-            message: 'brand id is required',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand id is required');
+        return;
     }
 
     if (!isValidInteger(req.params.id)) {
-        res.status(400).json({
-            success: false,
-            message: 'brand id must be interger',
-        });
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand id must be interger');
         return;
     }
 
@@ -111,11 +97,12 @@ const getAllMotorcyclesByBrandId = async (req, res) => {
 
     const newList = motorcycles.map(({ brand_id, ...other }) => other);
 
-    res.status(200).json({
-        success: true,
-        message: 'get motorcycles by brand id successfully!',
-        data: newList,
-    });
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'get motorcycles by brand id successfully!',
+        newList
+    );
 };
 
 const motorcycleBrandController = {

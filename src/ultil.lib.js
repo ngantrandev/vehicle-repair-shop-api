@@ -72,7 +72,8 @@ const generateJWT = (username, role) => {
 };
 
 const isValidInteger = (value) => {
-    const trimmedValue = value.trim();
+    // const trimmedValue = value.trim();
+    const trimmedValue = value.toString().trim();
 
     return (
         !isNaN(trimmedValue) &&
@@ -83,6 +84,25 @@ const isValidInteger = (value) => {
 
 const isValidTime = (time) => {
     return moment(time, 'HH:mm:ss', true).isValid();
+};
+
+const sendResponse = (res, statusCode, message, data) => {
+    if (!isValidInteger(statusCode)) {
+        throw new Error('statusCode must be integer');
+    }
+
+    if (statusCode != 200) {
+        res.status(statusCode).json({
+            success: false,
+            message,
+        });
+    } else {
+        res.status(statusCode).json({
+            success: true,
+            message,
+            data,
+        });
+    }
 };
 
 module.exports = {
@@ -96,4 +116,5 @@ module.exports = {
     generateJWT,
     isValidInteger,
     isValidTime,
+    sendResponse,
 };

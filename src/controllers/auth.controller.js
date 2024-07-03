@@ -1,4 +1,5 @@
 const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     selectData,
     comparePassWord,
@@ -8,6 +9,7 @@ const {
     convertTimeToGMT7,
     convertDateToGMT7,
     generateJWT,
+    sendResponse,
 } = require('../ultil.lib');
 
 const register = async (req, res) => {
@@ -21,10 +23,12 @@ const register = async (req, res) => {
 
     for (const field of requiredFields) {
         if (!req.body[field]) {
-            return res.status(400).json({
-                success: false,
-                message: `Missing required field: ${field}`,
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `Missing required field: ${field}`
+            );
+            return;
         }
     }
 
@@ -41,10 +45,11 @@ const register = async (req, res) => {
     ]);
 
     if (users.length > 0) {
-        res.status(409).json({
-            success: false,
-            message: 'This username already exists!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.CONFLICT,
+            'This username already exists!'
+        );
         return;
     }
 
@@ -74,18 +79,16 @@ const register = async (req, res) => {
     const result = await excuteQuery(insertQuery, values);
 
     if (!result) {
-        res.status(500).json({
-            success: false,
-            message: 'cannot create account at this time!',
-        });
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'cannot create account at this time!'
+        );
 
         return;
     }
 
-    res.status(200).json({
-        success: true,
-        message: 'Created account successfully!',
-    });
+    sendResponse(res, STATUS_CODE.OK, 'Created account successfully!');
 };
 
 const signin = async (req, res) => {
@@ -94,10 +97,7 @@ const signin = async (req, res) => {
         const inputPassword = req.body.password;
 
         if (!inputUsername || !inputPassword) {
-            res.status(400).json({
-                success: false,
-                message: 'Missing value',
-            });
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing value');
 
             return;
         }
@@ -131,7 +131,7 @@ const signin = async (req, res) => {
 
                 const token = generateJWT(inputUsername, USER_ROLES.staff);
 
-                res.status(200).json({
+                res.status(STATUS_CODE.OK).json({
                     success: true,
                     message: 'Sign in successfully!',
                     token: token,
@@ -146,10 +146,11 @@ const signin = async (req, res) => {
         const users = await selectData(query, [inputUsername]);
 
         if (users.length === 0) {
-            res.status(404).json({
-                success: false,
-                message: 'Wrong username or password',
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'Wrong username or password'
+            );
 
             return;
         }
@@ -157,10 +158,11 @@ const signin = async (req, res) => {
         const result = await comparePassWord(inputPassword, users[0].password);
 
         if (!result) {
-            res.status(404).json({
-                success: false,
-                message: 'Wrong username or password',
-            });
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'Wrong username or password'
+            );
 
             return;
         }
@@ -172,17 +174,14 @@ const signin = async (req, res) => {
 
         const token = generateJWT(inputUsername, newUserInfo.role);
 
-        res.status(200).json({
+        res.status(STATUS_CODE.OK).json({
             success: true,
             message: 'Sign in successfully!',
             token: token,
             data: newUserInfo,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
     }
 };
 

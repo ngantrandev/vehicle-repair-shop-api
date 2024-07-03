@@ -1,5 +1,6 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
-const { selectData } = require('../ultil.lib');
+const { selectData, sendResponse } = require('../ultil.lib');
+const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getAllServices = async (req, res) => {
     const query = `
@@ -11,11 +12,12 @@ const getAllServices = async (req, res) => {
 
     const services = await selectData(query, []);
 
-    res.status(200).json({
-        success: true,
-        message: 'Get all services successfully!',
-        data: services,
-    });
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'Get all services successfully!',
+        services
+    );
 };
 
 const adminServicesControllers = {
