@@ -62,9 +62,9 @@ const createUser = async (req, res) => {
     /* FIND USER*/
 
     const findQuery = `
-        SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?
+        SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
         UNION
-        SELECT * FROM ${TABLE_NAMES.staffs} WHERE username = ? 
+        SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? 
     `;
 
     const usersExist = await selectData(findQuery, [
@@ -147,7 +147,7 @@ const updateUser = async (req, res) => {
         'birthday',
         'image_file',
         'email',
-        'address',
+        'address_id',
         'phone',
         'role',
     ];

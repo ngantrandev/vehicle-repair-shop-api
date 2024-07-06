@@ -1,4 +1,8 @@
-const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
+const {
+    TABLE_NAMES,
+    USER_ROLES,
+    ACCOUNT_STATE,
+} = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     selectData,
@@ -35,10 +39,11 @@ const register = async (req, res) => {
     /* FIND USER */
 
     const selectQuery = `
-        SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?
+        SELECT id FROM ${TABLE_NAMES.users} WHERE username = '1'
         UNION
-        SELECT * FROM ${TABLE_NAMES.staffs} WHERE username = ?
+        SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = '1';
     `;
+
     const users = await selectData(selectQuery, [
         req.body.username,
         req.body.username,
@@ -57,7 +62,7 @@ const register = async (req, res) => {
 
     const fields = requiredFields.map((field) => ` ${field}`);
 
-    const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, '${ACCOUNT_STATE.active}')`;
 
     const values = [];
 
@@ -103,7 +108,7 @@ const signin = async (req, res) => {
         }
 
         const queryFindStaff = `
-        SELECT ${TABLE_NAMES.staffs}.*, ${TABLE_NAMES.service_stations}.name AS service_station_name, ${TABLE_NAMES.service_stations}.address AS service_station_adress
+        SELECT ${TABLE_NAMES.staffs}.*, ${TABLE_NAMES.service_stations}.name AS service_station_name, ${TABLE_NAMES.service_stations}.address_id AS service_station_address
             FROM ${TABLE_NAMES.staffs}
             JOIN ${TABLE_NAMES.service_stations}
             ON ${TABLE_NAMES.staffs}.station_id = ${TABLE_NAMES.service_stations}.id

@@ -11,10 +11,11 @@ const TABLE_NAMES = {
     service_motorcycles: 'service_motorcycles',
     spare_parts_services: 'spare_parts_services',
     staffs: 'staffs',
-    addresses: 'google_map_addresses',
+    addresses: 'goong_map_addresses',
     motorcycle_brands: 'motorcycle_brands',
     motorcycles: 'motorcycles',
     carts: 'carts',
+    bookings: 'bookings',
 };
 
 const USER_ROLES = {
@@ -28,10 +29,19 @@ const ACCOUNT_STATE = {
     deactive: '0',
 };
 
+const BOOKING_STATE = {
+    pending: 'pending',
+    accepted: 'accepted',
+    fixing: 'fixing',
+    done: 'done',
+    cancelled: 'cancelled',
+};
+
 module.exports = {
     APP_NAME,
     TABLE_NAMES,
     USER_ROLES,
     BASE_URL_PATH,
     ACCOUNT_STATE,
+    BOOKING_STATE,
 };

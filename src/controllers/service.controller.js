@@ -1,4 +1,3 @@
-const { TABLE_NAMES } = require('../configs/constants.config');
 const { QUERY_SELECT_SERVICE_BY_ID } = require('../configs/queries.config');
 const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');

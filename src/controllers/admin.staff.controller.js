@@ -73,9 +73,9 @@ const createStaff = async (req, res) => {
     /* FIND USER*/
 
     const findQuery = `
-        SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?
+        SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
         UNION
-        SELECT * FROM ${TABLE_NAMES.staffs} WHERE username = ? 
+        SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? 
     `;
 
     const usersExist = await selectData(findQuery, [
@@ -162,7 +162,7 @@ const updateStaff = async (req, res) => {
         'birthday',
         'image_file',
         'email',
-        'address',
+        'address_id',
         'phone',
         'station_id',
         'active',
@@ -294,9 +294,9 @@ const deleteStaff = async (req, res) => {
 const isUsernameExist = async (username, id) => {
     /**FIND USERNAME EXIST */
     const query = `
-        SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?
+        SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
         UNION
-        SELECT * FROM ${TABLE_NAMES.staffs} WHERE username = ? AND id != ?
+        SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? AND id != ?
     `;
 
     const staffsFound = await selectData(query, [username, username, id]);

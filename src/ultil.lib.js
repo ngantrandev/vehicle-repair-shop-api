@@ -4,6 +4,56 @@ const jwt = require('jsonwebtoken');
 
 const connection = require('./configs/db.config');
 
+const executeTransaction = async (queries, listParamArray) => {
+    if (queries.length !== listParamArray.length) {
+        throw new Error(
+            'PAY ATTENTION Queries length must equal to listParamArray length!!!!'
+        );
+    }
+    return new Promise((resolve, reject) => {
+        connection.beginTransaction(async (err) => {
+            if (err) {
+                return reject(err);
+            }
+
+            try {
+                const results = [];
+
+                for (let i = 0; i < queries.length; i++) {
+                    const result = await new Promise((resolve, reject) => {
+                        connection.query(
+                            queries[i],
+                            listParamArray[i],
+                            (error, result) => {
+                                if (error) {
+                                    return reject(error);
+                                }
+                                resolve(result);
+                            }
+                        );
+                    });
+                    results.push(result);
+                }
+
+                connection.commit((err) => {
+                    if (err) {
+                        connection.rollback(() => {
+                            connection.end();
+                            reject(err);
+                        });
+                        return;
+                    }
+                    resolve(results);
+                });
+            } catch (err) {
+                connection.rollback(() => {
+                    reject(err);
+                });
+            }
+        });
+    });
+};
+
 const excuteQuery = async (query, listPagrams) => {
     return new Promise((resolve, reject) => {
         connection.query(query, listPagrams, function (error, results) {
@@ -82,6 +132,13 @@ const isValidInteger = (value) => {
     );
 };
 
+const isValidDouble = (value) => {
+    // const trimmedValue = value.trim();
+    const trimmedValue = value.toString().trim();
+
+    return !isNaN(trimmedValue) && trimmedValue.length > 0;
+};
+
 const isValidTime = (time) => {
     return moment(time, 'HH:mm:ss', true).isValid();
 };
@@ -100,12 +157,13 @@ const sendResponse = (res, statusCode, message, data) => {
         res.status(statusCode).json({
             success: true,
             message,
-            data,
+            ...(data != null && { data }),
         });
     }
 };
 
 module.exports = {
+    executeTransaction,
     excuteQuery,
     selectData,
     hashPassWord,
@@ -117,4 +175,5 @@ module.exports = {
     isValidInteger,
     isValidTime,
     sendResponse,
+    isValidDouble,
 };

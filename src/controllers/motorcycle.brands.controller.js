@@ -1,4 +1,6 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
+const { STATUS_CODE } = require('../configs/status.codes.config');
+
 const { selectData, sendResponse } = require('../ultil.lib');
 
 const getAllMotorcycleBrands = async (req, res) => {
