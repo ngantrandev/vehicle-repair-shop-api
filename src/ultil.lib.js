@@ -3,6 +3,11 @@ const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
 
 const connection = require('./configs/db.config');
+const {
+    BOOKING_STATE,
+    TABLE_NAMES,
+    ACCOUNT_STATE,
+} = require('./configs/constants.config');
 
 const executeTransaction = async (queries, listParamArray) => {
     if (queries.length !== listParamArray.length) {
@@ -115,7 +120,7 @@ const generateJWT = (username, role) => {
             role,
         },
         process.env.JWT_ACCESS_TOKEN,
-        { expiresIn: '1d' }
+        { expiresIn: process.env.EXPIRES_TIME_ACCESS_TOKEN }
     );
 
     return tokent;
@@ -162,6 +167,65 @@ const sendResponse = (res, statusCode, message, data) => {
     }
 };
 
+const getIdOfNearestStation = async (latitude, longitude) => {
+    // find nearest station if latitude and longitude not null
+    if (!latitude || !longitude) {
+        return null;
+    }
+
+    // find stationId
+
+    return null;
+};
+
+const getIdOfTheMostFreeStaff = async (stationId) => {
+    // get staffid and booking with state = 'pending', 'accepted', 'fixing'
+
+    if (!stationId || !isValidInteger(stationId)) {
+        return null;
+    }
+
+    const query = `
+        SELECT
+            stf.id AS staff_id,
+            COUNT(b.id) AS total_bookings
+        FROM ${TABLE_NAMES.staffs} as stf
+        JOIN
+            ${TABLE_NAMES.service_stations} as ss
+            ON ss.id = stf.station_id
+        LEFT JOIN
+            ${TABLE_NAMES.bookings} AS b
+            ON b.staff_id = stf.id
+            AND (
+                b.status = '${BOOKING_STATE.pending}'
+                OR b.status = '${BOOKING_STATE.accepted}'
+                OR b.status = '${BOOKING_STATE.fixing}'
+            )
+
+        WHERE ss.id = ${stationId} AND stf.active = ${ACCOUNT_STATE.active}
+        
+        GROUP BY stf.id
+    `;
+
+    const data = await selectData(query, []);
+
+    if (data.length === 0) return null;
+
+    // init value
+    let staffId = data[0].staff_id;
+    let totalBookings = data[0].total_bookings;
+
+    // find userId with smallest bookings
+    data.forEach((item) => {
+        if (item.total_bookings < totalBookings) {
+            totalBookings = item.total_bookings;
+            staffId = item.staff_id;
+        }
+    });
+
+    return staffId;
+};
+
 module.exports = {
     executeTransaction,
     excuteQuery,
@@ -176,4 +240,6 @@ module.exports = {
     isValidTime,
     sendResponse,
     isValidDouble,
+    getIdOfNearestStation,
+    getIdOfTheMostFreeStaff,
 };

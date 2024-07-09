@@ -1,4 +1,8 @@
-const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
+const {
+    TABLE_NAMES,
+    USER_ROLES,
+    ACCOUNT_STATE,
+} = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     selectData,
@@ -139,6 +143,15 @@ const updateUser = async (req, res) => {
         return;
     }
 
+    if (usersFound[0].active == ACCOUNT_STATE.deactive) {
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            'user account is deactivated!'
+        );
+        return;
+    }
+
     const possibleFields = [
         'username',
         'password',
@@ -231,7 +244,40 @@ const updateUser = async (req, res) => {
     }
 };
 
-const deleteUser = async (req, res) => {
+// const deleteUser = async (req, res) => {
+//     if (!req.params.id) {
+//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+
+//         return;
+//     }
+
+//     if (!isValidInteger(req.params.id)) {
+//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+//         return;
+//     }
+
+//     /**DELETE USER */
+//     const deleteQuery = `DELETE FROM ${TABLE_NAMES.users} WHERE id = ?`;
+//     const result = await excuteQuery(deleteQuery, [req.params.id]);
+
+//     if (!result) {
+//         sendResponse(
+//             res,
+//             STATUS_CODE.INTERNAL_SERVER_ERROR,
+//             'Somthing went wrongs!'
+//         );
+
+//         return;
+//     } else if (result.affectedRows === 0) {
+//         sendResponse(res, STATUS_CODE.NOT_FOUND, 'user not found!');
+
+//         return;
+//     }
+
+//     sendResponse(res, STATUS_CODE.OK, 'Deleted account successfully!');
+// };
+
+const deactivateUser = async (req, res) => {
     if (!req.params.id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
 
@@ -243,31 +289,55 @@ const deleteUser = async (req, res) => {
         return;
     }
 
-    /**DELETE USER */
-    const deleteQuery = `DELETE FROM ${TABLE_NAMES.users} WHERE id = ?`;
-    const result = await excuteQuery(deleteQuery, [req.params.id]);
+    /**FIND USER */
+    const findUserQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
+    const usersFound = await selectData(findUserQuery, [req.params.id]);
+
+    if (usersFound.length === 0) {
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
+        return;
+    }
+
+    if (usersFound[0].role === USER_ROLES.admin) {
+        sendResponse(
+            res,
+            STATUS_CODE.FORBIDDEN,
+            'Cannot deactivate admin account!'
+        );
+        return;
+    }
+
+    if (usersFound[0].active == ACCOUNT_STATE.deactive) {
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            'user account is already deactivated!'
+        );
+        return;
+    }
+
+    const updateQuery = `UPDATE ${TABLE_NAMES.users} SET active = ? WHERE id = ?`;
+    const result = await excuteQuery(updateQuery, [
+        ACCOUNT_STATE.deactive,
+        req.params.id,
+    ]);
 
     if (!result) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Somthing went wrongs!'
+            'Cannot deactivate user at this time!'
         );
-
-        return;
-    } else if (result.affectedRows === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'user not found!');
-
         return;
     }
 
-    sendResponse(res, STATUS_CODE.OK, 'Deleted account successfully!');
+    sendResponse(res, STATUS_CODE.OK, 'Deactivated user successfully!');
 };
 
 const adminUserControllers = {
     getUserById,
     createUser,
-    deleteUser,
+    deactivateUser,
     updateUser,
 };
 

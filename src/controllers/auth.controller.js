@@ -108,10 +108,13 @@ const signin = async (req, res) => {
         }
 
         const queryFindStaff = `
-        SELECT ${TABLE_NAMES.staffs}.*, ${TABLE_NAMES.service_stations}.name AS service_station_name, ${TABLE_NAMES.service_stations}.address_id AS service_station_address
-            FROM ${TABLE_NAMES.staffs}
-            JOIN ${TABLE_NAMES.service_stations}
-            ON ${TABLE_NAMES.staffs}.station_id = ${TABLE_NAMES.service_stations}.id
+            SELECT 
+                stf.*,
+                ss.id AS station_id,
+                ss.name AS station_name
+            FROM ${TABLE_NAMES.staffs} AS stf
+            JOIN ${TABLE_NAMES.service_stations} AS ss
+                ON stf.station_id = ss.id
             WHERE username = ?
         `;
 
@@ -125,14 +128,26 @@ const signin = async (req, res) => {
             );
 
             if (result) {
-                const { password, ...newStaffInfo } = staffs[0];
+                // correct password but account is deactivated
+                if (staffs[0].active === ACCOUNT_STATE.deactive) {
+                    sendResponse(
+                        res,
+                        STATUS_CODE.FORBIDDEN,
+                        'This account has been deactivated!'
+                    );
+                    return;
+                }
 
-                newStaffInfo.created_at = convertTimeToGMT7(
-                    newStaffInfo.created_at
-                );
-                newStaffInfo.birthday = convertDateToGMT7(
-                    newStaffInfo.birthday
-                );
+                const { station_id, station_name, password, ...other } =
+                    staffs[0];
+
+                other.created_at = convertTimeToGMT7(other.created_at);
+                other.birthday = convertDateToGMT7(other.birthday);
+
+                other.station = {
+                    id: station_id,
+                    name: station_name,
+                };
 
                 const token = generateJWT(inputUsername, USER_ROLES.staff);
 
@@ -140,7 +155,7 @@ const signin = async (req, res) => {
                     success: true,
                     message: 'Sign in successfully!',
                     token: token,
-                    data: newStaffInfo,
+                    data: other,
                 });
                 return;
             }
@@ -172,18 +187,27 @@ const signin = async (req, res) => {
             return;
         }
 
-        const { password, ...newUserInfo } = users[0];
+        if (users[0].active == ACCOUNT_STATE.deactive) {
+            sendResponse(
+                res,
+                STATUS_CODE.FORBIDDEN,
+                'This account has been deactivated!'
+            );
+            return;
+        }
 
-        newUserInfo.created_at = convertTimeToGMT7(newUserInfo.created_at);
-        newUserInfo.birthday = convertDateToGMT7(newUserInfo.birthday);
+        const { password, ...other } = users[0];
 
-        const token = generateJWT(inputUsername, newUserInfo.role);
+        other.created_at = convertTimeToGMT7(other.created_at);
+        other.birthday = convertDateToGMT7(other.birthday);
+
+        const token = generateJWT(inputUsername, other.role);
 
         res.status(STATUS_CODE.OK).json({
             success: true,
             message: 'Sign in successfully!',
             token: token,
-            data: newUserInfo,
+            data: other,
         });
     } catch (error) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);

@@ -154,6 +154,15 @@ const updateStaff = async (req, res) => {
         return;
     }
 
+    if (staffsFound[0].active == ACCOUNT_STATE.deactive) {
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            'Staff account is deactivated!'
+        );
+        return;
+    }
+
     const possibleFields = [
         'username',
         'password',
@@ -259,7 +268,7 @@ const updateStaff = async (req, res) => {
     }
 };
 
-const deleteStaff = async (req, res) => {
+const deactivateStaff = async (req, res) => {
     if (!req.params.id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
         return;
@@ -270,26 +279,84 @@ const deleteStaff = async (req, res) => {
         return;
     }
 
-    /**DELETE USER */
-    const deleteQuery = `DELETE FROM ${TABLE_NAMES.staffs} WHERE id = ?`;
-    const result = await excuteQuery(deleteQuery, [req.params.id]);
+    /**FIND STAFF */
+    const findStaffQuery = `
+        SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
+    `;
+
+    const staffsFound = await selectData(findStaffQuery, [req.params.id]);
+    if (staffsFound.length === 0) {
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
+        return;
+    }
+
+    if (staffsFound[0].active == ACCOUNT_STATE.deactive) {
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            'Staff account is already deactivated!'
+        );
+        return;
+    }
+
+    const updateQuery = `
+        UPDATE ${TABLE_NAMES.staffs}
+        SET active = ?
+        WHERE id = ?
+    `;
+
+    const result = await excuteQuery(updateQuery, [
+        ACCOUNT_STATE.deactive,
+        req.params.id,
+    ]);
 
     if (!result) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Cannot deactivate staff at this time!'
         );
-
-        return;
-    } else if (result.affectedRows === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
-
         return;
     }
 
-    sendResponse(res, STATUS_CODE.OK, 'Deleted staff account successfully!');
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'Deactivated staff account successfully!'
+    );
 };
+
+// const deleteStaff = async (req, res) => {
+//     if (!req.params.id) {
+//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+//         return;
+//     }
+
+//     if (!isValidInteger(req.params.id)) {
+//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+//         return;
+//     }
+
+//     /**DELETE USER */
+//     const deleteQuery = `DELETE FROM ${TABLE_NAMES.staffs} WHERE id = ?`;
+//     const result = await excuteQuery(deleteQuery, [req.params.id]);
+
+//     if (!result) {
+//         sendResponse(
+//             res,
+//             STATUS_CODE.INTERNAL_SERVER_ERROR,
+//             'Something went wrongs!'
+//         );
+
+//         return;
+//     } else if (result.affectedRows === 0) {
+//         sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
+
+//         return;
+//     }
+
+//     sendResponse(res, STATUS_CODE.OK, 'Deleted staff account successfully!');
+// };
 
 const isUsernameExist = async (username, id) => {
     /**FIND USERNAME EXIST */
@@ -312,7 +379,7 @@ const adminStaffController = {
     getStaffById,
     createStaff,
     updateStaff,
-    deleteStaff,
+    deactivateStaff,
 };
 
 module.exports = adminStaffController;

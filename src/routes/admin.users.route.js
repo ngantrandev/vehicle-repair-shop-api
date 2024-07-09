@@ -10,6 +10,8 @@ router.post('/', adminUserControllers.createUser);
 
 router.patch('/:id', adminUserControllers.updateUser);
 
-router.delete('/:id', adminUserControllers.deleteUser);
+router.patch('/:id/deactivate', adminUserControllers.deactivateUser);
+
+// router.delete('/:id', adminUserControllers.deleteUser);
 
 module.exports = router;

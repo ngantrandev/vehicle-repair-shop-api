@@ -1,5 +1,9 @@
 const jwt = require('jsonwebtoken');
-const { USER_ROLES, TABLE_NAMES } = require('../configs/constants.config');
+const {
+    USER_ROLES,
+    TABLE_NAMES,
+    ACCOUNT_STATE,
+} = require('../configs/constants.config');
 const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 
@@ -80,8 +84,20 @@ const verifyOwner = async (req, res, next) => {
         return;
     }
 
+    if (users[0].active == ACCOUNT_STATE.deactive) {
+        sendResponse(
+            res,
+            STATUS_CODE.FORBIDDEN,
+            'This user account has been deactive'
+        );
+        return;
+    }
+
     // difference user
-    if (users[0].username != req.tokenPayload.username) {
+    if (
+        users[0].username != req.tokenPayload.username &&
+        req.tokenPayload.username != USER_ROLES.admin
+    ) {
         sendResponse(
             res,
             STATUS_CODE.FORBIDDEN,

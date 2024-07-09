@@ -7,6 +7,8 @@ const {
     getCurrentTimeInGMT7,
     isValidDouble,
     executeTransaction,
+    getIdOfTheMostFreeStaff,
+    getIdOfNearestStation,
 } = require('../ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const { TABLE_NAMES, BOOKING_STATE } = require('../configs/constants.config');
@@ -100,23 +102,13 @@ const createBooking = async (req, res) => {
         return;
     }
 
-    if (!req.body.user_id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `user_id is required`);
-        return;
-    }
-
     /** VALIDATE VALUE TYPE */
-
     if (!isValidInteger(req.body.service_id)) {
         sendResponse(
             res,
             STATUS_CODE.BAD_REQUEST,
             `service_id must be integer`
         );
-        return;
-    }
-    if (!isValidInteger(req.body.user_id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `user_id must be integer`);
         return;
     }
 
@@ -156,7 +148,7 @@ const createBooking = async (req, res) => {
             [
                 req.body.service_id,
                 req.body.note,
-                req.body.user_id,
+                req.params.user_id,
                 createdTime,
                 createdTime,
                 BOOKING_STATE.pending,
@@ -239,63 +231,6 @@ const cancelBooking = async (req, res) => {
 
     sendResponse(res, STATUS_CODE.OK, 'canceled booking successfully!');
     return;
-};
-
-const getIdOfNearestStation = async (latitude, longitude) => {
-    // find nearest station if latitude and longitude not null
-    if (!latitude || !longitude) {
-        return null;
-    }
-
-    // find stationId
-};
-
-const getIdOfTheMostFreeStaff = async (stationId) => {
-    // get staffid and booking with state = 'pending', 'accepted', 'fixing'
-
-    if (!stationId) {
-        return null;
-    }
-
-    const query = `
-        SELECT
-            stf.id AS staff_id,
-            COUNT(b.id) AS total_bookings
-        FROM ${TABLE_NAMES.staffs} as stf
-        JOIN
-            ${TABLE_NAMES.service_stations} as ss
-            ON ss.id = stf.station_id
-        LEFT JOIN
-            ${TABLE_NAMES.bookings} AS b
-            ON b.staff_id = stf.id
-            AND (
-                b.status = '${BOOKING_STATE.pending}'
-                OR b.status = '${BOOKING_STATE.accepted}'
-                OR b.status = '${BOOKING_STATE.fixing}'
-            )
-
-        WHERE ss.id = ${stationId}
-        
-        GROUP BY stf.id
-    `;
-
-    const data = await selectData(query, []);
-
-    if (data.length === 0) return null;
-
-    // init value
-    let staffId = data[0].staff_id;
-    let totalBookings = data[0].total_bookings;
-
-    // find userId with smallest bookings
-    data.forEach((item) => {
-        if (item.total_bookings < totalBookings) {
-            totalBookings = item.total_bookings;
-            staffId = item.staff_id;
-        }
-    });
-
-    return staffId;
 };
 
 const bookingController = {

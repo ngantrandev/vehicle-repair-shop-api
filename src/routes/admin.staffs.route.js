@@ -11,6 +11,8 @@ router.post('/', adminStaffController.createStaff);
 
 router.patch('/:id', adminStaffController.updateStaff);
 
-router.delete('/:id', adminStaffController.deleteStaff);
+router.patch('/:id/deactivate', adminStaffController.deactivateStaff);
+
+// router.delete('/:id', adminStaffController.deleteStaff);
 
 module.exports = router;
