@@ -6,6 +6,7 @@ const STATUS_CODE = {
     NOT_FOUND: 404,
     INTERNAL_SERVER_ERROR: 500,
     CONFLICT: 409,
+    UNPROCESSABLE_ENTITY: 422,
 };
 
 module.exports = { STATUS_CODE };

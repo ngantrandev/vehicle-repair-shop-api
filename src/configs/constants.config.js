@@ -16,6 +16,9 @@ const TABLE_NAMES = {
     motorcycles: 'motorcycles',
     carts: 'carts',
     bookings: 'bookings',
+    wards: 'wards',
+    districts: 'districts',
+    provinces: 'provinces',
 };
 
 const USER_ROLES = {

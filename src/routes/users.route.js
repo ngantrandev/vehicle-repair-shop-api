@@ -8,43 +8,50 @@ const cartController = require('../controllers/cart.controller');
 
 router.get(
     '/:user_id/carts',
-    middlewareControllers.verifyToken,
-    middlewareControllers.verifyOwner,
+    middlewareControllers.verifyCurrentUser,
     cartsController.getAllUserCarts
 );
 
 router.post(
     '/:user_id/carts',
-    middlewareControllers.verifyToken,
-    middlewareControllers.verifyOwner,
+    middlewareControllers.verifyCurrentUser,
     cartController.createCart
 );
 
-router.delete('/:user_id/carts/:cart_id', cartController.deleteCartById);
+router.delete(
+    '/:user_id/carts/:cart_id',
+    middlewareControllers.verifyCurrentUser,
+    cartController.deleteCartById
+);
 
 router.post(
     '/:user_id/carts/:cart_id/bookings',
-    middlewareControllers.verifyToken,
-    middlewareControllers.verifyOwner,
+    middlewareControllers.verifyCurrentUser,
     cartController.createBookingFromCart
 );
 
 router.get(
     '/:user_id/bookings',
-    middlewareControllers.verifyToken,
-    middlewareControllers.verifyOwner,
+    middlewareControllers.verifyCurrentUser,
     bookingsController.getAllBookingByUserId
 );
 
 router.get(
     '/:user_id/bookings/:booking_id',
-    middlewareControllers.verifyToken,
-    middlewareControllers.verifyOwner,
+    middlewareControllers.verifyCurrentUser,
     bookingController.getBookingById
 );
 
-router.post('/:user_id/bookings', bookingController.createBooking);
+router.post(
+    '/:user_id/bookings',
+    middlewareControllers.verifyCurrentUser,
+    bookingController.createBooking
+);
 
-router.patch('/:user_id/bookings/:booking_id', bookingController.cancelBooking);
+router.patch(
+    '/:user_id/bookings/:booking_id',
+    middlewareControllers.verifyCurrentUser,
+    bookingController.cancelBooking
+);
 
 module.exports = router;

@@ -63,7 +63,7 @@ const verifyStaffRole = (req, res, next) => {
     next();
 };
 
-const verifyOwner = async (req, res, next) => {
+const verifyCurrentUser = async (req, res, next) => {
     if (!req.params.user_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'missing user_id param');
 
@@ -96,7 +96,53 @@ const verifyOwner = async (req, res, next) => {
     // difference user
     if (
         users[0].username != req.tokenPayload.username &&
-        req.tokenPayload.username != USER_ROLES.admin
+        req.tokenPayload.role != USER_ROLES.admin
+    ) {
+        sendResponse(
+            res,
+            STATUS_CODE.FORBIDDEN,
+            'You are not allowed to do this action'
+        );
+        return;
+    }
+
+    next();
+};
+
+const verifyCurrentStaff = async (req, res, next) => {
+    if (!req.params.staff_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'missing staff_id param');
+
+        return;
+    }
+
+    if (!isValidInteger(req.params.staff_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff id must be interger');
+        return;
+    }
+
+    const query = `SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?`;
+    const staffs = await selectData(query, [req.params.staff_id]);
+
+    // not found this staff with id
+    if (staffs.length === 0) {
+        sendResponse(res, STATUS_CODE.NOT_FOUND, 'not found this staff');
+        return;
+    }
+
+    if (staffs[0].active == ACCOUNT_STATE.deactive) {
+        sendResponse(
+            res,
+            STATUS_CODE.FORBIDDEN,
+            'This staff account has been deactive'
+        );
+        return;
+    }
+
+    // difference staff
+    if (
+        staffs[0].username != req.tokenPayload.username &&
+        req.tokenPayload.role != USER_ROLES.admin
     ) {
         sendResponse(
             res,
@@ -113,7 +159,8 @@ const middlewareControllers = {
     verifyToken,
     verifyAdminRole,
     verifyStaffRole,
-    verifyOwner,
+    verifyCurrentUser,
+    verifyCurrentStaff,
 };
 
 module.exports = middlewareControllers;
