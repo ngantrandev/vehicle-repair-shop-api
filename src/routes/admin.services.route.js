@@ -4,8 +4,8 @@ const router = require('express').Router();
 
 router.post('/', adminServiceControllers.createService);
 
-router.patch('/:id', adminServiceControllers.updateService);
+router.patch('/:service_id', adminServiceControllers.updateService);
 
-router.delete('/:id', adminServiceControllers.deleteService);
+router.delete('/:service_id', adminServiceControllers.deleteService);
 
 module.exports = router;

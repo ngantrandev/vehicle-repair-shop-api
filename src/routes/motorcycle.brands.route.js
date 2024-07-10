@@ -5,12 +5,12 @@ const motorcycleBrandController = require('../controllers/motorcycle.brand.contr
 
 router.get('/', motorcycleBrandsController.getAllMotorcycleBrands);
 
-router.get('/:id', motorcycleBrandController.getBrandById);
+router.get('/:brand_id', motorcycleBrandController.getBrandById);
 
 router.get(
-    '/:id/motorcycles',
+    '/:brand_id/motorcycles',
     motorcycleBrandController.getAllMotorcyclesByBrandId
 );
-router.get('/:id/services', motorcycleBrandController.getAllServicesByBrandId);
+router.get('/:brand_id/services', motorcycleBrandController.getAllServicesByBrandId);
 
 module.exports = router;

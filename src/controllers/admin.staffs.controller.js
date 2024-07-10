@@ -19,12 +19,18 @@ const getAllStaffs = async (req, res) => {
 
     const staffs = await selectData(query, []);
 
-    const newStaffs = staffs.map(({ password, station_id, ...other }) => {
-        other.birthday = convertDateToGMT7(other.birthday);
-        other.created_at = convertTimeToGMT7(other.created_at);
+    const newStaffs = staffs.map(
+        ({ password, station_id, service_station_name, ...other }) => {
+            other.birthday = convertDateToGMT7(other.birthday);
+            other.created_at = convertTimeToGMT7(other.created_at);
 
-        return other;
-    });
+            other.service_station = {
+                id: station_id,
+                name: service_station_name,
+            };
+            return other;
+        }
+    );
 
     sendResponse(
         res,

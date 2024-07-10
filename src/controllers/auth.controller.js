@@ -39,9 +39,9 @@ const register = async (req, res) => {
     /* FIND USER */
 
     const selectQuery = `
-        SELECT id FROM ${TABLE_NAMES.users} WHERE username = '1'
+        SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
         UNION
-        SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = '1';
+        SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ?;
     `;
 
     const users = await selectData(selectQuery, [
@@ -49,6 +49,7 @@ const register = async (req, res) => {
         req.body.username,
     ]);
 
+    console.log('sdfsdf');
     if (users.length > 0) {
         sendResponse(
             res,
@@ -161,7 +162,31 @@ const signin = async (req, res) => {
             }
         }
 
-        const query = `SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?`;
+        const query = `
+            SELECT
+                u.*,
+                addr.street AS address_street,
+                addr.latitude AS address_latitude,
+                addr.longitude AS address_longitude,
+                w.id AS ward_id,
+                w.name AS ward_name,
+                d.id AS district_id,
+                d.name AS district_name,
+                p.id AS province_id,
+                p.name AS province_name
+
+            FROM ${TABLE_NAMES.users} AS u
+            LEFT JOIN
+                ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
+            LEFT JOIN
+                ${TABLE_NAMES.wards} AS w ON w.id = addr.ward_id
+            LEFT JOIN
+                ${TABLE_NAMES.districts} AS d ON d.id = w.district_id
+            LEFT JOIN
+                ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
+            WHERE u.username = ?`;
+
+        console.log(query);
 
         const users = await selectData(query, [inputUsername]);
 
@@ -196,10 +221,46 @@ const signin = async (req, res) => {
             return;
         }
 
-        const { password, ...other } = users[0];
+        const {
+            password,
+            address_id,
+            address_street,
+            address_latitude,
+            address_longitude,
+            ward_id,
+            ward_name,
+            district_id,
+            district_name,
+            province_id,
+            province_name,
+
+            ...other
+        } = users[0];
 
         other.created_at = convertTimeToGMT7(other.created_at);
         other.birthday = convertDateToGMT7(other.birthday);
+
+        other.address =
+            address_id === null
+                ? null
+                : {
+                      id: address_id,
+                      street: address_street,
+                      latitude: address_latitude,
+                      longitude: address_longitude,
+                      ward: {
+                          id: ward_id,
+                          name: ward_name,
+                      },
+                      district: {
+                          id: district_id,
+                          name: district_name,
+                      },
+                      province: {
+                          id: province_id,
+                          name: province_name,
+                      },
+                  };
 
         const token = generateJWT(inputUsername, other.role);
 

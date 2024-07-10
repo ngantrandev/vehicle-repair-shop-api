@@ -3,12 +3,12 @@ const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getAllServicesByMotorcycleId = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'motorcycle id is required');
+    if (!req.params.motorcycle_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'motorcycle_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
+    if (!isValidInteger(req.params.motorcycle_id)) {
         sendResponse(
             res,
             STATUS_CODE.BAD_REQUEST,
@@ -36,9 +36,19 @@ const getAllServicesByMotorcycleId = async (req, res) => {
             m.id = ?
     `;
 
-    const motorcycles = await selectData(query, [req.params.id]);
+    const motorcycles = await selectData(query, [req.params.motorcycle_id]);
 
-    const newList = motorcycles.map(({ category_id, ...other }) => other);
+    const newList = motorcycles.map(
+        ({ category_id, category_name, category_desc, ...other }) => {
+            other.category = {
+                id: category_id,
+                name: category_name,
+                description: category_desc,
+            };
+
+            return other;
+        }
+    );
 
     sendResponse(
         res,

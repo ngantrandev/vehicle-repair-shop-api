@@ -5,6 +5,7 @@ const {
     selectData,
     excuteQuery,
     sendResponse,
+    convertTimeToGMT7,
 } = require('../ultil.lib');
 
 const setBookingStatusToFixing = async (req, res) => {
@@ -189,6 +190,7 @@ const getAllBookingAssignedToStaff = async (req, res) => {
 
     const newBookings = bookings.map(
         ({
+            staff_id,
             service_name,
             service_id,
             service_price,
@@ -201,6 +203,9 @@ const getAllBookingAssignedToStaff = async (req, res) => {
             province_name,
             ...other
         }) => {
+            other.created_at = convertTimeToGMT7(other.created_at);
+            other.modified_at = convertTimeToGMT7(other.modified_at);
+
             other.service = {
                 id: service_id,
                 name: service_name,

@@ -19,6 +19,7 @@ const getAllUserCarts = async (req, res) => {
     const query = `
         SELECT
             c.id,
+            c.service_id,
             s.name AS service_name,
             s.image_url AS service_image_url,
             s.price AS service_price
@@ -31,11 +32,30 @@ const getAllUserCarts = async (req, res) => {
 
     const userCarts = await selectData(query, [req.params.user_id]);
 
+    const newList = userCarts.map(
+        ({
+            service_name,
+            service_image_url,
+            service_price,
+            service_id,
+            ...other
+        }) => {
+            other.service = {
+                id: service_id,
+                name: service_name,
+                image_url: service_image_url,
+                price: service_price,
+            };
+
+            return other;
+        }
+    );
+
     sendResponse(
         res,
         STATUS_CODE.OK,
         'Get all user carts successfully!',
-        userCarts
+        newList
     );
 };
 

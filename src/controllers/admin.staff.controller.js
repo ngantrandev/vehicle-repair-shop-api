@@ -13,28 +13,33 @@ const {
 } = require('../ultil.lib');
 
 const getStaffById = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.staff_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.staff_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id must be interger');
         return;
     }
 
     const query = QUERY_SELECT_STAFF_BY_ID;
 
-    const staffs = await selectData(query, [req.params.id]);
+    const staffs = await selectData(query, [req.params.staff_id]);
 
     if (staffs.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
         return;
     }
 
-    const { password, station_id, ...other } = staffs[0];
+    const { password, station_id, service_station_name, ...other } = staffs[0];
     other.birthday = convertDateToGMT7(other.birthday);
     other.created_at = convertTimeToGMT7(other.created_at);
+
+    other.service_station = {
+        id: station_id,
+        name: service_station_name,
+    };
 
     sendResponse(res, STATUS_CODE.OK, 'Find staff successfully!', other);
 };
@@ -133,13 +138,13 @@ const createStaff = async (req, res) => {
 };
 
 const updateStaff = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.staff_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.staff_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id must be interger');
         return;
     }
 
@@ -147,7 +152,7 @@ const updateStaff = async (req, res) => {
     const findStaffQuery = `
         SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
     `;
-    const staffsFound = await selectData(findStaffQuery, [req.params.id]);
+    const staffsFound = await selectData(findStaffQuery, [req.params.staff_id]);
 
     if (staffsFound.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
@@ -186,7 +191,7 @@ const updateStaff = async (req, res) => {
         }
 
         if (field === 'username') {
-            if (await isUsernameExist(req.body[field], req.params.id)) {
+            if (await isUsernameExist(req.body[field], req.params.staff_id)) {
                 sendResponse(
                     res,
                     STATUS_CODE.CONFLICT,
@@ -234,7 +239,7 @@ const updateStaff = async (req, res) => {
 
         const result = await excuteQuery(updateQuery, [
             ...updateValues,
-            req.params.id,
+            req.params.staff_id,
         ]);
 
         if (!result) {
@@ -247,11 +252,19 @@ const updateStaff = async (req, res) => {
         }
 
         const querySelect = QUERY_SELECT_STAFF_BY_ID;
-        const updatedStaffs = await selectData(querySelect, [req.params.id]);
+        const updatedStaffs = await selectData(querySelect, [
+            req.params.staff_id,
+        ]);
 
-        const { password, station_id, ...other } = updatedStaffs[0];
+        const { password, station_id, service_station_name, ...other } =
+            updatedStaffs[0];
         other.created_at = convertTimeToGMT7(other.created_at);
         other.birthday = convertDateToGMT7(other.birthday);
+
+        other.service_station = {
+            id: station_id,
+            name: service_station_name,
+        };
 
         sendResponse(
             res,
@@ -269,13 +282,13 @@ const updateStaff = async (req, res) => {
 };
 
 const deactivateStaff = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.staff_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.staff_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id must be interger');
         return;
     }
 
@@ -284,7 +297,7 @@ const deactivateStaff = async (req, res) => {
         SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
     `;
 
-    const staffsFound = await selectData(findStaffQuery, [req.params.id]);
+    const staffsFound = await selectData(findStaffQuery, [req.params.staff_id]);
     if (staffsFound.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
         return;
@@ -307,7 +320,7 @@ const deactivateStaff = async (req, res) => {
 
     const result = await excuteQuery(updateQuery, [
         ACCOUNT_STATE.deactive,
-        req.params.id,
+        req.params.staff_id,
     ]);
 
     if (!result) {
@@ -327,19 +340,19 @@ const deactivateStaff = async (req, res) => {
 };
 
 // const deleteStaff = async (req, res) => {
-//     if (!req.params.id) {
+//     if (!req.params.staff_id) {
 //         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
 //         return;
 //     }
 
-//     if (!isValidInteger(req.params.id)) {
+//     if (!isValidInteger(req.params.staff_id)) {
 //         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
 //         return;
 //     }
 
 //     /**DELETE USER */
 //     const deleteQuery = `DELETE FROM ${TABLE_NAMES.staffs} WHERE id = ?`;
-//     const result = await excuteQuery(deleteQuery, [req.params.id]);
+//     const result = await excuteQuery(deleteQuery, [req.params.staff_id]);
 
 //     if (!result) {
 //         sendResponse(

@@ -3,6 +3,7 @@ const {
     USER_ROLES,
     ACCOUNT_STATE,
 } = require('../configs/constants.config');
+const { QUERY_SELECT_USER_BY_ID } = require('../configs/queries.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     selectData,
@@ -16,28 +17,63 @@ const {
 } = require('../ultil.lib');
 
 const getUserById = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.user_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.user_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id must be interger');
         return;
     }
 
-    const query = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
+    const query = QUERY_SELECT_USER_BY_ID;
 
-    const users = await selectData(query, [req.params.id]);
+    const users = await selectData(query, [req.params.user_id]);
 
     if (users.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
         return;
     }
 
-    const { password, ...other } = users[0];
+    const {
+        password,
+        address_id,
+        address_street,
+        address_latitude,
+        address_longitude,
+        ward_id,
+        ward_name,
+        district_id,
+        district_name,
+        province_id,
+        province_name,
+        ...other
+    } = users[0];
     other.birthday = convertDateToGMT7(other.birthday);
     other.created_at = convertTimeToGMT7(other.created_at);
+
+    other.address =
+        address_id === null
+            ? null
+            : {
+                  id: address_id,
+                  street: address_street,
+                  latitude: address_latitude,
+                  longitude: address_longitude,
+                  ward: {
+                      id: ward_id,
+                      name: ward_name,
+                  },
+                  district: {
+                      id: district_id,
+                      name: district_name,
+                  },
+                  province: {
+                      id: province_id,
+                      name: province_name,
+                  },
+              };
 
     sendResponse(res, STATUS_CODE.OK, 'Find user successfullly!', other);
 };
@@ -124,19 +160,19 @@ const createUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.user_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.user_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id must be interger');
         return;
     }
 
     /**FIND USER */
-    const findUserQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
-    const usersFound = await selectData(findUserQuery, [req.params.id]);
+    const checkExistQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
+    const usersFound = await selectData(checkExistQuery, [req.params.user_id]);
 
     if (usersFound.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
@@ -150,6 +186,28 @@ const updateUser = async (req, res) => {
             'user account is deactivated!'
         );
         return;
+    }
+
+    if (req.body.username) {
+        const checkExistUsernameQuery = `
+            SELECT id FROM ${TABLE_NAMES.users} WHERE username = ? AND id != ?
+            UNION
+            SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ?
+        `;
+        const usersExist = await selectData(checkExistUsernameQuery, [
+            req.body.username,
+            req.params.user_id,
+            req.body.username,
+        ]);
+
+        if (usersExist.length > 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'This username already exists!'
+            );
+            return;
+        }
     }
 
     const possibleFields = [
@@ -210,7 +268,7 @@ const updateUser = async (req, res) => {
 
         const result = await excuteQuery(updateQuery, [
             ...updateValues,
-            req.params.id,
+            req.params.user_id,
         ]);
 
         if (!result) {
@@ -222,18 +280,55 @@ const updateUser = async (req, res) => {
             return;
         }
 
-        const querySelect = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
-        const updatedUsers = await selectData(querySelect, [req.params.id]);
+        const querySelect = QUERY_SELECT_USER_BY_ID;
+        const updatedUsers = await selectData(querySelect, [
+            req.params.user_id,
+        ]);
 
-        const { password, ...otherUserInfo } = updatedUsers[0];
-        otherUserInfo.created_at = convertTimeToGMT7(otherUserInfo.created_at);
-        otherUserInfo.birthday = convertDateToGMT7(otherUserInfo.birthday);
+        const {
+            password,
+            address_id,
+            address_street,
+            address_latitude,
+            address_longitude,
+            ward_id,
+            ward_name,
+            district_id,
+            district_name,
+            province_id,
+            province_name,
+            ...other
+        } = updatedUsers[0];
+        other.created_at = convertTimeToGMT7(other.created_at);
+        other.birthday = convertDateToGMT7(other.birthday);
+
+        other.address =
+            address_id === null
+                ? null
+                : {
+                      id: address_id,
+                      street: address_street,
+                      latitude: address_latitude,
+                      longitude: address_longitude,
+                      ward: {
+                          id: ward_id,
+                          name: ward_name,
+                      },
+                      district: {
+                          id: district_id,
+                          name: district_name,
+                      },
+                      province: {
+                          id: province_id,
+                          name: province_name,
+                      },
+                  };
 
         sendResponse(
             res,
             STATUS_CODE.OK,
             'Updated user info successfully!',
-            otherUserInfo
+            other
         );
     } catch (error) {
         sendResponse(
@@ -245,20 +340,20 @@ const updateUser = async (req, res) => {
 };
 
 // const deleteUser = async (req, res) => {
-//     if (!req.params.id) {
+//     if (!req.params.user_id) {
 //         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
 
 //         return;
 //     }
 
-//     if (!isValidInteger(req.params.id)) {
+//     if (!isValidInteger(req.params.user_id)) {
 //         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
 //         return;
 //     }
 
 //     /**DELETE USER */
 //     const deleteQuery = `DELETE FROM ${TABLE_NAMES.users} WHERE id = ?`;
-//     const result = await excuteQuery(deleteQuery, [req.params.id]);
+//     const result = await excuteQuery(deleteQuery, [req.params.user_id]);
 
 //     if (!result) {
 //         sendResponse(
@@ -278,20 +373,20 @@ const updateUser = async (req, res) => {
 // };
 
 const deactivateUser = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.user_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id is required');
 
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.user_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id must be interger');
         return;
     }
 
     /**FIND USER */
     const findUserQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
-    const usersFound = await selectData(findUserQuery, [req.params.id]);
+    const usersFound = await selectData(findUserQuery, [req.params.user_id]);
 
     if (usersFound.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
@@ -319,7 +414,7 @@ const deactivateUser = async (req, res) => {
     const updateQuery = `UPDATE ${TABLE_NAMES.users} SET active = ? WHERE id = ?`;
     const result = await excuteQuery(updateQuery, [
         ACCOUNT_STATE.deactive,
-        req.params.id,
+        req.params.user_id,
     ]);
 
     if (!result) {

@@ -81,13 +81,17 @@ const createService = async (req, res) => {
 };
 
 const updateService = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.service_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'service_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.service_id)) {
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            'service_id must be interger'
+        );
         return;
     }
 
@@ -107,7 +111,7 @@ const updateService = async (req, res) => {
 
     /**FIND SERVICE */
     const findQuery = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
-    const servicesFound = await selectData(findQuery, [req.params.id]);
+    const servicesFound = await selectData(findQuery, [req.params.service_id]);
 
     if (servicesFound.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
@@ -157,7 +161,7 @@ const updateService = async (req, res) => {
 
         const result = await excuteQuery(updateQuery, [
             ...updateValues,
-            req.params.id,
+            req.params.service_id,
         ]);
 
         if (!result) {
@@ -171,13 +175,24 @@ const updateService = async (req, res) => {
 
         // response updated service
         const querySelect = QUERY_SELECT_SERVICE_BY_ID;
-        const updatedServices = await selectData(querySelect, [req.params.id]);
+        const updatedServices = await selectData(querySelect, [
+            req.params.service_id,
+        ]);
+
+        const { category_id, category_name, category_desc, ...other } =
+            updatedServices[0];
+
+        other.category = {
+            id: category_id,
+            name: category_name,
+            description: category_desc,
+        };
 
         sendResponse(
             res,
             STATUS_CODE.OK,
             'Updated service info successfully!',
-            updatedServices[0]
+            other
         );
     } catch (error) {
         sendResponse(
@@ -189,20 +204,24 @@ const updateService = async (req, res) => {
 };
 
 const deleteService = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.service_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'service_id is required');
 
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.service_id)) {
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            'service_id must be interger'
+        );
         return;
     }
 
     /**FIND SERVICE */
     const findQuery = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
-    const servicesFound = await selectData(findQuery, [req.params.id]);
+    const servicesFound = await selectData(findQuery, [req.params.service_id]);
 
     if (servicesFound.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
@@ -211,7 +230,7 @@ const deleteService = async (req, res) => {
 
     /**DELETE SERVICE */
     const deleteQuery = `DELETE FROM ${TABLE_NAMES.services} WHERE id = ?`;
-    const result = await excuteQuery(deleteQuery, [req.params.id]);
+    const result = await excuteQuery(deleteQuery, [req.params.service_id]);
 
     if (!result) {
         sendResponse(

@@ -5,6 +5,6 @@ const router = require('express').Router();
 
 router.get('/', servicesControllers.getAllServices);
 
-router.get('/:id', serviceControllers.getServiceById);
+router.get('/:service_id', serviceControllers.getServiceById);
 
 module.exports = router;

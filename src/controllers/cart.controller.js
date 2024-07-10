@@ -61,13 +61,13 @@ const createCart = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Cannot create service at this time!'
+            'Cannot create cart at this time!'
         );
 
         return;
     }
 
-    sendResponse(res, STATUS_CODE.OK, 'Created service successfully!');
+    sendResponse(res, STATUS_CODE.OK, 'Created cart successfully!');
 };
 
 const createBookingFromCart = async (req, res) => {

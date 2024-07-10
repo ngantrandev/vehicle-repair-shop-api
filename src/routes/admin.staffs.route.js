@@ -5,14 +5,14 @@ const router = require('express').Router();
 
 router.get('/', adminStaffsController.getAllStaffs);
 
-router.get('/:id', adminStaffController.getStaffById);
+router.get('/:staff_id', adminStaffController.getStaffById);
 
 router.post('/', adminStaffController.createStaff);
 
-router.patch('/:id', adminStaffController.updateStaff);
+router.patch('/:staff_id', adminStaffController.updateStaff);
 
-router.patch('/:id/deactivate', adminStaffController.deactivateStaff);
+router.patch('/:staff_id/deactivate', adminStaffController.deactivateStaff);
 
-// router.delete('/:id', adminStaffController.deleteStaff);
+// router.delete('/:staff_id', adminStaffController.deleteStaff);
 
 module.exports = router;

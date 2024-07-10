@@ -3,19 +3,19 @@ const { STATUS_CODE } = require('../configs/status.codes.config');
 const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
 
 const getBrandById = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+    if (!req.params.brand_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+    if (!isValidInteger(req.params.brand_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id must be interger');
         return;
     }
 
     /**FIND BRAND */
     const selectQuery = `SELECT * FROM ${TABLE_NAMES.motorcycle_brands} WHERE id = ?`;
-    const brandsFound = await selectData(selectQuery, [req.params.id]);
+    const brandsFound = await selectData(selectQuery, [req.params.brand_id]);
 
     if (brandsFound.length === 0) {
         sendResponse(res, STATUS_CODE.NOT_FOUND, 'Motorcycle brand not found!');
@@ -31,14 +31,14 @@ const getBrandById = async (req, res) => {
 };
 
 const getAllServicesByBrandId = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand id is required');
+    if (!req.params.brand_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id is required');
 
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand id must be interger');
+    if (!isValidInteger(req.params.brand_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id must be interger');
         return;
     }
 
@@ -61,26 +61,36 @@ const getAllServicesByBrandId = async (req, res) => {
                 mb.id = ?
         `;
 
-    const motorcycles = await selectData(query, [req.params.id]);
+    const motorcycles = await selectData(query, [req.params.brand_id]);
 
-    const newList = motorcycles.map(({ category_id, ...other }) => other);
+    const newList = motorcycles.map(
+        ({ category_id, category_name, category_desc, ...other }) => {
+            other.category = {
+                id: category_id,
+                name: category_name,
+                description: category_desc,
+            };
+
+            return other;
+        }
+    );
 
     sendResponse(
         res,
         STATUS_CODE.OK,
-        'get services by brand id successfully!',
+        'get services by brand_id successfully!',
         newList
     );
 };
 
 const getAllMotorcyclesByBrandId = async (req, res) => {
-    if (!req.params.id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand id is required');
+    if (!req.params.brand_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.id)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand id must be interger');
+    if (!isValidInteger(req.params.brand_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id must be interger');
         return;
     }
 
@@ -95,12 +105,19 @@ const getAllMotorcyclesByBrandId = async (req, res) => {
 
     const motorcycles = await selectData(query, []);
 
-    const newList = motorcycles.map(({ brand_id, ...other }) => other);
+    const newList = motorcycles.map(({ brand_id, brand_name, ...other }) => {
+        other.brand = {
+            id: brand_id,
+            name: brand_name,
+        };
+
+        return other;
+    });
 
     sendResponse(
         res,
         STATUS_CODE.OK,
-        'get motorcycles by brand id successfully!',
+        'get motorcycles by brand_id successfully!',
         newList
     );
 };

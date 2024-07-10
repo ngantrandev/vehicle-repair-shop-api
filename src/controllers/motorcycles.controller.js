@@ -15,7 +15,14 @@ const getAllMotorcycles = async (req, res) => {
 
     const motorcycles = await selectData(query, []);
 
-    const newList = motorcycles.map(({ brand_id, ...other }) => other);
+    const newList = motorcycles.map(({ brand_id, brand_name, ...other }) => {
+        other.brand = {
+            id: brand_id,
+            name: brand_name,
+        };
+
+        return other;
+    });
 
     sendResponse(
         res,

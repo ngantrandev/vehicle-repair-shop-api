@@ -5,13 +5,13 @@ const adminBookingController = require('../controllers/admin.booking.controller'
 
 router.get('/', adminUsersController.getAllUser);
 
-router.get('/:id', adminUserControllers.getUserById);
+router.get('/:user_id', adminUserControllers.getUserById);
 
 router.post('/', adminUserControllers.createUser);
 
-router.patch('/:id', adminUserControllers.updateUser);
+router.patch('/:user_id', adminUserControllers.updateUser);
 
-router.patch('/:id/deactivate', adminUserControllers.deactivateUser);
+router.patch('/:user_id/deactivate', adminUserControllers.deactivateUser);
 
 router.patch(
     '/:user_id/bookings/:booking_id/confirm',
@@ -23,6 +23,6 @@ router.patch(
     adminBookingController.assignBookingToEmployee
 );
 
-// router.delete('/:id', adminUserControllers.deleteUser);
+// router.delete('/:user_id', adminUserControllers.deleteUser);
 
 module.exports = router;
