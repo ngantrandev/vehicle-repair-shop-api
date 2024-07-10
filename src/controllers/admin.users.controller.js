@@ -8,7 +8,8 @@ const {
 } = require('../ultil.lib');
 
 const getAllUser = async (req, res) => {
-    const query = `
+    try {
+        const query = `
         SELECT
             u.*,
             addr.street AS address_street,
@@ -32,55 +33,67 @@ const getAllUser = async (req, res) => {
             ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
     `;
 
-    const users = await selectData(query, []);
+        const users = await selectData(query, []);
 
-    const newUsers = users
-        .filter(({ username }) => req.tokenPayload.username !== username)
-        .map(
-            ({
-                password,
-                address_id,
-                address_street,
-                address_latitude,
-                address_longitude,
-                ward_id,
-                ward_name,
-                district_id,
-                district_name,
-                province_id,
-                province_name,
-                ...other
-            }) => {
-                other.birthday = convertDateToGMT7(other.birthday);
-                other.created_at = convertTimeToGMT7(other.created_at);
+        const newUsers = users
+            .filter(({ username }) => req.tokenPayload.username !== username)
+            .map(
+                ({
+                    password,
+                    address_id,
+                    address_street,
+                    address_latitude,
+                    address_longitude,
+                    ward_id,
+                    ward_name,
+                    district_id,
+                    district_name,
+                    province_id,
+                    province_name,
+                    ...other
+                }) => {
+                    other.birthday = convertDateToGMT7(other.birthday);
+                    other.created_at = convertTimeToGMT7(other.created_at);
 
-                other.address =
-                    address_id === null
-                        ? null
-                        : {
-                              id: address_id,
-                              street: address_street,
-                              latitude: address_latitude,
-                              longitude: address_longitude,
-                              ward: {
-                                  id: ward_id,
-                                  name: ward_name,
-                              },
-                              district: {
-                                  id: district_id,
-                                  name: district_name,
-                              },
-                              province: {
-                                  id: province_id,
-                                  name: province_name,
-                              },
-                          };
+                    other.address =
+                        address_id === null
+                            ? null
+                            : {
+                                  id: address_id,
+                                  street: address_street,
+                                  latitude: address_latitude,
+                                  longitude: address_longitude,
+                                  ward: {
+                                      id: ward_id,
+                                      name: ward_name,
+                                  },
+                                  district: {
+                                      id: district_id,
+                                      name: district_name,
+                                  },
+                                  province: {
+                                      id: province_id,
+                                      name: province_name,
+                                  },
+                              };
 
-                return other;
-            }
+                    return other;
+                }
+            );
+
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Get all users successfully!',
+            newUsers
         );
-
-    sendResponse(res, STATUS_CODE.OK, 'Get all users successfully!', newUsers);
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrong'
+        );
+    }
 };
 
 const userController = {

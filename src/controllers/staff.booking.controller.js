@@ -23,68 +23,76 @@ const setBookingStatusToFixing = async (req, res) => {
         return;
     }
 
-    const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND staff_id = ?`;
-    const bookingsFound = await selectData(checkExistBooking, [
-        req.params.booking_id,
-        req.params.staff_id,
-    ]);
+    try {
+        const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND staff_id = ?`;
+        const bookingsFound = await selectData(checkExistBooking, [
+            req.params.booking_id,
+            req.params.staff_id,
+        ]);
 
-    if (bookingsFound.length === 0) {
+        if (bookingsFound.length === 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'this booking does not belong to this staff!'
+            );
+            return;
+        }
+
+        if (bookingsFound[0].status === BOOKING_STATE.pending) {
+            sendResponse(
+                res,
+                STATUS_CODE.UNPROCESSABLE_ENTITY,
+                'booking has not been confirmed yet!'
+            );
+            return;
+        }
+
+        if (bookingsFound[0].status === BOOKING_STATE.cancelled) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'booking has been already cancelled!'
+            );
+            return;
+        }
+
+        if (bookingsFound[0].status === BOOKING_STATE.done) {
+            sendResponse(
+                res,
+                STATUS_CODE.FORBIDDEN,
+                'cannot change status of a booking that has been done!'
+            );
+            return;
+        }
+
+        if (bookingsFound[0].status === BOOKING_STATE.fixing) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'booking has been already set to fixing status!'
+            );
+            return;
+        }
+
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
+        await excuteQuery(updateBooking, [
+            BOOKING_STATE.fixing,
+            req.params.booking_id,
+        ]);
+
         sendResponse(
             res,
-            STATUS_CODE.NOT_FOUND,
-            'this booking does not belong to this staff!'
+            STATUS_CODE.OK,
+            'booking status changed to fixing successfully!'
         );
-        return;
-    }
-
-    if (bookingsFound[0].status === BOOKING_STATE.pending) {
+    } catch (error) {
         sendResponse(
             res,
-            STATUS_CODE.UNPROCESSABLE_ENTITY,
-            'booking has not been confirmed yet!'
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!'
         );
-        return;
     }
-
-    if (bookingsFound[0].status === BOOKING_STATE.cancelled) {
-        sendResponse(
-            res,
-            STATUS_CODE.CONFLICT,
-            'booking has been already cancelled!'
-        );
-        return;
-    }
-
-    if (bookingsFound[0].status === BOOKING_STATE.done) {
-        sendResponse(
-            res,
-            STATUS_CODE.FORBIDDEN,
-            'cannot change status of a booking that has been done!'
-        );
-        return;
-    }
-
-    if (bookingsFound[0].status === BOOKING_STATE.fixing) {
-        sendResponse(
-            res,
-            STATUS_CODE.CONFLICT,
-            'booking has been already set to fixing status!'
-        );
-        return;
-    }
-
-    const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
-    await excuteQuery(updateBooking, [
-        BOOKING_STATE.fixing,
-        req.params.booking_id,
-    ]);
-
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'booking status changed to fixing successfully!'
-    );
 };
 
 const setBookingStatusToDone = async (req, res) => {
@@ -102,63 +110,72 @@ const setBookingStatusToDone = async (req, res) => {
         return;
     }
 
-    const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND staff_id = ?`;
-    const bookingsFound = await selectData(checkExistBooking, [
-        req.params.booking_id,
-        req.params.staff_id,
-    ]);
+    try {
+        const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND staff_id = ?`;
+        const bookingsFound = await selectData(checkExistBooking, [
+            req.params.booking_id,
+            req.params.staff_id,
+        ]);
 
-    if (bookingsFound.length === 0) {
+        if (bookingsFound.length === 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'this booking does not belong to this staff!'
+            );
+            return;
+        }
+
+        if (bookingsFound[0].status === BOOKING_STATE.pending) {
+            sendResponse(
+                res,
+                STATUS_CODE.UNPROCESSABLE_ENTITY,
+                'booking has not been confirmed yet!'
+            );
+            return;
+        }
+
+        if (bookingsFound[0].status === BOOKING_STATE.cancelled) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'booking has been already cancelled!'
+            );
+            return;
+        }
+
+        if (bookingsFound[0].status === BOOKING_STATE.done) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'booking has been already set to done status!'
+            );
+            return;
+        }
+
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
+        await excuteQuery(updateBooking, [
+            BOOKING_STATE.done,
+            req.params.booking_id,
+        ]);
+
         sendResponse(
             res,
-            STATUS_CODE.NOT_FOUND,
-            'this booking does not belong to this staff!'
+            STATUS_CODE.OK,
+            'booking status changed to done successfully!'
         );
-        return;
-    }
-
-    if (bookingsFound[0].status === BOOKING_STATE.pending) {
+    } catch (error) {
         sendResponse(
             res,
-            STATUS_CODE.UNPROCESSABLE_ENTITY,
-            'booking has not been confirmed yet!'
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!'
         );
-        return;
     }
-
-    if (bookingsFound[0].status === BOOKING_STATE.cancelled) {
-        sendResponse(
-            res,
-            STATUS_CODE.CONFLICT,
-            'booking has been already cancelled!'
-        );
-        return;
-    }
-
-    if (bookingsFound[0].status === BOOKING_STATE.done) {
-        sendResponse(
-            res,
-            STATUS_CODE.CONFLICT,
-            'booking has been already set to done status!'
-        );
-        return;
-    }
-
-    const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
-    await excuteQuery(updateBooking, [
-        BOOKING_STATE.done,
-        req.params.booking_id,
-    ]);
-
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'booking status changed to done successfully!'
-    );
 };
 
 const getAllBookingAssignedToStaff = async (req, res) => {
-    const query = `
+    try {
+        const query = `
         SELECT
             b.*,
             s.id AS service_id,
@@ -186,47 +203,54 @@ const getAllBookingAssignedToStaff = async (req, res) => {
         WHERE staff_id = ?
     `;
 
-    const bookings = await selectData(query, [req.params.staff_id]);
+        const bookings = await selectData(query, [req.params.staff_id]);
 
-    const newBookings = bookings.map(
-        ({
-            staff_id,
-            service_name,
-            service_id,
-            service_price,
-            address_id,
-            address_street,
-            address_latitude,
-            address_longitude,
-            ward_name,
-            district_name,
-            province_name,
-            ...other
-        }) => {
-            other.created_at = convertTimeToGMT7(other.created_at);
-            other.modified_at = convertTimeToGMT7(other.modified_at);
+        const newBookings = bookings.map(
+            ({
+                staff_id,
+                service_name,
+                service_id,
+                service_price,
+                address_id,
+                address_street,
+                address_latitude,
+                address_longitude,
+                ward_name,
+                district_name,
+                province_name,
+                ...other
+            }) => {
+                other.created_at = convertTimeToGMT7(other.created_at);
+                other.modified_at = convertTimeToGMT7(other.modified_at);
 
-            other.service = {
-                id: service_id,
-                name: service_name,
-                price: service_price,
-            };
+                other.service = {
+                    id: service_id,
+                    name: service_name,
+                    price: service_price,
+                };
 
-            other.address = {
-                id: address_id,
-                street: address_street,
-                latitude: address_latitude,
-                longitude: address_longitude,
-                ward: ward_name,
-                district: district_name,
-                province: province_name,
-            };
+                other.address = {
+                    id: address_id,
+                    street: address_street,
+                    latitude: address_latitude,
+                    longitude: address_longitude,
+                    ward: ward_name,
+                    district: district_name,
+                    province: province_name,
+                };
 
-            return other;
-        }
-    );
+                return other;
+            }
+        );
 
-    sendResponse(res, STATUS_CODE.OK, 'success', newBookings);
+        sendResponse(res, STATUS_CODE.OK, 'success', newBookings);
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!'
+        );
+    }
 };
 
 const staffBookingController = {

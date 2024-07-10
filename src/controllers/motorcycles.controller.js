@@ -3,7 +3,8 @@ const { selectData, sendResponse } = require('../ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getAllMotorcycles = async (req, res) => {
-    const query = `
+    try {
+        const query = `
         SELECT
             m.*,
             mb.name AS brand_name
@@ -13,23 +14,32 @@ const getAllMotorcycles = async (req, res) => {
             ${TABLE_NAMES.motorcycle_brands} AS mb ON mb.id = m.brand_id
     `;
 
-    const motorcycles = await selectData(query, []);
+        const motorcycles = await selectData(query, []);
 
-    const newList = motorcycles.map(({ brand_id, brand_name, ...other }) => {
-        other.brand = {
-            id: brand_id,
-            name: brand_name,
-        };
+        const newList = motorcycles.map(
+            ({ brand_id, brand_name, ...other }) => {
+                other.brand = {
+                    id: brand_id,
+                    name: brand_name,
+                };
 
-        return other;
-    });
+                return other;
+            }
+        );
 
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'Get all motorcycles successfully!',
-        newList
-    );
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Get all motorcycles successfully!',
+            newList
+        );
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!'
+        );
+    }
 };
 
 const motorcycleBrandsController = {

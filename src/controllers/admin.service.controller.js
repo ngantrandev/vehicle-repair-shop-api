@@ -56,28 +56,36 @@ const createService = async (req, res) => {
 
     /** CREATE SERVICE */
 
-    const insertedFields = requiredFields.map((field) => ` ${field}`);
-    const insertedValues = [];
+    try {
+        const insertedFields = requiredFields.map((field) => ` ${field}`);
+        const insertedValues = [];
 
-    const queryCreate = `INSERT INTO ${TABLE_NAMES.services} (${insertedFields}) VALUES (?, ?, ?, ?, ?)`;
+        const queryCreate = `INSERT INTO ${TABLE_NAMES.services} (${insertedFields}) VALUES (?, ?, ?, ?, ?)`;
 
-    for (const field of requiredFields) {
-        insertedValues.push(req.body[field]);
-    }
+        for (const field of requiredFields) {
+            insertedValues.push(req.body[field]);
+        }
 
-    const result = await excuteQuery(queryCreate, insertedValues);
+        const result = await excuteQuery(queryCreate, insertedValues);
 
-    if (!result) {
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'Cannot create service at this time!'
+            );
+
+            return;
+        }
+
+        sendResponse(res, STATUS_CODE.OK, 'Created service successfully!');
+    } catch (error) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Cannot create service at this time!'
+            'Something went wrongs!'
         );
-
-        return;
     }
-
-    sendResponse(res, STATUS_CODE.OK, 'Created service successfully!');
 };
 
 const updateService = async (req, res) => {
@@ -109,50 +117,52 @@ const updateService = async (req, res) => {
         return;
     }
 
-    /**FIND SERVICE */
-    const findQuery = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
-    const servicesFound = await selectData(findQuery, [req.params.service_id]);
-
-    if (servicesFound.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
-        return;
-    }
-
-    const possibleFields = [
-        'category_id',
-        'name',
-        'description',
-        'price',
-        'estimated_time',
-        'image_file',
-    ];
-
-    const updateFields = [];
-    const updateValues = [];
-
-    for (const field of possibleFields) {
-        if (!req.body[field]) {
-            continue;
-        }
-
-        if (field === 'image_file') {
-            /**
-             * Save file
-             * get file path
-             * save file path to image_url field
-             */
-        } else {
-            updateFields.push(`${field} = ?`);
-            updateValues.push(req.body[field]);
-        }
-    }
-
-    if (updateFields.length === 0) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
-        return;
-    }
-
     try {
+        /**FIND SERVICE */
+        const findQuery = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
+        const servicesFound = await selectData(findQuery, [
+            req.params.service_id,
+        ]);
+
+        if (servicesFound.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
+            return;
+        }
+
+        const possibleFields = [
+            'category_id',
+            'name',
+            'description',
+            'price',
+            'estimated_time',
+            'image_file',
+        ];
+
+        const updateFields = [];
+        const updateValues = [];
+
+        for (const field of possibleFields) {
+            if (!req.body[field]) {
+                continue;
+            }
+
+            if (field === 'image_file') {
+                /**
+                 * Save file
+                 * get file path
+                 * save file path to image_url field
+                 */
+            } else {
+                updateFields.push(`${field} = ?`);
+                updateValues.push(req.body[field]);
+            }
+        }
+
+        if (updateFields.length === 0) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
+            return;
+        }
+
         const updateQuery = `
             UPDATE ${TABLE_NAMES.services}
             SET ${updateFields.join(', ')}
@@ -219,30 +229,40 @@ const deleteService = async (req, res) => {
         return;
     }
 
-    /**FIND SERVICE */
-    const findQuery = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
-    const servicesFound = await selectData(findQuery, [req.params.service_id]);
+    try {
+        /**FIND SERVICE */
+        const findQuery = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
+        const servicesFound = await selectData(findQuery, [
+            req.params.service_id,
+        ]);
 
-    if (servicesFound.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
-        return;
-    }
+        if (servicesFound.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
+            return;
+        }
 
-    /**DELETE SERVICE */
-    const deleteQuery = `DELETE FROM ${TABLE_NAMES.services} WHERE id = ?`;
-    const result = await excuteQuery(deleteQuery, [req.params.service_id]);
+        /**DELETE SERVICE */
+        const deleteQuery = `DELETE FROM ${TABLE_NAMES.services} WHERE id = ?`;
+        const result = await excuteQuery(deleteQuery, [req.params.service_id]);
 
-    if (!result) {
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'Cannot delete service at this time!'
+            );
+
+            return;
+        }
+
+        sendResponse(res, STATUS_CODE.OK, 'Deleted service successfully!');
+    } catch (error) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Cannot delete service at this time!'
+            'Something went wrongs!'
         );
-
-        return;
     }
-
-    sendResponse(res, STATUS_CODE.OK, 'Deleted service successfully!');
 };
 
 const adminServiceController = {

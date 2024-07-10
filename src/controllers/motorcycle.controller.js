@@ -17,7 +17,8 @@ const getAllServicesByMotorcycleId = async (req, res) => {
         return;
     }
 
-    const query = `
+    try {
+        const query = `
         SELECT DISTINCT
             s.*,
             sc.name AS category_name,
@@ -36,26 +37,33 @@ const getAllServicesByMotorcycleId = async (req, res) => {
             m.id = ?
     `;
 
-    const motorcycles = await selectData(query, [req.params.motorcycle_id]);
+        const motorcycles = await selectData(query, [req.params.motorcycle_id]);
 
-    const newList = motorcycles.map(
-        ({ category_id, category_name, category_desc, ...other }) => {
-            other.category = {
-                id: category_id,
-                name: category_name,
-                description: category_desc,
-            };
+        const newList = motorcycles.map(
+            ({ category_id, category_name, category_desc, ...other }) => {
+                other.category = {
+                    id: category_id,
+                    name: category_name,
+                    description: category_desc,
+                };
 
-            return other;
-        }
-    );
+                return other;
+            }
+        );
 
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'get services by motorcycle id successfully!',
-        newList
-    );
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'get services by motorcycle id successfully!',
+            newList
+        );
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrongs!'
+        );
+    }
 };
 
 const motorcycleBrandController = {

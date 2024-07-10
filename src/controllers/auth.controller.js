@@ -36,65 +36,73 @@ const register = async (req, res) => {
         }
     }
 
-    /* FIND USER */
+    try {
+        /* FIND USER */
 
-    const selectQuery = `
-        SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
-        UNION
-        SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ?;
-    `;
+        const selectQuery = `
+    SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
+    UNION
+    SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ?;
+`;
 
-    const users = await selectData(selectQuery, [
-        req.body.username,
-        req.body.username,
-    ]);
+        const users = await selectData(selectQuery, [
+            req.body.username,
+            req.body.username,
+        ]);
 
-    console.log('sdfsdf');
-    if (users.length > 0) {
-        sendResponse(
-            res,
-            STATUS_CODE.CONFLICT,
-            'This username already exists!'
-        );
-        return;
-    }
-
-    /* CREATE USER */
-
-    const fields = requiredFields.map((field) => ` ${field}`);
-
-    const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, '${ACCOUNT_STATE.active}')`;
-
-    const values = [];
-
-    for (const field of requiredFields) {
-        const value = req.body[field];
-        if (field === 'password') {
-            const hash = await hashPassWord(value);
-            values.push(hash);
-        } else {
-            values.push(value);
+        console.log('sdfsdf');
+        if (users.length > 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'This username already exists!'
+            );
+            return;
         }
-    }
 
-    // add role value
-    values.push(USER_ROLES.customer);
-    // add time created account
-    values.push(getCurrentTimeInGMT7());
+        /* CREATE USER */
 
-    const result = await excuteQuery(insertQuery, values);
+        const fields = requiredFields.map((field) => ` ${field}`);
 
-    if (!result) {
+        const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, '${ACCOUNT_STATE.active}')`;
+
+        const values = [];
+
+        for (const field of requiredFields) {
+            const value = req.body[field];
+            if (field === 'password') {
+                const hash = await hashPassWord(value);
+                values.push(hash);
+            } else {
+                values.push(value);
+            }
+        }
+
+        // add role value
+        values.push(USER_ROLES.customer);
+        // add time created account
+        values.push(getCurrentTimeInGMT7());
+
+        const result = await excuteQuery(insertQuery, values);
+
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'cannot create account at this time!'
+            );
+
+            return;
+        }
+
+        sendResponse(res, STATUS_CODE.OK, 'Created account successfully!');
+    } catch (error) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'cannot create account at this time!'
+            'something went wrong!'
         );
-
-        return;
     }
-
-    sendResponse(res, STATUS_CODE.OK, 'Created account successfully!');
 };
 
 const signin = async (req, res) => {

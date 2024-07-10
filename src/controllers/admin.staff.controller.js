@@ -23,25 +23,34 @@ const getStaffById = async (req, res) => {
         return;
     }
 
-    const query = QUERY_SELECT_STAFF_BY_ID;
+    try {
+        const query = QUERY_SELECT_STAFF_BY_ID;
 
-    const staffs = await selectData(query, [req.params.staff_id]);
+        const staffs = await selectData(query, [req.params.staff_id]);
 
-    if (staffs.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
-        return;
+        if (staffs.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
+            return;
+        }
+
+        const { password, station_id, service_station_name, ...other } =
+            staffs[0];
+        other.birthday = convertDateToGMT7(other.birthday);
+        other.created_at = convertTimeToGMT7(other.created_at);
+
+        other.service_station = {
+            id: station_id,
+            name: service_station_name,
+        };
+
+        sendResponse(res, STATUS_CODE.OK, 'Find staff successfully!', other);
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrongs!'
+        );
     }
-
-    const { password, station_id, service_station_name, ...other } = staffs[0];
-    other.birthday = convertDateToGMT7(other.birthday);
-    other.created_at = convertTimeToGMT7(other.created_at);
-
-    other.service_station = {
-        id: station_id,
-        name: service_station_name,
-    };
-
-    sendResponse(res, STATUS_CODE.OK, 'Find staff successfully!', other);
 };
 
 const createStaff = async (req, res) => {
@@ -75,66 +84,78 @@ const createStaff = async (req, res) => {
         return;
     }
 
-    /* FIND USER*/
+    try {
+        /* FIND USER*/
 
-    const findQuery = `
-        SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
-        UNION
-        SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? 
-    `;
+        const findQuery = `
+    SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
+    UNION
+    SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? 
+`;
 
-    const usersExist = await selectData(findQuery, [
-        req.body.username,
-        req.body.username,
-    ]);
+        const usersExist = await selectData(findQuery, [
+            req.body.username,
+            req.body.username,
+        ]);
 
-    if (usersExist.length > 0) {
-        sendResponse(
-            res,
-            STATUS_CODE.CONFLICT,
-            'This username already exists!'
-        );
-        return;
-    }
-
-    /** CREATE USER */
-
-    const insertedFields = [];
-    const insertedValues = [];
-
-    for (const field of requiredFields) {
-        const value = req.body[field];
-
-        if (field === 'password') {
-            const hash = await hashPassWord(value);
-            insertedValues.push(hash);
-        } else {
-            insertedValues.push(value);
+        if (usersExist.length > 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'This username already exists!'
+            );
+            return;
         }
 
-        insertedFields.push(`${field} `);
-    }
+        /** CREATE USER */
 
-    const queryCreate = `INSERT INTO ${TABLE_NAMES.staffs} (${insertedFields}, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        const insertedFields = [];
+        const insertedValues = [];
 
-    // add time created
-    insertedValues.push(getCurrentTimeInGMT7());
-    // set account state: active state
-    insertedValues.push(ACCOUNT_STATE.active);
+        for (const field of requiredFields) {
+            const value = req.body[field];
 
-    const result = await excuteQuery(queryCreate, insertedValues);
+            if (field === 'password') {
+                const hash = await hashPassWord(value);
+                insertedValues.push(hash);
+            } else {
+                insertedValues.push(value);
+            }
 
-    if (!result) {
+            insertedFields.push(`${field} `);
+        }
+
+        const queryCreate = `INSERT INTO ${TABLE_NAMES.staffs} (${insertedFields}, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        // add time created
+        insertedValues.push(getCurrentTimeInGMT7());
+        // set account state: active state
+        insertedValues.push(ACCOUNT_STATE.active);
+
+        const result = await excuteQuery(queryCreate, insertedValues);
+
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'Cannot create staff at this time!'
+            );
+
+            return;
+        }
+
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Created staff account successfully!'
+        );
+    } catch (error) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Cannot create staff at this time!'
+            'Something went wrongs!'
         );
-
-        return;
     }
-
-    sendResponse(res, STATUS_CODE.OK, 'Created staff account successfully!');
 };
 
 const updateStaff = async (req, res) => {
@@ -148,89 +169,93 @@ const updateStaff = async (req, res) => {
         return;
     }
 
-    /**FIND USER */
-    const findStaffQuery = `
-        SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
-    `;
-    const staffsFound = await selectData(findStaffQuery, [req.params.staff_id]);
-
-    if (staffsFound.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
-        return;
-    }
-
-    if (staffsFound[0].active == ACCOUNT_STATE.deactive) {
-        sendResponse(
-            res,
-            STATUS_CODE.BAD_REQUEST,
-            'Staff account is deactivated!'
-        );
-        return;
-    }
-
-    const possibleFields = [
-        'username',
-        'password',
-        'firstname',
-        'lastname',
-        'birthday',
-        'image_file',
-        'email',
-        'address_id',
-        'phone',
-        'station_id',
-        'active',
-    ];
-
-    const updateFields = [];
-    const updateValues = [];
-
-    for (const field of possibleFields) {
-        if (!req.body[field]) {
-            continue;
-        }
-
-        if (field === 'username') {
-            if (await isUsernameExist(req.body[field], req.params.staff_id)) {
-                sendResponse(
-                    res,
-                    STATUS_CODE.CONFLICT,
-                    'username already exist!'
-                );
-                return;
-            }
-
-            updateFields.push(`${field} = ?`);
-            updateValues.push(req.body[field]);
-        } else if (field === 'password') {
-            if (req.body[field].trim().length === 0) {
-                sendResponse(
-                    res,
-                    STATUS_CODE.BAD_REQUEST,
-                    'password connot empty'
-                );
-                return;
-            }
-
-            const hash = await hashPassWord(req.body[field]);
-            updateFields.push(`${field} = ?`);
-            updateValues.push(hash);
-        } else if (field === 'image_file') {
-            // save file
-            // get file path
-            // save path to field "image_url"
-        } else {
-            updateFields.push(`${field} = ?`);
-            updateValues.push(req.body[field]);
-        }
-    }
-
-    if (updateFields.length === 0) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
-        return;
-    }
-
     try {
+        /**FIND USER */
+        const findStaffQuery = `
+            SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
+        `;
+        const staffsFound = await selectData(findStaffQuery, [
+            req.params.staff_id,
+        ]);
+
+        if (staffsFound.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
+            return;
+        }
+
+        if (staffsFound[0].active == ACCOUNT_STATE.deactive) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                'Staff account is deactivated!'
+            );
+            return;
+        }
+
+        const possibleFields = [
+            'username',
+            'password',
+            'firstname',
+            'lastname',
+            'birthday',
+            'image_file',
+            'email',
+            'address_id',
+            'phone',
+            'station_id',
+            'active',
+        ];
+
+        const updateFields = [];
+        const updateValues = [];
+
+        for (const field of possibleFields) {
+            if (!req.body[field]) {
+                continue;
+            }
+
+            if (field === 'username') {
+                if (
+                    await isUsernameExist(req.body[field], req.params.staff_id)
+                ) {
+                    sendResponse(
+                        res,
+                        STATUS_CODE.CONFLICT,
+                        'username already exist!'
+                    );
+                    return;
+                }
+
+                updateFields.push(`${field} = ?`);
+                updateValues.push(req.body[field]);
+            } else if (field === 'password') {
+                if (req.body[field].trim().length === 0) {
+                    sendResponse(
+                        res,
+                        STATUS_CODE.BAD_REQUEST,
+                        'password connot empty'
+                    );
+                    return;
+                }
+
+                const hash = await hashPassWord(req.body[field]);
+                updateFields.push(`${field} = ?`);
+                updateValues.push(hash);
+            } else if (field === 'image_file') {
+                // save file
+                // get file path
+                // save path to field "image_url"
+            } else {
+                updateFields.push(`${field} = ?`);
+                updateValues.push(req.body[field]);
+            }
+        }
+
+        if (updateFields.length === 0) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
+            return;
+        }
+
         const updateQuery = `
             UPDATE ${TABLE_NAMES.staffs}
             SET ${updateFields}
@@ -292,51 +317,61 @@ const deactivateStaff = async (req, res) => {
         return;
     }
 
-    /**FIND STAFF */
-    const findStaffQuery = `
-        SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
-    `;
+    try {
+        /**FIND STAFF */
+        const findStaffQuery = `
+     SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
+ `;
 
-    const staffsFound = await selectData(findStaffQuery, [req.params.staff_id]);
-    if (staffsFound.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
-        return;
-    }
+        const staffsFound = await selectData(findStaffQuery, [
+            req.params.staff_id,
+        ]);
+        if (staffsFound.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
+            return;
+        }
 
-    if (staffsFound[0].active == ACCOUNT_STATE.deactive) {
+        if (staffsFound[0].active == ACCOUNT_STATE.deactive) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                'Staff account is already deactivated!'
+            );
+            return;
+        }
+
+        const updateQuery = `
+     UPDATE ${TABLE_NAMES.staffs}
+     SET active = ?
+     WHERE id = ?
+ `;
+
+        const result = await excuteQuery(updateQuery, [
+            ACCOUNT_STATE.deactive,
+            req.params.staff_id,
+        ]);
+
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'Cannot deactivate staff at this time!'
+            );
+            return;
+        }
+
         sendResponse(
             res,
-            STATUS_CODE.BAD_REQUEST,
-            'Staff account is already deactivated!'
+            STATUS_CODE.OK,
+            'Deactivated staff account successfully!'
         );
-        return;
-    }
-
-    const updateQuery = `
-        UPDATE ${TABLE_NAMES.staffs}
-        SET active = ?
-        WHERE id = ?
-    `;
-
-    const result = await excuteQuery(updateQuery, [
-        ACCOUNT_STATE.deactive,
-        req.params.staff_id,
-    ]);
-
-    if (!result) {
+    } catch (error) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Cannot deactivate staff at this time!'
+            'Something went wrongs!'
         );
-        return;
     }
-
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'Deactivated staff account successfully!'
-    );
 };
 
 // const deleteStaff = async (req, res) => {

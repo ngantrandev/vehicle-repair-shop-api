@@ -13,21 +13,35 @@ const getBrandById = async (req, res) => {
         return;
     }
 
-    /**FIND BRAND */
-    const selectQuery = `SELECT * FROM ${TABLE_NAMES.motorcycle_brands} WHERE id = ?`;
-    const brandsFound = await selectData(selectQuery, [req.params.brand_id]);
+    try {
+        /**FIND BRAND */
+        const selectQuery = `SELECT * FROM ${TABLE_NAMES.motorcycle_brands} WHERE id = ?`;
+        const brandsFound = await selectData(selectQuery, [
+            req.params.brand_id,
+        ]);
 
-    if (brandsFound.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Motorcycle brand not found!');
-        return;
+        if (brandsFound.length === 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'Motorcycle brand not found!'
+            );
+            return;
+        }
+
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Get motorcycle brand by id successfully!',
+            brandsFound[0]
+        );
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrongs!'
+        );
     }
-
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'Get motorcycle brand by id successfully!',
-        brandsFound[0]
-    );
 };
 
 const getAllServicesByBrandId = async (req, res) => {
@@ -42,7 +56,8 @@ const getAllServicesByBrandId = async (req, res) => {
         return;
     }
 
-    const query = `
+    try {
+        const query = `
             SELECT DISTINCT
                 s.*,
                 sc.name AS category_name,
@@ -61,26 +76,33 @@ const getAllServicesByBrandId = async (req, res) => {
                 mb.id = ?
         `;
 
-    const motorcycles = await selectData(query, [req.params.brand_id]);
+        const motorcycles = await selectData(query, [req.params.brand_id]);
 
-    const newList = motorcycles.map(
-        ({ category_id, category_name, category_desc, ...other }) => {
-            other.category = {
-                id: category_id,
-                name: category_name,
-                description: category_desc,
-            };
+        const newList = motorcycles.map(
+            ({ category_id, category_name, category_desc, ...other }) => {
+                other.category = {
+                    id: category_id,
+                    name: category_name,
+                    description: category_desc,
+                };
 
-            return other;
-        }
-    );
+                return other;
+            }
+        );
 
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'get services by brand_id successfully!',
-        newList
-    );
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'get services by brand_id successfully!',
+            newList
+        );
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!'
+        );
+    }
 };
 
 const getAllMotorcyclesByBrandId = async (req, res) => {
@@ -94,32 +116,42 @@ const getAllMotorcyclesByBrandId = async (req, res) => {
         return;
     }
 
-    const query = `
-        SELECT
-            m.*,
-            mb.name AS brand_name
-        FROM ${TABLE_NAMES.motorcycles} AS m
-        JOIN ${TABLE_NAMES.motorcycle_brands} as mb
-            ON mb.id = m.brand_id
-    `;
+    try {
+        const query = `
+    SELECT
+        m.*,
+        mb.name AS brand_name
+    FROM ${TABLE_NAMES.motorcycles} AS m
+    JOIN ${TABLE_NAMES.motorcycle_brands} as mb
+        ON mb.id = m.brand_id
+`;
 
-    const motorcycles = await selectData(query, []);
+        const motorcycles = await selectData(query, []);
 
-    const newList = motorcycles.map(({ brand_id, brand_name, ...other }) => {
-        other.brand = {
-            id: brand_id,
-            name: brand_name,
-        };
+        const newList = motorcycles.map(
+            ({ brand_id, brand_name, ...other }) => {
+                other.brand = {
+                    id: brand_id,
+                    name: brand_name,
+                };
 
-        return other;
-    });
+                return other;
+            }
+        );
 
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'get motorcycles by brand_id successfully!',
-        newList
-    );
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'get motorcycles by brand_id successfully!',
+            newList
+        );
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!'
+        );
+    }
 };
 
 const motorcycleBrandController = {

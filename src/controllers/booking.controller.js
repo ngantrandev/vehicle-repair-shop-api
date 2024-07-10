@@ -28,64 +28,72 @@ const getBookingById = async (req, res) => {
         return;
     }
 
-    /**FIND BOOKING */
-    const selectQuery = `
-        SELECT
-            b.*,
-            s.name AS service_name,
-            s.price AS service_price,
-            stf.id AS staff_id,
-            stf.firstname AS staff_firstname,
-            stf.lastname AS staff_lastname
-        FROM
-            ${TABLE_NAMES.bookings} AS b
-        JOIN
-            ${TABLE_NAMES.services} AS s ON s.id = b.service_id
-        JOIN
-            ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
-        WHERE user_id = ? AND service_id = ?
-    `;
-    const bookings = await selectData(selectQuery, [
-        req.params.user_id,
-        req.params.booking_id,
-    ]);
+    try {
+        /**FIND BOOKING */
+        const selectQuery = `
+    SELECT
+        b.*,
+        s.name AS service_name,
+        s.price AS service_price,
+        stf.id AS staff_id,
+        stf.firstname AS staff_firstname,
+        stf.lastname AS staff_lastname
+    FROM
+        ${TABLE_NAMES.bookings} AS b
+    JOIN
+        ${TABLE_NAMES.services} AS s ON s.id = b.service_id
+    JOIN
+        ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
+    WHERE user_id = ? AND service_id = ?
+`;
+        const bookings = await selectData(selectQuery, [
+            req.params.user_id,
+            req.params.booking_id,
+        ]);
 
-    if (bookings.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
-        return;
+        if (bookings.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
+            return;
+        }
+
+        const {
+            service_id,
+            service_name,
+            service_price,
+            user_id,
+            staff_id,
+            staff_firstname,
+            staff_lastname,
+            ...other
+        } = bookings[0];
+        other.created_at = convertTimeToGMT7(other.created_at);
+        if (other.modified_at) {
+            other.modified_at = convertTimeToGMT7(other.modified_at);
+        }
+        other.staff = {
+            id: staff_id,
+            firstname: staff_firstname,
+            lastname: staff_lastname,
+        };
+        other.service = {
+            id: service_id,
+            name: service_name,
+            price: service_price,
+        };
+
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Get booking by booking_id and user_id successfully!',
+            other
+        );
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!'
+        );
     }
-
-    const {
-        service_id,
-        service_name,
-        service_price,
-        user_id,
-        staff_id,
-        staff_firstname,
-        staff_lastname,
-        ...other
-    } = bookings[0];
-    other.created_at = convertTimeToGMT7(other.created_at);
-    if (other.modified_at) {
-        other.modified_at = convertTimeToGMT7(other.modified_at);
-    }
-    other.staff = {
-        id: staff_id,
-        firstname: staff_firstname,
-        lastname: staff_lastname,
-    };
-    other.service = {
-        id: service_id,
-        name: service_name,
-        price: service_price,
-    };
-
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'Get booking by booking_id and user_id successfully!',
-        other
-    );
 };
 const createBooking = async (req, res) => {
     /**VALIDATE VALUE */
@@ -189,48 +197,56 @@ const cancelBooking = async (req, res) => {
         return;
     }
 
-    const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
-    const bookings = await selectData(selectQuery, [req.params.booking_id]);
-    if (bookings.length === 0) {
-        sendResponse(
-            res,
-            STATUS_CODE.NOT_FOUND,
-            'cannot find this booking by id'
-        );
-        return;
-    }
+    try {
+        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
+        const bookings = await selectData(selectQuery, [req.params.booking_id]);
+        if (bookings.length === 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'cannot find this booking by id'
+            );
+            return;
+        }
 
-    const query = `
+        const query = `
         UPDATE ${TABLE_NAMES.bookings}
         SET modified_at = ?, status = ?, note = ?
         WHERE
             id = ? AND status != ?`;
-    const result = await excuteQuery(query, [
-        getCurrentTimeInGMT7(),
-        BOOKING_STATE.cancelled,
-        req.body.note,
-        req.params.booking_id,
-        BOOKING_STATE.cancelled,
-    ]);
+        const result = await excuteQuery(query, [
+            getCurrentTimeInGMT7(),
+            BOOKING_STATE.cancelled,
+            req.body.note,
+            req.params.booking_id,
+            BOOKING_STATE.cancelled,
+        ]);
 
-    if (!result) {
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'cannot cancel booking at this time'
+            );
+            return;
+        } else if (result.affectedRows === 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'this booking has been already cancelled'
+            );
+            return;
+        }
+
+        sendResponse(res, STATUS_CODE.OK, 'canceled booking successfully!');
+        return;
+    } catch (error) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'cannot cancel booking at this time'
+            'something went wrong'
         );
-        return;
-    } else if (result.affectedRows === 0) {
-        sendResponse(
-            res,
-            STATUS_CODE.CONFLICT,
-            'this booking has been already cancelled'
-        );
-        return;
     }
-
-    sendResponse(res, STATUS_CODE.OK, 'canceled booking successfully!');
-    return;
 };
 
 const bookingController = {

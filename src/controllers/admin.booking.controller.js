@@ -26,33 +26,41 @@ const confirmBooking = async (req, res) => {
         return;
     }
 
-    const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
-    const bookingsFound = await selectData(checkExistBooking, [
-        req.params.booking_id,
-    ]);
+    try {
+        const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
+        const bookingsFound = await selectData(checkExistBooking, [
+            req.params.booking_id,
+        ]);
 
-    if (bookingsFound.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
-        return;
-    }
+        if (bookingsFound.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
+            return;
+        }
 
-    if (bookingsFound[0].status === BOOKING_STATE.accepted) {
+        if (bookingsFound[0].status === BOOKING_STATE.accepted) {
+            sendResponse(
+                res,
+                STATUS_CODE.CONFLICT,
+                'booking has been already confirmed!'
+            );
+
+            return;
+        }
+
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
+        await excuteQuery(updateBooking, [
+            BOOKING_STATE.accepted,
+            req.params.booking_id,
+        ]);
+
+        sendResponse(res, STATUS_CODE.OK, 'booking confirmed successfully!');
+    } catch (error) {
         sendResponse(
             res,
-            STATUS_CODE.CONFLICT,
-            'booking has been already confirmed!'
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrong'
         );
-
-        return;
     }
-
-    const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
-    await excuteQuery(updateBooking, [
-        BOOKING_STATE.accepted,
-        req.params.booking_id,
-    ]);
-
-    sendResponse(res, STATUS_CODE.OK, 'booking confirmed successfully!');
 };
 
 const assignBookingToEmployee = async (req, res) => {

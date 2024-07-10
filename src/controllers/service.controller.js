@@ -17,26 +17,39 @@ const getServiceById = async (req, res) => {
         return;
     }
 
-    /**FIND SERVICE */
-    const selectQuery = QUERY_SELECT_SERVICE_BY_ID;
-    const servicesFound = await selectData(selectQuery, [
-        req.params.service_id,
-    ]);
+    try {
+        /**FIND SERVICE */
+        const selectQuery = QUERY_SELECT_SERVICE_BY_ID;
+        const servicesFound = await selectData(selectQuery, [
+            req.params.service_id,
+        ]);
 
-    if (servicesFound.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Service not found!');
-        return;
+        if (servicesFound.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'Service not found!');
+            return;
+        }
+
+        const { category_id, category_name, category_desc, ...other } =
+            servicesFound[0];
+        other.category = {
+            id: category_id,
+            name: category_name,
+            description: category_desc,
+        };
+
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Get service by id successfully!',
+            other
+        );
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrongs!'
+        );
     }
-
-    const { category_id, category_name, category_desc, ...other } =
-        servicesFound[0];
-    other.category = {
-        id: category_id,
-        name: category_name,
-        description: category_desc,
-    };
-
-    sendResponse(res, STATUS_CODE.OK, 'Get service by id successfully!', other);
 };
 
 const serviceControllers = {

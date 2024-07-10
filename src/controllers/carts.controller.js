@@ -16,47 +16,55 @@ const getAllUserCarts = async (req, res) => {
     //     rn;
     // }
 
-    const query = `
-        SELECT
-            c.id,
-            c.service_id,
-            s.name AS service_name,
-            s.image_url AS service_image_url,
-            s.price AS service_price
+    try {
+        const query = `
+    SELECT
+        c.id,
+        c.service_id,
+        s.name AS service_name,
+        s.image_url AS service_image_url,
+        s.price AS service_price
 
-        FROM ${TABLE_NAMES.carts} AS c
-        JOIN
-            ${TABLE_NAMES.services} AS s ON s.id = c.service_id
-        WHERE c.user_id = ?
-    `;
+    FROM ${TABLE_NAMES.carts} AS c
+    JOIN
+        ${TABLE_NAMES.services} AS s ON s.id = c.service_id
+    WHERE c.user_id = ?
+`;
 
-    const userCarts = await selectData(query, [req.params.user_id]);
+        const userCarts = await selectData(query, [req.params.user_id]);
 
-    const newList = userCarts.map(
-        ({
-            service_name,
-            service_image_url,
-            service_price,
-            service_id,
-            ...other
-        }) => {
-            other.service = {
-                id: service_id,
-                name: service_name,
-                image_url: service_image_url,
-                price: service_price,
-            };
+        const newList = userCarts.map(
+            ({
+                service_name,
+                service_image_url,
+                service_price,
+                service_id,
+                ...other
+            }) => {
+                other.service = {
+                    id: service_id,
+                    name: service_name,
+                    image_url: service_image_url,
+                    price: service_price,
+                };
 
-            return other;
-        }
-    );
+                return other;
+            }
+        );
 
-    sendResponse(
-        res,
-        STATUS_CODE.OK,
-        'Get all user carts successfully!',
-        newList
-    );
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Get all user carts successfully!',
+            newList
+        );
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrong'
+        );
+    }
 };
 
 const cartsController = {

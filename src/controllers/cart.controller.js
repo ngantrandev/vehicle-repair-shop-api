@@ -36,38 +36,46 @@ const createCart = async (req, res) => {
         return;
     }
 
-    /**CHECK SERVICE */
-    const queryCheckService = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
-    const services = await excuteQuery(queryCheckService, [
-        req.body.service_id,
-    ]);
-    if (services.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, `Service not found`);
-        return;
-    }
+    try {
+        /**CHECK SERVICE */
+        const queryCheckService = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
+        const services = await excuteQuery(queryCheckService, [
+            req.body.service_id,
+        ]);
+        if (services.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, `Service not found`);
+            return;
+        }
 
-    /** CREATE CART */
+        /** CREATE CART */
 
-    const insertedFields = requiredFields.map((field) => ` ${field}`);
+        const insertedFields = requiredFields.map((field) => ` ${field}`);
 
-    const queryCreate = `INSERT INTO ${TABLE_NAMES.carts} (${insertedFields}, user_id) VALUES (?, ?)`;
+        const queryCreate = `INSERT INTO ${TABLE_NAMES.carts} (${insertedFields}, user_id) VALUES (?, ?)`;
 
-    const result = await excuteQuery(queryCreate, [
-        req.body.service_id,
-        req.params.user_id,
-    ]);
+        const result = await excuteQuery(queryCreate, [
+            req.body.service_id,
+            req.params.user_id,
+        ]);
 
-    if (!result) {
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'Cannot create cart at this time!'
+            );
+
+            return;
+        }
+
+        sendResponse(res, STATUS_CODE.OK, 'Created cart successfully!');
+    } catch (error) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Cannot create cart at this time!'
+            'something went wrong!'
         );
-
-        return;
     }
-
-    sendResponse(res, STATUS_CODE.OK, 'Created cart successfully!');
 };
 
 const createBookingFromCart = async (req, res) => {
@@ -107,14 +115,16 @@ const createBookingFromCart = async (req, res) => {
         return;
     }
 
-    const checkCartExistQuery = `SELECT * FROM ${TABLE_NAMES.carts} WHERE id = ?`;
-    const carts = await selectData(checkCartExistQuery, [req.params.cart_id]);
-    if (carts.length === 0) {
-        sendResponse(res, STATUS_CODE.NOT_FOUND, 'Cart not found');
-        return;
-    }
-
     try {
+        const checkCartExistQuery = `SELECT * FROM ${TABLE_NAMES.carts} WHERE id = ?`;
+        const carts = await selectData(checkCartExistQuery, [
+            req.params.cart_id,
+        ]);
+        if (carts.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'Cart not found');
+            return;
+        }
+
         /** auto choose staffid if user give latitude and longitude */
         const stationId = await getIdOfNearestStation(
             req.body.latitude,
