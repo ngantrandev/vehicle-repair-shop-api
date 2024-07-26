@@ -28,7 +28,7 @@ apiRoute.use(
     staffsRoutes
 );
 
-apiRoute.use('/motorcycle_brands', motorcycleBrandsRoute);
+apiRoute.use('/motorcycle-brands', motorcycleBrandsRoute);
 
 apiRoute.use('/services', servicesRoute);
 
