@@ -11,20 +11,20 @@ const getAllBookingByUserId = async (req, res) => {
     try {
         /**FIND SERVICE */
         const selectQuery = `
-     SELECT
-         b.*,
-         s.name AS service_name,
-         s.price AS service_price,
-         stf.id AS staff_id,
-         stf.firstname AS staff_firstname,
-         stf.lastname AS staff_lastname
-     FROM
-         ${TABLE_NAMES.bookings} AS b
-     JOIN
-         ${TABLE_NAMES.services} AS s ON s.id = b.service_id
-     JOIN
-         ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
-     WHERE user_id = ?
+        SELECT
+            b.*,
+            s.name AS service_name,
+            s.price AS service_price,
+            stf.id AS staff_id,
+            stf.firstname AS staff_firstname,
+            stf.lastname AS staff_lastname
+        FROM
+            ${TABLE_NAMES.bookings} AS b
+        LEFT JOIN
+            ${TABLE_NAMES.services} AS s ON s.id = b.service_id
+        LEFT JOIN
+            ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
+        WHERE user_id = ?
  `;
 
         const bookings = await selectData(selectQuery, [

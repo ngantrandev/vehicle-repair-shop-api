@@ -68,7 +68,7 @@ const excuteQuery = async (query, listPagrams) => {
     });
 };
 
-const selectData = async (query, listPagrams) => {
+const selectData = async (query, listPagrams = []) => {
     return new Promise((resolve, reject) => {
         connection.query(query, listPagrams, function (error, results) {
             if (error) reject(error);

@@ -95,83 +95,83 @@ const setBookingStatusToFixing = async (req, res) => {
     }
 };
 
-const setBookingStatusToDone = async (req, res) => {
-    if (!req.params.booking_id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
-        return;
-    }
+// const setBookingStatusToDone = async (req, res) => {
+//     if (!req.params.booking_id) {
+//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
+//         return;
+//     }
 
-    if (!isValidInteger(req.params.booking_id)) {
-        sendResponse(
-            res,
-            STATUS_CODE.BAD_REQUEST,
-            'booking_id must be integer'
-        );
-        return;
-    }
+//     if (!isValidInteger(req.params.booking_id)) {
+//         sendResponse(
+//             res,
+//             STATUS_CODE.BAD_REQUEST,
+//             'booking_id must be integer'
+//         );
+//         return;
+//     }
 
-    try {
-        const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND staff_id = ?`;
-        const bookingsFound = await selectData(checkExistBooking, [
-            req.params.booking_id,
-            req.params.staff_id,
-        ]);
+//     try {
+//         const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND staff_id = ?`;
+//         const bookingsFound = await selectData(checkExistBooking, [
+//             req.params.booking_id,
+//             req.params.staff_id,
+//         ]);
 
-        if (bookingsFound.length === 0) {
-            sendResponse(
-                res,
-                STATUS_CODE.NOT_FOUND,
-                'this booking does not belong to this staff!'
-            );
-            return;
-        }
+//         if (bookingsFound.length === 0) {
+//             sendResponse(
+//                 res,
+//                 STATUS_CODE.NOT_FOUND,
+//                 'this booking does not belong to this staff!'
+//             );
+//             return;
+//         }
 
-        if (bookingsFound[0].status === BOOKING_STATE.pending) {
-            sendResponse(
-                res,
-                STATUS_CODE.UNPROCESSABLE_ENTITY,
-                'booking has not been confirmed yet!'
-            );
-            return;
-        }
+//         if (bookingsFound[0].status === BOOKING_STATE.pending) {
+//             sendResponse(
+//                 res,
+//                 STATUS_CODE.UNPROCESSABLE_ENTITY,
+//                 'booking has not been confirmed yet!'
+//             );
+//             return;
+//         }
 
-        if (bookingsFound[0].status === BOOKING_STATE.cancelled) {
-            sendResponse(
-                res,
-                STATUS_CODE.CONFLICT,
-                'booking has been already cancelled!'
-            );
-            return;
-        }
+//         if (bookingsFound[0].status === BOOKING_STATE.cancelled) {
+//             sendResponse(
+//                 res,
+//                 STATUS_CODE.CONFLICT,
+//                 'booking has been already cancelled!'
+//             );
+//             return;
+//         }
 
-        if (bookingsFound[0].status === BOOKING_STATE.done) {
-            sendResponse(
-                res,
-                STATUS_CODE.CONFLICT,
-                'booking has been already set to done status!'
-            );
-            return;
-        }
+//         if (bookingsFound[0].status === BOOKING_STATE.done) {
+//             sendResponse(
+//                 res,
+//                 STATUS_CODE.CONFLICT,
+//                 'booking has been already set to done status!'
+//             );
+//             return;
+//         }
 
-        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
-        await excuteQuery(updateBooking, [
-            BOOKING_STATE.done,
-            req.params.booking_id,
-        ]);
+//         const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
+//         await excuteQuery(updateBooking, [
+//             BOOKING_STATE.done,
+//             req.params.booking_id,
+//         ]);
 
-        sendResponse(
-            res,
-            STATUS_CODE.OK,
-            'booking status changed to done successfully!'
-        );
-    } catch (error) {
-        sendResponse(
-            res,
-            STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
-        );
-    }
-};
+//         sendResponse(
+//             res,
+//             STATUS_CODE.OK,
+//             'booking status changed to done successfully!'
+//         );
+//     } catch (error) {
+//         sendResponse(
+//             res,
+//             STATUS_CODE.INTERNAL_SERVER_ERROR,
+//             'something went wrongs!'
+//         );
+//     }
+// };
 
 const getAllBookingAssignedToStaff = async (req, res) => {
     try {
@@ -255,7 +255,6 @@ const getAllBookingAssignedToStaff = async (req, res) => {
 
 const staffBookingController = {
     setBookingStatusToFixing,
-    setBookingStatusToDone,
     getAllBookingAssignedToStaff,
 };
 

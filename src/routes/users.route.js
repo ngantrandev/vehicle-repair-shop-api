@@ -49,7 +49,7 @@ router.post(
 );
 
 router.patch(
-    '/:user_id/bookings/:booking_id',
+    '/:user_id/bookings/:booking_id/cancel',
     middlewareControllers.verifyCurrentUser,
     bookingController.cancelBooking
 );

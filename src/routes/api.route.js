@@ -8,6 +8,8 @@ const servicesRoute = require('../routes/services.route');
 const motorcyclesRoute = require('../routes/motorcycles.route');
 const usersRoutes = require('../routes/users.route');
 const staffsRoutes = require('../routes/staffs.route');
+const addressesRoute = require('../routes/addresses.route');
+const stationController = require('../controllers/station.controller');
 
 const apiRoute = express();
 
@@ -33,5 +35,9 @@ apiRoute.use('/motorcycle-brands', motorcycleBrandsRoute);
 apiRoute.use('/services', servicesRoute);
 
 apiRoute.use('/motorcycles', motorcyclesRoute);
+
+apiRoute.use('/addresses', addressesRoute);
+
+apiRoute.use('/stations', stationController.getAllServiceStations);
 
 module.exports = apiRoute;
