@@ -50,7 +50,6 @@ const register = async (req, res) => {
             req.body.username,
         ]);
 
-        console.log('sdfsdf');
         if (users.length > 0) {
             sendResponse(
                 res,
@@ -160,6 +159,12 @@ const signin = async (req, res) => {
 
                 const token = generateJWT(inputUsername, USER_ROLES.staff);
 
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    path: '/',
+                    sameSite: 'strict',
+                });
+
                 res.status(STATUS_CODE.OK).json({
                     success: true,
                     message: 'Sign in successfully!',
@@ -193,8 +198,6 @@ const signin = async (req, res) => {
             LEFT JOIN
                 ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
             WHERE u.username = ?`;
-
-        console.log(query);
 
         const users = await selectData(query, [inputUsername]);
 
@@ -271,6 +274,12 @@ const signin = async (req, res) => {
                   };
 
         const token = generateJWT(inputUsername, other.role);
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            path: '/',
+            sameSite: 'strict',
+        });
 
         res.status(STATUS_CODE.OK).json({
             success: true,

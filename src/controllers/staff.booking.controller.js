@@ -75,9 +75,10 @@ const setBookingStatusToFixing = async (req, res) => {
             return;
         }
 
-        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ? WHERE id = ?`;
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, note = ? WHERE id = ?`;
         await excuteQuery(updateBooking, [
             BOOKING_STATE.fixing,
+            req.body.note,
             req.params.booking_id,
         ]);
 
@@ -176,32 +177,33 @@ const setBookingStatusToFixing = async (req, res) => {
 const getAllBookingAssignedToStaff = async (req, res) => {
     try {
         const query = `
-        SELECT
-            b.*,
-            s.id AS service_id,
-            s.name AS service_name,
-            s.price AS service_price,
-            addr.street AS address_street,
-            addr.latitude AS address_latitude,
-            addr.longitude AS address_longitude,
-            w.name AS ward_name,
-            d.name AS district_name,
-            p.name AS province_name
-        
-        FROM ${TABLE_NAMES.bookings} AS b
-        JOIN 
-            ${TABLE_NAMES.services} AS s ON b.service_id = s.id
-        JOIN
-            ${TABLE_NAMES.addresses} AS addr ON addr.id = b.address_id
-        JOIN
-            ${TABLE_NAMES.wards} AS w ON w.id = addr.ward_id
-        JOIN
-            ${TABLE_NAMES.districts} AS d ON d.id = w.district_id
-        JOIN
-            ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
-        
-        WHERE staff_id = ?
-    `;
+            SELECT
+                b.*,
+                s.id AS service_id,
+                s.name AS service_name,
+                s.price AS service_price,
+                addr.street AS address_street,
+                addr.latitude AS address_latitude,
+                addr.longitude AS address_longitude,
+                w.name AS ward_name,
+                d.name AS district_name,
+                p.name AS province_name,
+                u.id AS user_id,
+                u.firstname AS user_firstname,
+                u.lastname AS user_lastname,
+                u.email AS user_email,
+                u.phone AS user_phone
+
+            FROM ( SELECT *
+                    FROM ${TABLE_NAMES.bookings}
+                    WHERE staff_id = ? ) AS b
+            JOIN ${TABLE_NAMES.users} AS u ON b.user_id = u.id
+            JOIN ${TABLE_NAMES.services} AS s ON b.service_id = s.id
+            JOIN ${TABLE_NAMES.addresses} AS addr ON addr.id = b.address_id
+            JOIN ${TABLE_NAMES.wards} AS w ON w.id = addr.ward_id
+            JOIN ${TABLE_NAMES.districts} AS d ON d.id = w.district_id
+            JOIN ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
+        `;
 
         const bookings = await selectData(query, [req.params.staff_id]);
 
@@ -218,6 +220,11 @@ const getAllBookingAssignedToStaff = async (req, res) => {
                 ward_name,
                 district_name,
                 province_name,
+                user_id,
+                user_firstname,
+                user_lastname,
+                user_email,
+                user_phone,
                 ...other
             }) => {
                 other.created_at = convertTimeToGMT7(other.created_at);
@@ -237,6 +244,14 @@ const getAllBookingAssignedToStaff = async (req, res) => {
                     ward: ward_name,
                     district: district_name,
                     province: province_name,
+                };
+
+                other.user = {
+                    id: user_id,
+                    firstname: user_firstname,
+                    lastname: user_lastname,
+                    email: user_email,
+                    phone: user_phone,
                 };
 
                 return other;

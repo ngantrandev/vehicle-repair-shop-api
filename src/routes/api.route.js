@@ -10,6 +10,7 @@ const usersRoutes = require('../routes/users.route');
 const staffsRoutes = require('../routes/staffs.route');
 const addressesRoute = require('../routes/addresses.route');
 const stationController = require('../controllers/station.controller');
+const bookingController = require('../controllers/booking.controller');
 
 const apiRoute = express();
 
@@ -38,6 +39,10 @@ apiRoute.use('/motorcycles', motorcyclesRoute);
 
 apiRoute.use('/addresses', addressesRoute);
 
-apiRoute.use('/stations', stationController.getAllServiceStations);
+apiRoute.get('/stations', stationController.getAllServiceStations);
+
+apiRoute.get('/stations/:station_id/staffs', stationController.getAllStaffOfServiceStation);
+
+apiRoute.get('/bookings/:booking_id', bookingController.getBookingById);
 
 module.exports = apiRoute;

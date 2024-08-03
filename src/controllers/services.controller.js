@@ -3,14 +3,33 @@ const { selectData, sendResponse } = require('../ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getAllServices = async (req, res) => {
+    const { category_id: categoryId, motorcycle_brand: motocycleBrand } =
+        req.query;
+
+    let where = '';
+
+    if (categoryId) {
+        where = `WHERE ${TABLE_NAMES.services}.category_id = '${categoryId}'`;
+    }
+    if (motocycleBrand) {
+        where = `WHERE ${TABLE_NAMES.service_motorcycles}.motorcycle_id = '${motocycleBrand}'`;
+    }
+    if (categoryId && motocycleBrand) {
+        where = `WHERE ${TABLE_NAMES.services}.category_id = '${categoryId}' AND ${TABLE_NAMES.service_motorcycles}.motorcycle_id = '${motocycleBrand}'`;
+    }
+
     try {
         const query = `
     SELECT ${TABLE_NAMES.services}.*,
     ${TABLE_NAMES.service_categories}.name AS category_name, 
-    ${TABLE_NAMES.service_categories}.description AS category_desc 
+    ${TABLE_NAMES.service_categories}.description AS category_desc
     FROM ${TABLE_NAMES.services}
-    JOIN ${TABLE_NAMES.service_categories}
+    LEFT JOIN ${TABLE_NAMES.service_categories}
     ON ${TABLE_NAMES.services}.category_id = ${TABLE_NAMES.service_categories}.id
+    LEFT JOIN ${TABLE_NAMES.service_motorcycles}
+    ON ${TABLE_NAMES.services}.id = ${TABLE_NAMES.service_motorcycles}.service_id
+    ${where}
+    GROUP BY ${TABLE_NAMES.services}.id
 `;
 
         const services = await selectData(query, []);

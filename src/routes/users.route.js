@@ -36,12 +36,6 @@ router.get(
     bookingsController.getAllBookingByUserId
 );
 
-router.get(
-    '/:user_id/bookings/:booking_id',
-    middlewareControllers.verifyCurrentUser,
-    bookingController.getBookingById
-);
-
 router.post(
     '/:user_id/bookings',
     middlewareControllers.verifyCurrentUser,

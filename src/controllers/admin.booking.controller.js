@@ -59,7 +59,7 @@ const confirmBooking = async (req, res) => {
         }
 
         const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, staff_id = ?, note = ? WHERE id = ?`;
-        console.log(req.body.employee_id, req.body.note);
+       
         await excuteQuery(updateBooking, [
             BOOKING_STATE.accepted,
             req.body.employee_id,

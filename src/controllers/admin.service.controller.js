@@ -136,6 +136,7 @@ const updateService = async (req, res) => {
             'price',
             'estimated_time',
             'image_file',
+            'active',
         ];
 
         const updateFields = [];

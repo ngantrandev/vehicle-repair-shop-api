@@ -16,9 +16,4 @@ adminRoutes.use('/staffs', adminStaffsRoute);
 
 adminRoutes.use('/bookings', adminBookingController.getAllBooking);
 
-adminRoutes.use(
-    '/stations/:station_id/staffs',
-    adminStaffsController.getAllStaffOfServiceStation
-);
-
 module.exports = adminRoutes;
