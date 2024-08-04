@@ -159,11 +159,11 @@ const signin = async (req, res) => {
 
                 const token = generateJWT(inputUsername, USER_ROLES.staff);
 
-                res.cookie('token', token, {
-                    httpOnly: true,
-                    path: '/',
-                    sameSite: 'strict',
-                });
+                // res.cookie('token', token, {
+                //     httpOnly: true,
+                //     path: '/',
+                //     sameSite: 'strict',
+                // });
 
                 res.status(STATUS_CODE.OK).json({
                     success: true,
