@@ -10,7 +10,7 @@ const {
     excuteQuery,
     sendResponse,
     convertTimeToGMT7,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 
 const confirmBooking = async (req, res) => {
     if (!req.params.booking_id) {
@@ -59,7 +59,7 @@ const confirmBooking = async (req, res) => {
         }
 
         const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, staff_id = ?, note = ? WHERE id = ?`;
-       
+
         await excuteQuery(updateBooking, [
             BOOKING_STATE.accepted,
             req.body.employee_id,

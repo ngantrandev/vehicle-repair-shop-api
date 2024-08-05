@@ -1,6 +1,10 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
+const {
+    selectData,
+    isValidInteger,
+    sendResponse,
+} = require('../ultil/ultil.lib');
 
 const getBrandById = async (req, res) => {
     if (!req.params.brand_id) {

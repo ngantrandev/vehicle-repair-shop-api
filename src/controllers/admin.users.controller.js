@@ -5,7 +5,7 @@ const {
     convertDateToGMT7,
     convertTimeToGMT7,
     sendResponse,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 
 const getAllUser = async (req, res) => {
     try {

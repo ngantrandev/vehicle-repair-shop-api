@@ -1,5 +1,9 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
-const { selectData, isValidInteger, sendResponse } = require('../ultil.lib');
+const {
+    selectData,
+    isValidInteger,
+    sendResponse,
+} = require('../ultil/ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getAllServicesByMotorcycleId = async (req, res) => {

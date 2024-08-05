@@ -7,7 +7,7 @@ const {
     excuteQuery,
     selectData,
     sendResponse,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 
 const createService = async (req, res) => {
     const requiredFields = [

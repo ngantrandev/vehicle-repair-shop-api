@@ -1,6 +1,10 @@
 const { TABLE_NAMES, ACCOUNT_STATE } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const { sendResponse, selectData, isValidInteger } = require('../ultil.lib');
+const {
+    sendResponse,
+    selectData,
+    isValidInteger,
+} = require('../ultil/ultil.lib');
 
 const getAllServiceStations = async (req, res) => {
     try {
@@ -65,7 +69,9 @@ const getAllStaffOfServiceStation = async (req, res) => {
 
         const staffs = await selectData(query, [station_id]);
 
-        const newStaffs = staffs.map(({password, station_id, ...other }) => other);
+        const newStaffs = staffs.map(
+            ({ password, station_id, ...other }) => other
+        );
 
         sendResponse(
             res,
@@ -80,7 +86,7 @@ const getAllStaffOfServiceStation = async (req, res) => {
 
 const stationController = {
     getAllServiceStations,
-    getAllStaffOfServiceStation
+    getAllStaffOfServiceStation,
 };
 
 module.exports = stationController;

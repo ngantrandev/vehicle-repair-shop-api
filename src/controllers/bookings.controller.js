@@ -3,7 +3,7 @@ const {
     isValidInteger,
     sendResponse,
     convertTimeToGMT7,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const { TABLE_NAMES } = require('../configs/constants.config');
 

@@ -1,6 +1,6 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const { excuteQuery, sendResponse } = require('../ultil.lib');
+const { excuteQuery, sendResponse } = require('../ultil/ultil.lib');
 
 const getServiceCategory = async (req, res) => {
     try {

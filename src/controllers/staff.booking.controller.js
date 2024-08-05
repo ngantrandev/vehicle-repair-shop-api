@@ -6,7 +6,7 @@ const {
     excuteQuery,
     sendResponse,
     convertTimeToGMT7,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 
 const setBookingStatusToFixing = async (req, res) => {
     if (!req.params.booking_id) {

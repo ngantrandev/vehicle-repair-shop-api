@@ -6,7 +6,7 @@ const {
     convertTimeToGMT7,
     sendResponse,
     isValidInteger,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 
 const getAllStaffs = async (req, res) => {
     try {

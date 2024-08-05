@@ -14,7 +14,7 @@ const {
     convertDateToGMT7,
     generateJWT,
     sendResponse,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 
 const register = async (req, res) => {
     const requiredFields = [

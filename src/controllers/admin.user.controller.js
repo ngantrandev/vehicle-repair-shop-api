@@ -14,7 +14,7 @@ const {
     hashPassWord,
     isValidInteger,
     sendResponse,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 
 const getUserById = async (req, res) => {
     if (!req.params.user_id) {

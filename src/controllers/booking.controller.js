@@ -9,7 +9,7 @@ const {
     executeTransaction,
     getIdOfTheMostFreeStaff,
     getIdOfNearestStation,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const { TABLE_NAMES, BOOKING_STATE } = require('../configs/constants.config');
 
@@ -131,7 +131,7 @@ const getBookingById = async (req, res) => {
             name: station_name,
             latitude: station_latitude,
             longitude: station_longitude,
-        }
+        };
 
         sendResponse(
             res,

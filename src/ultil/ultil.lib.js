@@ -2,12 +2,13 @@ const bcrypt = require('bcrypt');
 const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
 
-const connection = require('./configs/db.config');
+const connection = require('../configs/db.config');
 const {
     BOOKING_STATE,
     TABLE_NAMES,
     ACCOUNT_STATE,
-} = require('./configs/constants.config');
+} = require('../configs/constants.config');
+const goongServices = require('../services/goongServices');
 
 const executeTransaction = async (queries, listParamArray) => {
     if (queries.length !== listParamArray.length) {
@@ -168,14 +169,55 @@ const sendResponse = (res, statusCode, message, data) => {
 };
 
 const getIdOfNearestStation = async (latitude, longitude) => {
-    // find nearest station if latitude and longitude not null
     if (!latitude || !longitude) {
         return null;
     }
 
-    // find stationId
+    // find nearest station if latitude and longitude not null
+    const query = `SELECT
+        ss.id AS station_id,
+        addr.latitude,
+        addr.longitude
+                
+        FROM ${TABLE_NAMES.service_stations} AS ss
+        JOIN ${TABLE_NAMES.addresses} AS addr
+        ON ss.address_id = addr.id
+    `;
 
-    return null;
+    const stations = await selectData(query, []);
+
+    if (stations.length === 0) {
+        return null;
+    }
+
+    const destinations = stations.map((station) => [
+        [station.latitude, station.longitude],
+    ]);
+
+    const distanceMatrix =
+        await goongServices.getDistanceMatrixFromUserAddrToOtherStations(
+            [[latitude, longitude]],
+            destinations
+        );
+
+    if (!distanceMatrix) {
+        return null;
+    }
+
+    const data = distanceMatrix.rows[0].elements;
+
+    // find nearest station
+    let minDistance = data[0].distance.value;
+    let stationId = stations[0].station_id;
+
+    data.forEach((item, index) => {
+        if (item.distance.value < minDistance) {
+            minDistance = item.distance.value;
+            stationId = stations[index].station_id;
+        }
+    });
+
+    return stationId;
 };
 
 const getIdOfTheMostFreeStaff = async (stationId) => {

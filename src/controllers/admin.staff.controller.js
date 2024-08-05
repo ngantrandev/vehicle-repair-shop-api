@@ -10,7 +10,7 @@ const {
     getCurrentTimeInGMT7,
     excuteQuery,
     sendResponse,
-} = require('../ultil.lib');
+} = require('../ultil/ultil.lib');
 
 const getStaffById = async (req, res) => {
     if (!req.params.staff_id) {

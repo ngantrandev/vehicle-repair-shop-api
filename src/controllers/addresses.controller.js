@@ -1,6 +1,10 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const { selectData, sendResponse, isValidInteger } = require('../ultil.lib');
+const {
+    selectData,
+    sendResponse,
+    isValidInteger,
+} = require('../ultil/ultil.lib');
 
 const getProvinces = async (req, res) => {
     try {
