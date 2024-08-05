@@ -22,7 +22,7 @@ const register = async (req, res) => {
         'password',
         'firstname',
         'lastname',
-        'email',
+        'phone',
     ];
 
     for (const field of requiredFields) {
@@ -40,10 +40,10 @@ const register = async (req, res) => {
         /* FIND USER */
 
         const selectQuery = `
-    SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
-    UNION
-    SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ?;
-`;
+            SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
+            UNION
+            SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ?;
+        `;
 
         const users = await selectData(selectQuery, [
             req.body.username,

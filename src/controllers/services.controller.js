@@ -3,34 +3,56 @@ const { selectData, sendResponse } = require('../ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 
 const getAllServices = async (req, res) => {
-    const { category_id: categoryId, motorcycle_brand: motocycleBrand } =
-        req.query;
+    const {
+        category_id: categoryId,
+        motorcycle_brand: motocycleBrand,
+        key,
+    } = req.query;
 
-    let where = '';
+    /**KEY is the key word user types on search form*/
+
+    const wheres = [];
 
     if (categoryId) {
-        where = `WHERE ${TABLE_NAMES.services}.category_id = '${categoryId}'`;
+        wheres.push(
+            `WHERE ${TABLE_NAMES.services}.category_id = '${categoryId}'`
+        );
     }
     if (motocycleBrand) {
-        where = `WHERE ${TABLE_NAMES.service_motorcycles}.motorcycle_id = '${motocycleBrand}'`;
+        wheres.push(
+            `WHERE ${TABLE_NAMES.service_motorcycles}.motorcycle_id = '${motocycleBrand}'`
+        );
     }
-    if (categoryId && motocycleBrand) {
-        where = `WHERE ${TABLE_NAMES.services}.category_id = '${categoryId}' AND ${TABLE_NAMES.service_motorcycles}.motorcycle_id = '${motocycleBrand}'`;
+
+    if (key) {
+        const filter = `
+                s.name LIKE '%${key}%' OR
+                sc.name LIKE '%${key}%' OR
+                m.name LIKE '%${key}%'
+            `;
+        wheres.push(filter);
     }
+
+    const where = wheres.length ? `WHERE ${wheres.join(' AND ')}` : '';
 
     try {
         const query = `
-    SELECT ${TABLE_NAMES.services}.*,
-    ${TABLE_NAMES.service_categories}.name AS category_name, 
-    ${TABLE_NAMES.service_categories}.description AS category_desc
-    FROM ${TABLE_NAMES.services}
-    LEFT JOIN ${TABLE_NAMES.service_categories}
-    ON ${TABLE_NAMES.services}.category_id = ${TABLE_NAMES.service_categories}.id
-    LEFT JOIN ${TABLE_NAMES.service_motorcycles}
-    ON ${TABLE_NAMES.services}.id = ${TABLE_NAMES.service_motorcycles}.service_id
-    ${where}
-    GROUP BY ${TABLE_NAMES.services}.id
-`;
+            SELECT
+                s.*,
+                sc.name AS category_name,
+                sc.description AS category_desc
+
+            FROM ${TABLE_NAMES.services} AS s
+            LEFT JOIN ${TABLE_NAMES.service_categories} AS sc
+                ON s.category_id = sc.id
+            LEFT JOIN ${TABLE_NAMES.service_motorcycles} AS sm
+                ON s.id = sm.service_id
+            LEFT JOIN ${TABLE_NAMES.motorcycles} AS m
+                ON sm.motorcycle_id = m.id
+            ${where}
+            GROUP BY s.id
+        
+        `;
 
         const services = await selectData(query, []);
 
