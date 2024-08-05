@@ -145,20 +145,20 @@ const assignBookingToEmployee = async (req, res) => {
             return;
         }
 
-        if (employeesFound[0].id == bookingsFound[0].staff_id) {
-            sendResponse(
-                res,
-                STATUS_CODE.CONFLICT,
-                'booking has been already assigned to this employee!'
-            );
-            return;
+        let updateBooking = '';
+        const bodyData = [];
+        bodyData.push(req.body.employee_id);
+
+        if (req.body.note) {
+            updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET staff_id = ?, note = ? WHERE id = ?`;
+            bodyData.push(req.body.note);
+        } else {
+            updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET staff_id = ? WHERE id = ?`;
         }
 
-        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET staff_id = ? WHERE id = ?`;
-        await excuteQuery(updateBooking, [
-            req.body.employee_id,
-            req.params.booking_id,
-        ]);
+        bodyData.push(req.params.booking_id);
+
+        await excuteQuery(updateBooking, bodyData);
 
         sendResponse(
             res,
