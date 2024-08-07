@@ -1,3 +1,6 @@
+const path = require('path');
+const fs = require('fs');
+
 const {
     selectData,
     isValidInteger,
@@ -181,7 +184,37 @@ const createBooking = async (req, res) => {
         return;
     }
 
+    let fileName = '';
+    let filePath = '';
+    let relativePath = ''; /** path from root dir to image */
+
     try {
+        if (req.file) {
+            const buffer = req.file.buffer;
+            fileName = Date.now() + path.extname(req.file.originalname);
+            relativePath = path.join('uploads', fileName);
+            const appDir = path.dirname(require.main.filename);
+
+            const uploadFolder = path.join(appDir, 'uploads');
+
+            if (!fs.existsSync(uploadFolder)) {
+                fs.mkdirSync(uploadFolder);
+            }
+
+            filePath = path.join(uploadFolder, fileName);
+
+            try {
+                await fs.promises.writeFile(filePath, buffer);
+            } catch (error) {
+                sendResponse(
+                    res,
+                    STATUS_CODE.INTERNAL_SERVER_ERROR,
+                    'cannot create booking at this time'
+                );
+                return;
+            }
+        }
+
         /** auto choose staffid if user give latitude and longitude */
         const stationId = await getIdOfNearestStation(
             req.body.latitude,
@@ -193,7 +226,7 @@ const createBooking = async (req, res) => {
         const queries = [
             `INSERT INTO ${TABLE_NAMES.addresses} (latitude, longitude, ward_id, street) VALUES (?, ?, ?, ?);`,
             'SET @address_id = LAST_INSERT_ID();',
-            `INSERT INTO ${TABLE_NAMES.bookings} (service_id, note, user_id, created_at, modified_at, address_id, status, staff_id) VALUES (?, ?, ?, ?, ?, @address_id, ?, ?);`,
+            `INSERT INTO ${TABLE_NAMES.bookings} (service_id, note, user_id, created_at, modified_at, address_id, status, staff_id, image_url) VALUES (?, ?, ?, ?, ?, @address_id, ?, ?, ?);`,
         ];
         const createdTime = getCurrentTimeInGMT7();
 
@@ -213,6 +246,7 @@ const createBooking = async (req, res) => {
                 createdTime,
                 BOOKING_STATE.pending,
                 staffId ? staffId.toString() : null,
+                relativePath,
             ],
         ];
 
@@ -223,7 +257,7 @@ const createBooking = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };

@@ -41,7 +41,18 @@ apiRoute.use('/addresses', addressesRoute);
 
 apiRoute.get('/stations', stationController.getAllServiceStations);
 
-apiRoute.get('/stations/:station_id/staffs', stationController.getAllStaffOfServiceStation);
+apiRoute.post('/stations', stationController.createStation);
+
+apiRoute.get('/stations/:station_id', stationController.getStationById);
+
+apiRoute.patch('/stations/:station_id', stationController.updateStation);
+
+apiRoute.delete('/stations/:station_id', stationController.deleteStation);
+
+apiRoute.get(
+    '/stations/:station_id/staffs',
+    stationController.getAllStaffOfServiceStation
+);
 
 apiRoute.get('/bookings/:booking_id', bookingController.getBookingById);
 

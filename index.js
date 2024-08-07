@@ -13,6 +13,7 @@ const apiRoute = require('./src/routes/api.route');
 app.use(cors());
 app.use(morgan('common'));
 app.use(bodyparser.json({ limit: '50mb' }));
+app.use(`${BASE_URL_PATH}/uploads`, express.static('uploads'));
 
 app.get('/', (req, res) => {
     res.status(200).json('Hello World!');

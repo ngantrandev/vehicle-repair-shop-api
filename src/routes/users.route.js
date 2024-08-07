@@ -1,10 +1,12 @@
 const router = require('express').Router();
+const multer = require('multer');
 
 const cartsController = require('../controllers/carts.controller');
 const bookingController = require('../controllers/booking.controller');
 const bookingsController = require('../controllers/bookings.controller');
 const middlewareControllers = require('../middlewares/verify.middleware');
 const cartController = require('../controllers/cart.controller');
+const uploadImgService = require('../services/uploadImageService');
 
 router.get(
     '/:user_id/carts',
@@ -39,6 +41,7 @@ router.get(
 router.post(
     '/:user_id/bookings',
     middlewareControllers.verifyCurrentUser,
+    uploadImgService.upload.single('file'),
     bookingController.createBooking
 );
 

@@ -7,21 +7,22 @@ const getAllServices = async (req, res) => {
         category_id: categoryId,
         motorcycle_brand: motocycleBrand,
         key,
+        active,
     } = req.query;
 
     /**KEY is the key word user types on search form*/
 
     const wheres = [];
 
+    if (active) {
+        wheres.push(`s.active = 1`);
+    }
+
     if (categoryId) {
-        wheres.push(
-            `WHERE ${TABLE_NAMES.services}.category_id = '${categoryId}'`
-        );
+        wheres.push(`s.category_id = '${categoryId}'`);
     }
     if (motocycleBrand) {
-        wheres.push(
-            `WHERE ${TABLE_NAMES.service_motorcycles}.motorcycle_id = '${motocycleBrand}'`
-        );
+        wheres.push(`sm.motorcycle_id = '${motocycleBrand}'`);
     }
 
     if (key) {
