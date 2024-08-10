@@ -3,6 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const bodyparser = require('body-parser');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 dotenv.config();
 const app = express();
@@ -13,7 +14,14 @@ const apiRoute = require('./src/routes/api.route');
 app.use(cors());
 app.use(morgan('common'));
 app.use(bodyparser.json({ limit: '50mb' }));
-app.use(`${BASE_URL_PATH}/uploads`, express.static('uploads'));
+
+fs.access('./uploads', (error) => {
+    if (error) {
+        fs.mkdirSync('./uploads');
+    }
+});
+
+app.use(`/uploads`, express.static('uploads'));
 
 app.get('/', (req, res) => {
     res.status(200).json('Hello World!');

@@ -3,6 +3,7 @@ const {
     USER_ROLES,
     ACCOUNT_STATE,
 } = require('../configs/constants.config');
+const { QUERY_SELECT_USER_BY_USERNAME } = require('../configs/queries.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     selectData,
@@ -175,29 +176,7 @@ const signin = async (req, res) => {
             }
         }
 
-        const query = `
-            SELECT
-                u.*,
-                addr.street AS address_street,
-                addr.latitude AS address_latitude,
-                addr.longitude AS address_longitude,
-                w.id AS ward_id,
-                w.name AS ward_name,
-                d.id AS district_id,
-                d.name AS district_name,
-                p.id AS province_id,
-                p.name AS province_name
-
-            FROM ${TABLE_NAMES.users} AS u
-            LEFT JOIN
-                ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
-            LEFT JOIN
-                ${TABLE_NAMES.wards} AS w ON w.id = addr.ward_id
-            LEFT JOIN
-                ${TABLE_NAMES.districts} AS d ON d.id = w.district_id
-            LEFT JOIN
-                ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
-            WHERE u.username = ?`;
+        const query = QUERY_SELECT_USER_BY_USERNAME;
 
         const users = await selectData(query, [inputUsername]);
 

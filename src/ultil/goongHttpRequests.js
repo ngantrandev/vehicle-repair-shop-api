@@ -23,7 +23,6 @@ const get = async (apiPath, params = {}) => {
 
         return res;
     } catch (error) {
-        console.log('error', error);
         throw new Error(error);
     }
 };

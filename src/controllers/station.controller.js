@@ -248,16 +248,12 @@ const createStation = async (req, res) => {
         longitude,
     } = req.body;
 
-    console.log(req.body);
-
     try {
         const queries = [
             `INSERT INTO ${TABLE_NAMES.addresses} (street, ward_id, latitude, longitude) VALUES (?, ?, ?, ?);`,
             'SET @address_id = LAST_INSERT_ID();',
             `INSERT INTO ${TABLE_NAMES.service_stations} (name, address_id) VALUES (?, @address_id);`,
         ];
-
-        console.log(queries);
 
         const params = [
             [stationStreet, wardId, latitude, longitude],

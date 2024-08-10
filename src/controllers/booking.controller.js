@@ -1,5 +1,5 @@
 const path = require('path');
-const fs = require('fs');
+const sharp = require('sharp');
 
 const {
     selectData,
@@ -185,26 +185,16 @@ const createBooking = async (req, res) => {
     }
 
     let fileName = '';
-    let filePath = '';
     let relativePath = ''; /** path from root dir to image */
 
     try {
         if (req.file) {
             const buffer = req.file.buffer;
-            fileName = Date.now() + path.extname(req.file.originalname);
-            relativePath = path.join('uploads', fileName);
-            const appDir = path.dirname(require.main.filename);
-
-            const uploadFolder = path.join(appDir, 'uploads');
-
-            if (!fs.existsSync(uploadFolder)) {
-                fs.mkdirSync(uploadFolder);
-            }
-
-            filePath = path.join(uploadFolder, fileName);
+            fileName = Date.now() + '.webp';
+            relativePath = path.join('./uploads', fileName);
 
             try {
-                await fs.promises.writeFile(filePath, buffer);
+                await sharp(buffer).webp({ quality: 20 }).toFile(relativePath);
             } catch (error) {
                 sendResponse(
                     res,

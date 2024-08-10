@@ -165,7 +165,6 @@ const createBookingFromCart = async (req, res) => {
 
         sendResponse(res, STATUS_CODE.OK, 'Created booking successfully!');
     } catch (error) {
-        console.log(error);
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,

@@ -11,6 +11,8 @@ const staffsRoutes = require('../routes/staffs.route');
 const addressesRoute = require('../routes/addresses.route');
 const stationController = require('../controllers/station.controller');
 const bookingController = require('../controllers/booking.controller');
+const profileController = require('../controllers/profile.controller');
+const { upload } = require('../services/uploadImageService');
 
 const apiRoute = express();
 
@@ -55,5 +57,13 @@ apiRoute.get(
 );
 
 apiRoute.get('/bookings/:booking_id', bookingController.getBookingById);
+
+apiRoute.get('/profile/:username', profileController.getUserByUsername);
+
+apiRoute.patch(
+    '/profile/:user_id',
+    upload.single('file'),
+    profileController.updateUserProfile
+);
 
 module.exports = apiRoute;

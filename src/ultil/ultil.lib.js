@@ -182,6 +182,7 @@ const getIdOfNearestStation = async (latitude, longitude) => {
         FROM ${TABLE_NAMES.service_stations} AS ss
         JOIN ${TABLE_NAMES.addresses} AS addr
         ON ss.address_id = addr.id
+        WHERE addr.latitude IS NOT NULL AND addr.longitude IS NOT NULL
     `;
 
     const stations = await selectData(query, []);
