@@ -24,6 +24,7 @@ const register = async (req, res) => {
         'firstname',
         'lastname',
         'phone',
+        'email',
     ];
 
     for (const field of requiredFields) {

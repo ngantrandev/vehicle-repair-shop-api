@@ -1,6 +1,6 @@
 const express = require('express');
-const authRoutes = require('./auth.route');
 
+const authRoutes = require('./auth.route');
 const middlewareControllers = require('../middlewares/verify.middleware');
 const adminRoutes = require('./admin.route');
 const motorcycleBrandsRoute = require('../routes/motorcycle.brands.route');
@@ -8,8 +8,8 @@ const servicesRoute = require('../routes/services.route');
 const motorcyclesRoute = require('../routes/motorcycles.route');
 const usersRoutes = require('../routes/users.route');
 const staffsRoutes = require('../routes/staffs.route');
+const stationsRoutes = require('../routes/stations.route');
 const addressesRoute = require('../routes/addresses.route');
-const stationController = require('../controllers/station.controller');
 const bookingController = require('../controllers/booking.controller');
 const profileController = require('../controllers/profile.controller');
 const { upload } = require('../services/uploadImageService');
@@ -41,20 +41,7 @@ apiRoute.use('/motorcycles', motorcyclesRoute);
 
 apiRoute.use('/addresses', addressesRoute);
 
-apiRoute.get('/stations', stationController.getAllServiceStations);
-
-apiRoute.post('/stations', stationController.createStation);
-
-apiRoute.get('/stations/:station_id', stationController.getStationById);
-
-apiRoute.patch('/stations/:station_id', stationController.updateStation);
-
-apiRoute.delete('/stations/:station_id', stationController.deleteStation);
-
-apiRoute.get(
-    '/stations/:station_id/staffs',
-    stationController.getAllStaffOfServiceStation
-);
+apiRoute.use('/stations', stationsRoutes);
 
 apiRoute.get('/bookings/:booking_id', bookingController.getBookingById);
 
