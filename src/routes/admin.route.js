@@ -3,8 +3,7 @@ const express = require('express');
 const adminUsersRoute = require('./admin.users.route');
 const adminServicesRoute = require('./admin.services.route');
 const adminStaffsRoute = require('./admin.staffs.route');
-const adminBookingController = require('../controllers/admin.booking.controller');
-const adminStaffsController = require('../controllers/admin.staffs.controller');
+const bookingRoute = require('../routes/bookings.route');
 
 const adminRoutes = express();
 
@@ -14,6 +13,6 @@ adminRoutes.use('/services', adminServicesRoute);
 
 adminRoutes.use('/staffs', adminStaffsRoute);
 
-adminRoutes.use('/bookings', adminBookingController.getAllBooking);
+adminRoutes.use('/bookings', bookingRoute);
 
 module.exports = adminRoutes;

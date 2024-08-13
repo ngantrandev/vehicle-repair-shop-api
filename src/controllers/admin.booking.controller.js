@@ -58,9 +58,10 @@ const confirmBooking = async (req, res) => {
             return;
         }
 
-        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, staff_id = ?, note = ? WHERE id = ?`;
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?,pre_status = ?, staff_id = ?, note = ? WHERE id = ?`;
 
         await excuteQuery(updateBooking, [
+            BOOKING_STATE.accepted,
             BOOKING_STATE.accepted,
             req.body.employee_id,
             req.body.note,
@@ -117,7 +118,7 @@ const assignBookingToEmployee = async (req, res) => {
             return;
         }
 
-        if (bookingsFound[0].status !== BOOKING_STATE.accepted) {
+        if (bookingsFound[0].status === BOOKING_STATE.pending) {
             sendResponse(
                 res,
                 STATUS_CODE.UNPROCESSABLE_ENTITY,

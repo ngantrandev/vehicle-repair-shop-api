@@ -287,12 +287,13 @@ const cancelBooking = async (req, res) => {
 
         const query = `
         UPDATE ${TABLE_NAMES.bookings}
-        SET modified_at = ?, status = ?, note = ?
+        SET modified_at = ?, status = ?, pre_status = ?, note = ?
         WHERE
             id = ? AND status != ?`;
         const result = await excuteQuery(query, [
             getCurrentTimeInGMT7(),
             BOOKING_STATE.cancelled,
+            bookings[0].status,
             req.body.note,
             req.params.booking_id,
             BOOKING_STATE.cancelled,
@@ -315,6 +316,60 @@ const cancelBooking = async (req, res) => {
         }
 
         sendResponse(res, STATUS_CODE.OK, 'canceled booking successfully!');
+        return;
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrong'
+        );
+    }
+};
+
+const undoBooking = async (req, res) => {
+    if (!req.params.booking_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
+        return;
+    }
+
+    if (!isValidInteger(req.params.booking_id)) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
+        return;
+    }
+
+    try {
+        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
+        const bookings = await selectData(selectQuery, [req.params.booking_id]);
+
+        if (bookings.length === 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'cannot find this booking by id'
+            );
+            return;
+        }
+
+        const query = `
+        UPDATE ${TABLE_NAMES.bookings}
+        SET status = ?
+        WHERE
+            id = ?`;
+        const result = await excuteQuery(query, [
+            bookings[0].pre_status,
+            req.params.booking_id,
+        ]);
+
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.INTERNAL_SERVER_ERROR,
+                'cannot undo booking at this time'
+            );
+            return;
+        }
+
+        sendResponse(res, STATUS_CODE.OK, 'undo booking successfully!');
         return;
     } catch (error) {
         sendResponse(
@@ -382,9 +437,10 @@ const setBookingStatusToDone = async (req, res) => {
             return;
         }
 
-        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, note = ? WHERE id = ?`;
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, pre_status = ?, note = ? WHERE id = ?`;
         await excuteQuery(updateBooking, [
             BOOKING_STATE.done,
+            bookingsFound[0].status,
             req.body.note,
             req.params.booking_id,
         ]);
@@ -408,6 +464,7 @@ const bookingController = {
     createBooking,
     cancelBooking,
     setBookingStatusToDone,
+    undoCancelBooking: undoBooking,
 };
 
 module.exports = bookingController;

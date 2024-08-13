@@ -75,9 +75,10 @@ const setBookingStatusToFixing = async (req, res) => {
             return;
         }
 
-        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, note = ? WHERE id = ?`;
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, pre_status = ?, note = ? WHERE id = ?`;
         await excuteQuery(updateBooking, [
             BOOKING_STATE.fixing,
+            bookingsFound[0].status,
             req.body.note,
             req.params.booking_id,
         ]);
