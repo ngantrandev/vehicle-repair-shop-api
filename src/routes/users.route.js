@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const multer = require('multer');
 
 const cartsController = require('../controllers/carts.controller');
 const bookingController = require('../controllers/booking.controller');
@@ -32,22 +31,17 @@ router.post(
     cartController.createBookingFromCart
 );
 
-router.get(
-    '/:user_id/bookings',
-    middlewareControllers.verifyCurrentUser,
-    bookingsController.getAllBookingByUserId
-);
+// Bookings routes
+router.get('/bookings', bookingsController.getAllBooking);
 
 router.post(
-    '/:user_id/bookings',
-    middlewareControllers.verifyCurrentUser,
+    '/bookings',
     uploadImgService.upload.single('file'),
     bookingController.createBooking
 );
 
 router.patch(
-    '/:user_id/bookings/:booking_id/cancel',
-    middlewareControllers.verifyCurrentUser,
+    '/bookings/:booking_id/cancel',
     bookingController.cancelBooking
 );
 

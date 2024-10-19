@@ -50,25 +50,16 @@ const QUERY_SELECT_USER_BY_ID = `
 const QUERY_SELECT_USER_BY_USERNAME = `
     SELECT
         u.*,
-        addr.street AS address_street,
         addr.latitude AS address_latitude,
         addr.longitude AS address_longitude,
-        w.id AS ward_id,
-        w.name AS ward_name,
-        d.id AS district_id,
-        d.name AS district_name,
-        p.id AS province_id,
-        p.name AS province_name
+        addr.id AS address_id,
+        addr.place_id AS place_id,
+        addr.address_name AS address_name,
+        addr.full_address AS full_address
 
     FROM ${TABLE_NAMES.users} AS u
     LEFT JOIN
         ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
-    LEFT JOIN
-        ${TABLE_NAMES.wards} AS w ON w.id = addr.ward_id
-    LEFT JOIN
-        ${TABLE_NAMES.districts} AS d ON d.id = w.district_id
-    LEFT JOIN
-        ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
     WHERE username = ?
 `;
 

@@ -37,43 +37,45 @@ const getBookingById = async (req, res) => {
    
             SELECT
                 b.*,
-                s.id AS service_id,
                 s.name AS service_name,
                 s.price AS service_price,
-                addr.street AS address_street,
-                addr.latitude AS address_latitude,
-                addr.longitude AS address_longitude,
-                w.name AS ward_name,
-                d.name AS district_name,
-                p.name AS province_name,
+                s.image_url AS service_image_url,
+                s.estimated_time AS service_estimated_time,
+                stf.id AS staff_id,
+                stf.firstname AS staff_firstname,
+                stf.lastname AS staff_lastname,
+                addr.address_name,
+                addr.full_address,
+                addr.latitude as address_latitude,
+                addr.longitude as address_longitude,
                 u.id AS user_id,
                 u.firstname AS user_firstname,
                 u.lastname AS user_lastname,
-                u.email AS user_email,
                 u.phone AS user_phone,
-                ss.id AS station_id,
-                ss.name AS station_name,
-                ss_addr.longitude AS station_longitude,
-                ss_addr.latitude AS station_latitude,
-                stf.id AS staff_id
-
-
+                st.id AS station_id,
+                st.name AS station_name,
+                st_addr.latitude AS station_latitude,
+                st_addr.longitude AS station_longitude,
+                st_addr.full_address AS station_address,
+                st_addr.address_name AS station_address_name
             FROM ( SELECT *
                     FROM ${TABLE_NAMES.bookings}
-                    WHERE id = ?) AS b
-            JOIN ${TABLE_NAMES.users} AS u ON b.user_id = u.id
-            JOIN ${TABLE_NAMES.services} AS s ON b.service_id = s.id
-            JOIN ${TABLE_NAMES.addresses} AS addr ON addr.id = b.address_id
-            JOIN ${TABLE_NAMES.wards} AS w ON w.id = addr.ward_id
-            JOIN ${TABLE_NAMES.districts} AS d ON d.id = w.district_id
-            JOIN ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
-            LEFT JOIN ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
-            LEFT JOIN ${TABLE_NAMES.service_stations} AS ss ON ss.id = stf.station_id
-            LEFT JOIN ${TABLE_NAMES.addresses} AS ss_addr ON ss_addr.id = ss.address_id
+                    WHERE id = ? AND user_id = ?) AS b
+            LEFT JOIN
+                ${TABLE_NAMES.services} AS s ON s.id = b.service_id
+            LEFT JOIN
+                ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
+            LEFT JOIN
+                ${TABLE_NAMES.addresses} AS addr ON addr.id = b.address_id
+            LEFT JOIN
+                ${TABLE_NAMES.users} AS u ON u.id = b.user_id
+            LEFT JOIN
+                ${TABLE_NAMES.service_stations} AS st ON st.id = stf.station_id
+            LEFT JOIN
+                ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
+        `;
 
-       
-`;
-        const bookings = await selectData(selectQuery, [req.params.booking_id]);
+        const bookings = await selectData(selectQuery, [req.params.booking_id, req.tokenPayload.user_id]);
 
         if (bookings.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
@@ -84,13 +86,13 @@ const getBookingById = async (req, res) => {
             service_name,
             service_id,
             service_price,
+            service_image_url,
+            service_estimated_time,
             address_id,
-            address_street,
             address_latitude,
             address_longitude,
-            ward_name,
-            district_name,
-            province_name,
+            address_name,
+            full_address,
             user_id,
             user_firstname,
             user_lastname,
@@ -100,25 +102,31 @@ const getBookingById = async (req, res) => {
             station_name,
             station_longitude,
             station_latitude,
+            station_address,
+            station_address_name,
+            staff_id,
+            staff_firstname,
+            staff_lastname,
             ...other
         } = bookings[0];
         other.created_at = convertTimeToGMT7(other.created_at);
-        other.modified_at = convertTimeToGMT7(other.modified_at);
-
+        if (other.modified_at) {
+            other.modified_at = convertTimeToGMT7(other.modified_at);
+        }
         other.service = {
             id: service_id,
             name: service_name,
             price: service_price,
+            image_url: service_image_url,
+            estimated_time: service_estimated_time,
         };
 
         other.address = {
             id: address_id,
-            street: address_street,
             latitude: address_latitude,
             longitude: address_longitude,
-            ward: ward_name,
-            district: district_name,
-            province: province_name,
+            address_name: address_name,
+            full_address: full_address,
         };
 
         other.user = {
@@ -129,11 +137,20 @@ const getBookingById = async (req, res) => {
             phone: user_phone,
         };
 
-        other.station = {
-            id: station_id,
-            name: station_name,
-            latitude: station_latitude,
-            longitude: station_longitude,
+        other.staff = {
+            id: staff_id,
+            firstname: staff_firstname,
+            lastname: staff_lastname,
+            station: {
+                id: station_id,
+                name: station_name,
+                address: {
+                    latitude: station_latitude,
+                    longitude: station_longitude,
+                    address_name: station_address_name,
+                    full_address: station_address,
+                },
+            },
         };
 
         sendResponse(
@@ -152,14 +169,6 @@ const getBookingById = async (req, res) => {
 };
 const createBooking = async (req, res) => {
     /**VALIDATE VALUE */
-    if (!req.body.ward_id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `ward_id is required`);
-        return;
-    }
-    if (!req.body.street) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `street is required`);
-        return;
-    }
     if (!req.body.service_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, `service_id is required`);
         return;
@@ -181,6 +190,18 @@ const createBooking = async (req, res) => {
     }
     if (req.body.longitude && !isValidDouble(req.body.longitude)) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, `longitude must be double`);
+        return;
+    }
+    if (!req.body.address_name) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, `address_name is required`);
+        return;
+    }
+    if (!req.body.full_address) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, `full_address is required`);
+        return;
+    }
+    if (!req.body.place_id) {
+        sendResponse(res, STATUS_CODE.BAD_REQUEST, `place_id is required`);
         return;
     }
 
@@ -214,7 +235,7 @@ const createBooking = async (req, res) => {
         const staffId = await getIdOfTheMostFreeStaff(stationId);
 
         const queries = [
-            `INSERT INTO ${TABLE_NAMES.addresses} (latitude, longitude, ward_id, street) VALUES (?, ?, ?, ?);`,
+            `INSERT INTO ${TABLE_NAMES.addresses} (latitude, longitude, place_id, address_name, full_address) VALUES (?, ?, ?, ?, ?);`,
             'SET @address_id = LAST_INSERT_ID();',
             `INSERT INTO ${TABLE_NAMES.bookings} (service_id, note, user_id, created_at, modified_at, address_id, status, staff_id, image_url) VALUES (?, ?, ?, ?, ?, @address_id, ?, ?, ?);`,
         ];
@@ -224,14 +245,15 @@ const createBooking = async (req, res) => {
             [
                 req.body.latitude,
                 req.body.longitude,
-                req.body.ward_id,
-                req.body.street,
+                req.body.place_id,
+                req.body.address_name,
+                req.body.full_address,
             ],
             [],
             [
                 req.body.service_id,
                 req.body.note,
-                req.params.user_id,
+                req.tokenPayload.user_id,
                 createdTime,
                 createdTime,
                 BOOKING_STATE.pending,
@@ -258,24 +280,24 @@ const cancelBooking = async (req, res) => {
         return;
     }
 
-    if (!req.body.note) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'field note is required');
-        return;
-    }
+    // if (!req.body.note) {
+    //     sendResponse(res, STATUS_CODE.BAD_REQUEST, 'field note is required');
+    //     return;
+    // }
 
     if (!isValidInteger(req.params.booking_id)) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
         return;
     }
 
-    if (req.body.note.trim().length === 0) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'note cannot empty');
-        return;
-    }
+    // if (!req.body.note || req.body.note.trim().length === 0) {
+    //     sendResponse(res, STATUS_CODE.BAD_REQUEST, 'note cannot empty');
+    //     return;
+    // }
 
     try {
-        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
-        const bookings = await selectData(selectQuery, [req.params.booking_id]);
+        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND user_id = ?`;
+        const bookings = await selectData(selectQuery, [req.params.booking_id, req.tokenPayload.user_id]);
         if (bookings.length === 0) {
             sendResponse(
                 res,
@@ -306,14 +328,15 @@ const cancelBooking = async (req, res) => {
                 'cannot cancel booking at this time'
             );
             return;
-        } else if (result.affectedRows === 0) {
-            sendResponse(
-                res,
-                STATUS_CODE.CONFLICT,
-                'this booking has been already cancelled'
-            );
-            return;
         }
+        //  else if (result.affectedRows === 0) {
+        //     sendResponse(
+        //         res,
+        //         STATUS_CODE.CONFLICT,
+        //         'this booking has been already cancelled'
+        //     );
+        //     return;
+        // }
 
         sendResponse(res, STATUS_CODE.OK, 'canceled booking successfully!');
         return;
@@ -321,7 +344,7 @@ const cancelBooking = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrong'
+            'something went wrong' + error
         );
     }
 };
@@ -338,8 +361,8 @@ const undoBooking = async (req, res) => {
     }
 
     try {
-        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
-        const bookings = await selectData(selectQuery, [req.params.booking_id]);
+        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND user_id = ?`;
+        const bookings = await selectData(selectQuery, [req.params.booking_id, req.tokenPayload.user_id]);
 
         if (bookings.length === 0) {
             sendResponse(
@@ -464,7 +487,7 @@ const bookingController = {
     createBooking,
     cancelBooking,
     setBookingStatusToDone,
-    undoCancelBooking: undoBooking,
+    undoBooking,
 };
 
 module.exports = bookingController;

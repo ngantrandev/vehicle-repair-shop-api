@@ -99,7 +99,7 @@ const verifyCurrentUser = async (req, res, next) => {
 
     // difference user
     if (
-        users[0].username != req.tokenPayload.username &&
+        users[0].id != req.tokenPayload.user_id &&
         req.tokenPayload.role != USER_ROLES.admin
     ) {
         sendResponse(
@@ -145,7 +145,7 @@ const verifyCurrentStaff = async (req, res, next) => {
 
     // difference staff
     if (
-        staffs[0].username != req.tokenPayload.username &&
+        staffs[0].id != req.tokenPayload.user_id &&
         req.tokenPayload.role != USER_ROLES.admin
     ) {
         sendResponse(

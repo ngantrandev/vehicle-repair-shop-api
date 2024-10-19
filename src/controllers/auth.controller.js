@@ -111,70 +111,14 @@ const signin = async (req, res) => {
         const inputUsername = req.body.username;
         const inputPassword = req.body.password;
 
-        if (!inputUsername || !inputPassword) {
-            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing value');
-
+        if (!inputUsername) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing username');
             return;
         }
 
-        const queryFindStaff = `
-            SELECT 
-                stf.*,
-                ss.id AS station_id,
-                ss.name AS station_name
-            FROM ${TABLE_NAMES.staffs} AS stf
-            JOIN ${TABLE_NAMES.service_stations} AS ss
-                ON stf.station_id = ss.id
-            WHERE username = ?
-        `;
-
-        const staffs = await selectData(queryFindStaff, [inputUsername]);
-
-        // staffs length > 0 => user is a staff
-        if (staffs.length > 0) {
-            const result = await comparePassWord(
-                inputPassword,
-                staffs[0].password
-            );
-
-            if (result) {
-                // correct password but account is deactivated
-                if (staffs[0].active === ACCOUNT_STATE.deactive) {
-                    sendResponse(
-                        res,
-                        STATUS_CODE.FORBIDDEN,
-                        'This account has been deactivated!'
-                    );
-                    return;
-                }
-
-                const { station_id, station_name, password, ...other } =
-                    staffs[0];
-
-                other.created_at = convertTimeToGMT7(other.created_at);
-                other.birthday = convertDateToGMT7(other.birthday);
-
-                other.station = {
-                    id: station_id,
-                    name: station_name,
-                };
-
-                const token = generateJWT(inputUsername, USER_ROLES.staff);
-
-                // res.cookie('token', token, {
-                //     httpOnly: true,
-                //     path: '/',
-                //     sameSite: 'strict',
-                // });
-
-                res.status(STATUS_CODE.OK).json({
-                    success: true,
-                    message: 'Sign in successfully!',
-                    token: token,
-                    data: other,
-                });
-                return;
-            }
+        if (!inputPassword) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing password');
+            return;
         }
 
         const query = QUERY_SELECT_USER_BY_USERNAME;
@@ -215,15 +159,11 @@ const signin = async (req, res) => {
         const {
             password,
             address_id,
-            address_street,
             address_latitude,
             address_longitude,
-            ward_id,
-            ward_name,
-            district_id,
-            district_name,
-            province_id,
-            province_name,
+            place_id,
+            address_name,
+            full_address,
 
             ...other
         } = users[0];
@@ -236,24 +176,14 @@ const signin = async (req, res) => {
                 ? null
                 : {
                       id: address_id,
-                      street: address_street,
                       latitude: address_latitude,
                       longitude: address_longitude,
-                      ward: {
-                          id: ward_id,
-                          name: ward_name,
-                      },
-                      district: {
-                          id: district_id,
-                          name: district_name,
-                      },
-                      province: {
-                          id: province_id,
-                          name: province_name,
-                      },
+                      place_id: place_id,
+                      address_name: address_name,
+                      full_address: full_address,
                   };
 
-        const token = generateJWT(inputUsername, other.role);
+        const token = generateJWT(users[0].id, inputUsername, other.role);
 
         res.cookie('token', token, {
             httpOnly: true,
@@ -272,6 +202,88 @@ const signin = async (req, res) => {
     }
 };
 
-const authController = { signin, register };
+const staffSignin = async (req, res) => {
+    try {
+        const inputUsername = req.body.username;
+        const inputPassword = req.body.password;
+
+        if (!inputUsername) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing username');
+            return;
+        }
+
+        if (!inputPassword) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing password');
+            return;
+        }
+
+        const queryFindStaff = `
+            SELECT
+                stf.*,
+                ss.id AS station_id,
+                ss.name AS station_name
+            FROM ${TABLE_NAMES.staffs} AS stf
+            JOIN ${TABLE_NAMES.service_stations} AS ss
+                ON stf.station_id = ss.id
+            WHERE username = ?
+        `;
+
+        const staffs = await selectData(queryFindStaff, [inputUsername]);
+
+        if (staffs.length == 0) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'Wrong username or password'
+            );
+
+            return;
+        }
+        const result = await comparePassWord(inputPassword, staffs[0].password);
+
+        if (!result) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'Wrong username or password'
+            );
+
+            return;
+        }
+        if (staffs[0].active === ACCOUNT_STATE.deactive) {
+            sendResponse(
+                res,
+                STATUS_CODE.FORBIDDEN,
+                'This account has been deactivated!'
+            );
+            return;
+        }
+
+        const { station_id, station_name, password, ...other } = staffs[0];
+
+        other.created_at = convertTimeToGMT7(other.created_at);
+        other.birthday = convertDateToGMT7(other.birthday);
+
+        other.role = USER_ROLES.staff;
+        other.station = {
+            id: station_id,
+            name: station_name,
+        };
+
+        const token = generateJWT(staffs[0].id, inputUsername, USER_ROLES.staff);
+
+        res.status(STATUS_CODE.OK).json({
+            success: true,
+            message: 'Sign in successfully!',
+            token: token,
+            data: other,
+        });
+        return;
+    } catch (error) {
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
+    }
+};
+
+const authController = { signin, register, staffSignin };
 
 module.exports = authController;
