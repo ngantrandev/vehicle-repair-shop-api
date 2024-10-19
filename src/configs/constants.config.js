@@ -19,6 +19,7 @@ const TABLE_NAMES = {
     wards: 'wards',
     districts: 'districts',
     provinces: 'provinces',
+    notifications: 'notifications',
 };
 
 const USER_ROLES = {

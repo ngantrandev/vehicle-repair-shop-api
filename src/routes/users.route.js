@@ -6,6 +6,7 @@ const bookingsController = require('../controllers/bookings.controller');
 const middlewareControllers = require('../middlewares/verify.middleware');
 const cartController = require('../controllers/cart.controller');
 const uploadImgService = require('../services/uploadImageService');
+const notificationController = require('../controllers/notification.controller');
 
 router.get(
     '/:user_id/carts',
@@ -44,5 +45,13 @@ router.patch(
     '/bookings/:booking_id/cancel',
     bookingController.cancelBooking
 );
+
+// Notification routes
+router.get('/notifications', notificationController.getAllNotifications);
+router.patch(
+    '/notifications/:notification_id/mark_read',
+    notificationController.markNotificationAsRead
+);
+router.patch('/notifications/mark_all_read', notificationController.markAllNotificationsAsRead);
 
 module.exports = router;
