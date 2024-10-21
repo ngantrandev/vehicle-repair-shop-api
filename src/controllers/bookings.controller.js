@@ -7,7 +7,6 @@ const { STATUS_CODE } = require('../configs/status.codes.config');
 const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
 
 const getAllBooking = async (req, res) => {
-    console.log('get all booking');
     try {
         let where = 'WHERE user_id = ?';
         if (req.tokenPayload.role === USER_ROLES.admin) {
@@ -104,7 +103,7 @@ const getAllBooking = async (req, res) => {
                     id: address_id,
                     latitude: address_latitude,
                     longitude: address_longitude,
-                    name: address_name,
+                    address_name: address_name,
                     full_address: full_address,
                 };
 

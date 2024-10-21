@@ -12,6 +12,7 @@ const stationsRoutes = require('../routes/stations.route');
 const addressesRoute = require('../routes/addresses.route');
 const bookingController = require('../controllers/booking.controller');
 const profileController = require('../controllers/profile.controller');
+const addressController = require('../controllers/address.controller');
 const { upload } = require('../services/uploadImageService');
 
 const apiRoute = express();
@@ -52,5 +53,9 @@ apiRoute.patch(
     upload.single('file'),
     profileController.updateUserProfile
 );
+
+// Address routes
+apiRoute.get('/address/autocomplete', addressController.autocompleteAddress);
+apiRoute.get('/address/geocode', addressController.getAddressByPlaceId);
 
 module.exports = apiRoute;
