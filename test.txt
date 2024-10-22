@@ -1,0 +1,27 @@
+{
+    "result": {
+        "place_id": "IXfve4KUf2NmuJAWpne2VUirRh6oDpjnTrl3J6l4lNxkpE0Drw-Y3k_KePjWzfrmYadxNG6tJgP5PgmBdqLR65kl6dzeulKrAfKpOWrhomPGXmF0Org59mIiqVSWYD-PY",
+        "formatted_address": "Trường Tiểu học Trương Định, Đường C2, Khu phố 4, Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+        "geometry": {
+            "location": {
+                "lat": 10.822787797000046,
+                "lng": 106.62388036500005
+            }
+        },
+        "plus_code": {
+            "compound_code": "+68WZ Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+            "global_code": "46AQ5+68WZ"
+        },
+        "compound": {
+            "district": "Quận 12",
+            "commune": "Tân Thới Nhất",
+            "province": "Hồ Chí Minh"
+        },
+        "name": "Trường Tiểu học Trương Định",
+        "url": "https://maps.goong.io/?pid=IXfve4KUf2NmuJAWpne2VUirRh6oDpjnTrl3J6l4lNxkpE0Drw-Y3k_KePjWzfrmYadxNG6tJgP5PgmBdqLR65kl6dzeulKrAfKpOWrhomPGXmF0Org59mIiqVSWYD-PY",
+        "types": [
+            "primary_school"
+        ]
+    },
+    "status": "OK"
+}

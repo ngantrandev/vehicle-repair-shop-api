@@ -27,12 +27,15 @@ const getDistanceMatrixFromUserAddrToOtherStations = async (
     return resData;
 };
 
-const autocompleteAddress =async (text)=>{
+const autocompleteAddress = async (input, latitude, longitude) => {
     const apiPath = '/place/autocomplete';
     const params = {
-        input: text,
+        input: input,
+        location: `${latitude},${longitude}`,
+        limit: 10,
+        radius: 10,
         api_key: process.env.GOONG_API_KEY,
-    }
+    };
 
     const res = await goongHttpRequests.get(apiPath, params);
 
@@ -43,9 +46,46 @@ const autocompleteAddress =async (text)=>{
     const resData = res.data?.predictions;
 
     return resData;
-}
+};
 
-const getAddressByPlaceId = async (place_id) => {
+//convert address to geocode
+const forwardGeocode = async (address) => {
+    const apiPath = '/geocode';
+    const params = {
+        address,
+        api_key: process.env.GOONG_API_KEY,
+    };
+
+    const res = await goongHttpRequests.get(apiPath, params);
+
+    if (!res || res.status !== STATUS_CODE.OK) {
+        return null;
+    }
+
+    const resData = res.data;
+
+    return resData;
+};
+
+const reverseGeocode = async (latitude, longitude) => {
+    const apiPath = '/geocode';
+    const params = {
+        latlng: `${latitude},${longitude}`,
+        api_key: process.env.GOONG_API_KEY,
+    };
+
+    const res = await goongHttpRequests.get(apiPath, params);
+
+    if (!res || res.status !== STATUS_CODE.OK) {
+        return null;
+    }
+
+    const resData = res.data?.results;
+
+    return resData;
+};
+
+const getAddressDetailByPlaceId = async (place_id) => {
     const apiPath = '/geocode';
     const params = {
         place_id,
@@ -61,12 +101,14 @@ const getAddressByPlaceId = async (place_id) => {
     const resData = res.data;
 
     return resData;
-}
+};
 
 const goongServices = {
     getDistanceMatrixFromUserAddrToOtherStations,
     autocompleteAddress,
-    getAddressByPlaceId,
+    forwardGeocode,
+    reverseGeocode,
+    getAddressDetailByPlaceId,
 };
 
 module.exports = goongServices;

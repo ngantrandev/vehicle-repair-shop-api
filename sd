@@ -1,0 +1,248 @@
+{
+    "success": true,
+    "message": "Get revers geocode successfully!",
+    "data": [
+        {
+            "address_components": [
+                {
+                    "long_name": "Trường Tiểu học Trương Định",
+                    "short_name": "Trường Tiểu học Trương Định"
+                },
+                {
+                    "long_name": "Đường C2",
+                    "short_name": "Đường C2"
+                },
+                {
+                    "long_name": "Khu phố 4",
+                    "short_name": "Khu phố 4"
+                },
+                {
+                    "long_name": "Tân Thới Nhất",
+                    "short_name": "Tân Thới Nhất"
+                },
+                {
+                    "long_name": "Quận 12",
+                    "short_name": "Quận 12"
+                },
+                {
+                    "long_name": "Hồ Chí Minh",
+                    "short_name": "Hồ Chí Minh"
+                }
+            ],
+            "formatted_address": "Trường Tiểu học Trương Định, Đường C2, Khu phố 4, Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+            "geometry": {
+                "location": {
+                    "lat": 10.822787797000046,
+                    "lng": 106.62388036500005
+                },
+                "boundary": "qz`aAo{wiSSeBIs@jCc@D\\Z~BoC^"
+            },
+            "place_id": "IXfve4KUf2NmuJAWpne2VUirRh6oDpjnTrl3J6l4lNxkpE0Drw-Y3k_KePjWzfrmYadxNG6tJgP5PgmBdqLR65kl6dzeulKrAfKpOWrhomPGXmF0Org59mIiqVSWYD-PY",
+            "reference": "IXfve4KUf2NmuJAWpne2VUirRh6oDpjnTrl3J6l4lNxkpE0Drw-Y3k_KePjWzfrmYadxNG6tJgP5PgmBdqLR65kl6dzeulKrAfKpOWrhomPGXmF0Org59mIiqVSWYD-PY",
+            "plus_code": {
+                "compound_code": "+68WZ Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+                "global_code": "46AQ5+68WZ"
+            },
+            "compound": {
+                "district": "Quận 12",
+                "commune": "Tân Thới Nhất",
+                "province": "Hồ Chí Minh"
+            },
+            "types": [
+                "primary_school"
+            ],
+            "name": "Trường Tiểu học Trương Định",
+            "address": "Đường C2, Khu phố 4, Tân Thới Nhất, Quận 12, Hồ Chí Minh"
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "Trường Tiểu học Trương Định",
+                    "short_name": "Trường Tiểu học Trương Định"
+                },
+                {
+                    "long_name": "Tân Thới Nhất",
+                    "short_name": "Tân Thới Nhất"
+                },
+                {
+                    "long_name": "Quận 12",
+                    "short_name": "Quận 12"
+                },
+                {
+                    "long_name": "Hồ Chí Minh",
+                    "short_name": "Hồ Chí Minh"
+                }
+            ],
+            "formatted_address": "Trường Tiểu học Trương Định, Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+            "geometry": {
+                "location": {
+                    "lat": 10.8226523,
+                    "lng": 106.6238701
+                },
+                "boundary": null
+            },
+            "place_id": "GmobjIVuSLxfkmo5NEej-XCSVIqFb_ciXJRXAIhtv8tbr0gIgnKw5WmXYg-7bqvsab95S4tv8u9bkmIRjWuF1USDQ1DSnWpHEaa2CT41AW-ShaH0bu42djZe_QDCNGvbN",
+            "reference": "GmobjIVuSLxfkmo5NEej-XCSVIqFb_ciXJRXAIhtv8tbr0gIgnKw5WmXYg-7bqvsab95S4tv8u9bkmIRjWuF1USDQ1DSnWpHEaa2CT41AW-ShaH0bu42djZe_QDCNGvbN",
+            "plus_code": {
+                "compound_code": "+BL0TGZ Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+                "global_code": "46AQ5+BL0TGZ"
+            },
+            "compound": {
+                "district": "Quận 12",
+                "commune": "Tân Thới Nhất",
+                "province": "Hồ Chí Minh"
+            },
+            "types": [],
+            "name": "Trường Tiểu học Trương Định",
+            "address": "Tân Thới Nhất, Quận 12, Hồ Chí Minh"
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "Cổng chính",
+                    "short_name": "Cổng chính"
+                },
+                {
+                    "long_name": "Trường Tiểu học Trương Định",
+                    "short_name": "Trường Tiểu học Trương Định"
+                },
+                {
+                    "long_name": "Đường C2",
+                    "short_name": "Đường C2"
+                },
+                {
+                    "long_name": "Tân Thới Nhất",
+                    "short_name": "Tân Thới Nhất"
+                },
+                {
+                    "long_name": "Quận 12",
+                    "short_name": "Quận 12"
+                },
+                {
+                    "long_name": "Hồ Chí Minh",
+                    "short_name": "Hồ Chí Minh"
+                }
+            ],
+            "formatted_address": "Cổng chính, Trường Tiểu học Trương Định, Đường C2, Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+            "geometry": {
+                "location": {
+                    "lat": 10.822749544000033,
+                    "lng": 106.62354887500004
+                },
+                "boundary": null
+            },
+            "place_id": "soTtIk8lJgpxTm00Yt0mIhnnAUUeFSYyoYph3GrRJ2Z5ltFkktXafz2O3PVGzZq3PZqUjKa4TpsJVtyIdi2u33VaeUgqISL77YKRSRmJ0hO2EnkESYRKUhGO2tjlJE__E",
+            "reference": "soTtIk8lJgpxTm00Yt0mIhnnAUUeFSYyoYph3GrRJ2Z5ltFkktXafz2O3PVGzZq3PZqUjKa4TpsJVtyIdi2u33VaeUgqISL77YKRSRmJ0hO2EnkESYRKUhGO2tjlJE__E",
+            "plus_code": {
+                "compound_code": "+GKKU Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+                "global_code": "46AQ5+GKKU"
+            },
+            "compound": {
+                "district": "Quận 12",
+                "commune": "Tân Thới Nhất",
+                "province": "Hồ Chí Minh"
+            },
+            "types": [
+                "site"
+            ],
+            "name": "Cổng C2",
+            "address": "Trường Tiểu học Trương Định, Đường C2, Tân Thới Nhất, Quận 12, Hồ Chí Minh"
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "Cổng phụ",
+                    "short_name": "Cổng phụ"
+                },
+                {
+                    "long_name": "Trường Tiểu học Trương Định",
+                    "short_name": "Trường Tiểu học Trương Định"
+                },
+                {
+                    "long_name": "Đường B",
+                    "short_name": "Đường B"
+                },
+                {
+                    "long_name": "Tân Thới Nhất",
+                    "short_name": "Tân Thới Nhất"
+                },
+                {
+                    "long_name": "Quận 12",
+                    "short_name": "Quận 12"
+                },
+                {
+                    "long_name": "Hồ Chí Minh",
+                    "short_name": "Hồ Chí Minh"
+                }
+            ],
+            "formatted_address": "Cổng phụ, Trường Tiểu học Trương Định, Đường B, Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+            "geometry": {
+                "location": {
+                    "lat": 10.822461705000023,
+                    "lng": 106.62395887200006
+                },
+                "boundary": null
+            },
+            "place_id": "Wax9r6sZN51jhHInqFSdwnytkiivCVjYYa6_ArQLltRjoW49mAiSnmCvbn-qL-71eb1UCq1QlZ19sVZ7mlCan1iEMmCrYpHAeb1LX69tnfR4JFiHnQuNnXoLUCCdCHubd",
+            "reference": "Wax9r6sZN51jhHInqFSdwnytkiivCVjYYa6_ArQLltRjoW49mAiSnmCvbn-qL-71eb1UCq1QlZ19sVZ7mlCan1iEMmCrYpHAeb1LX69tnfR4JFiHnQuNnXoLUCCdCHubd",
+            "plus_code": {
+                "compound_code": "+GKKV Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+                "global_code": "46AQ5+GKKV"
+            },
+            "compound": {
+                "district": "Quận 12",
+                "commune": "Tân Thới Nhất",
+                "province": "Hồ Chí Minh"
+            },
+            "types": [
+                "site"
+            ],
+            "name": "Cổng B",
+            "address": "Trường Tiểu học Trương Định, Đường B, Tân Thới Nhất, Quận 12, Hồ Chí Minh"
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "Đường C2",
+                    "short_name": "Đường C2"
+                },
+                {
+                    "long_name": "Tân Thới Nhất",
+                    "short_name": "Tân Thới Nhất"
+                },
+                {
+                    "long_name": "Quận 12",
+                    "short_name": "Quận 12"
+                },
+                {
+                    "long_name": "Hồ Chí Minh",
+                    "short_name": "Hồ Chí Minh"
+                }
+            ],
+            "formatted_address": "Đường C2, Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+            "geometry": {
+                "location": {
+                    "lat": 10.822806076447712,
+                    "lng": 106.62347590927234
+                },
+                "boundary": null
+            },
+            "place_id": "o6EedG91VaZy1VpRrmOLw26iSlCbY6GldI1KIftfoel5jWgWkl6D-27Xv14EBZPblj0SnEEHi5YqoWdtlVm6kLa_ShOVbL2Qd7NFUZNjk_p2iVYFpVQWDk3GhXi6TdOjT",
+            "reference": "o6EedG91VaZy1VpRrmOLw26iSlCbY6GldI1KIftfoel5jWgWkl6D-27Xv14EBZPblj0SnEEHi5YqoWdtlVm6kLa_ShOVbL2Qd7NFUZNjk_p2iVYFpVQWDk3GhXi6TdOjT",
+            "plus_code": {
+                "compound_code": "+5ZIFY Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+                "global_code": "46AQ5+5ZIFY"
+            },
+            "compound": {
+                "district": "Quận 12",
+                "commune": "Tân Thới Nhất",
+                "province": "Hồ Chí Minh"
+            },
+            "types": [
+                "street"
+            ],
+            "name": "Đường C2",
+            "address": "Tân Thới Nhất, Quận 12, Hồ Chí Minh"
+        }
+    ]
+}

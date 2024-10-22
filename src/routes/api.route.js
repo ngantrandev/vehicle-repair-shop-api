@@ -56,6 +56,7 @@ apiRoute.patch(
 
 // Address routes
 apiRoute.get('/address/autocomplete', addressController.autocompleteAddress);
-apiRoute.get('/address/geocode', addressController.getAddressByPlaceId);
+apiRoute.get('/address/reverse', addressController.reverseGeocode);
+apiRoute.get('/address/detail', addressController.getAddressDetailByPlaceId);
 
 module.exports = apiRoute;

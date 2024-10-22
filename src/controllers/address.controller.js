@@ -4,41 +4,90 @@ const { sendResponse } = require('../ultil/ultil.lib');
 
 const autocompleteAddress = async (req, res) => {
     try {
-        const { text: searchAddressText, longitude, latitude } = req.query;
+        const { input: searchAddressText, longitude, latitude } = req.query;
 
-        if(!searchAddressText) {
-            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Search address text is required!');
+        if (!searchAddressText) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'input is required!');
             return;
         }
 
-        const data = await goongServices.autocompleteAddress(searchAddressText);
+        const data = await goongServices.autocompleteAddress(
+            searchAddressText,
+            latitude,
+            longitude
+        );
 
-        const newList = data.map(({
-            structured_formatting,
-            place_id
-        })=>{
-            return {
-                place_id,
-                address_name: structured_formatting.main_text,
-                full_address: structured_formatting.secondary_text,
-            }
+        const newList = data.reduce(
+            (acc, { structured_formatting, place_id, compound }) => {
+                const { district, commune, province } = compound;
 
-        })
+                if (district && commune && province) {
+                    acc.push({
+                        place_id,
+                        address_name: structured_formatting.main_text,
+                        full_address: structured_formatting.secondary_text,
+                    });
+                }
 
+                return acc;
+            },
+            []
+        );
         sendResponse(res, 200, 'Get address successfully!', newList);
     } catch (error) {}
 };
 
-const getAddressByPlaceId = async (req, res) => {
+const reverseGeocode = async (req, res) => {
     try {
-        const { place_id } = req.query;
+        const { lat, lng } = req.query;
 
-        if(!place_id) {
-            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Place id is required!');
+        if (!lat || !lng) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                'Latitude and longitude are required!'
+            );
             return;
         }
 
-        const data = await goongServices.getAddressByPlaceId(place_id);
+        const data = await goongServices.reverseGeocode(lat, lng);
+
+        const newList = data.reduce(
+            (acc, { place_id, name, address, compound }) => {
+                const { district, commune, province } = compound;
+
+                if (district && commune && province) {
+                    acc.push({
+                        place_id,
+                        address_name: name,
+                        full_address: address,
+                    });
+                }
+
+                return acc;
+            },
+            []
+        );
+        sendResponse(res, 200, 'Get reverse geocode successfully!', newList);
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrong!' + error
+        );
+    }
+};
+
+const getAddressDetailByPlaceId = async (req, res) => {
+    try {
+        const { place_id } = req.query;
+
+        if (!place_id) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'place_id is required!');
+            return;
+        }
+
+        const data = await goongServices.getAddressDetailByPlaceId(place_id);
 
         const results = data.results;
 
@@ -53,17 +102,27 @@ const getAddressByPlaceId = async (req, res) => {
             full_address: fullAddress,
             latitude: locations.lat,
             longitude: locations.lng,
-        }
+        };
 
-        sendResponse(res, 200, 'Get address by place id successfully!', address);
+        sendResponse(
+            res,
+            200,
+            'Get address by place id successfully!',
+            address
+        );
     } catch (error) {
-        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, 'Something went wrong!');
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrong!' + error
+        );
     }
-}
+};
 
 const addressController = {
     autocompleteAddress,
-    getAddressByPlaceId,
-}
+    reverseGeocode,
+    getAddressDetailByPlaceId,
+};
 
 module.exports = addressController;
