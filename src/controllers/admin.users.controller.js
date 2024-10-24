@@ -12,25 +12,17 @@ const getAllUser = async (req, res) => {
         const query = `
         SELECT
             u.*,
-            addr.street AS address_street,
             addr.latitude AS address_latitude,
             addr.longitude AS address_longitude,
-            w.id AS ward_id,
-            w.name AS ward_name,
-            d.id AS district_id,
-            d.name AS district_name,
-            p.id AS province_id,
-            p.name AS province_name
-
-        FROM ${TABLE_NAMES.users} AS u
+            addr.id AS address_id,
+            addr.place_id AS place_id,
+            addr.address_name AS address_name,
+            addr.full_address AS full_address
+        FROM (
+            SELECT * FROM ${TABLE_NAMES.users}
+        ) AS u
         LEFT JOIN
             ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
-        LEFT JOIN
-            ${TABLE_NAMES.wards} AS w ON w.id = addr.ward_id
-        LEFT JOIN
-            ${TABLE_NAMES.districts} AS d ON d.id = w.district_id
-        LEFT JOIN
-            ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
     `;
 
         const users = await selectData(query, []);
@@ -41,41 +33,29 @@ const getAllUser = async (req, res) => {
                 ({
                     password,
                     address_id,
-                    address_street,
                     address_latitude,
                     address_longitude,
-                    ward_id,
-                    ward_name,
-                    district_id,
-                    district_name,
-                    province_id,
-                    province_name,
+                    place_id,
+                    address_name,
+                    full_address,
                     ...other
                 }) => {
                     other.birthday = convertDateToGMT7(other.birthday);
                     other.created_at = convertTimeToGMT7(other.created_at);
 
-                    other.address =
-                        address_id === null
-                            ? null
-                            : {
-                                  id: address_id,
-                                  street: address_street,
-                                  latitude: address_latitude,
-                                  longitude: address_longitude,
-                                  ward: {
-                                      id: ward_id,
-                                      name: ward_name,
-                                  },
-                                  district: {
-                                      id: district_id,
-                                      name: district_name,
-                                  },
-                                  province: {
-                                      id: province_id,
-                                      name: province_name,
-                                  },
-                              };
+                    if (!address_id) {
+                        other.address = null;
+                        return other;
+                    }
+
+                    other.address = {
+                        id: address_id,
+                        latitude: address_latitude,
+                        longitude: address_longitude,
+                        place_id: place_id,
+                        address_name: address_name,
+                        full_address: full_address,
+                    };
 
                     return other;
                 }

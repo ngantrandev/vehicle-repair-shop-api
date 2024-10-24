@@ -12,7 +12,6 @@ const stationsRoutes = require('../routes/stations.route');
 const addressesRoute = require('../routes/addresses.route');
 const bookingController = require('../controllers/booking.controller');
 const profileController = require('../controllers/profile.controller');
-const addressController = require('../controllers/address.controller');
 const { upload } = require('../services/uploadImageService');
 
 const apiRoute = express();
@@ -40,11 +39,11 @@ apiRoute.use('/services', servicesRoute);
 
 apiRoute.use('/motorcycles', motorcyclesRoute);
 
-apiRoute.use('/addresses', addressesRoute);
+apiRoute.use('/address', addressesRoute);
 
 apiRoute.use('/stations', stationsRoutes);
 
-apiRoute.get('/bookings/:booking_id', bookingController.getBookingById);
+apiRoute.get('/bookings/:booking_id', middlewareControllers.verifyToken, bookingController.getBookingById);
 
 apiRoute.get('/profile/:username', profileController.getUserByUsername);
 
@@ -53,10 +52,5 @@ apiRoute.patch(
     upload.single('file'),
     profileController.updateUserProfile
 );
-
-// Address routes
-apiRoute.get('/address/autocomplete', addressController.autocompleteAddress);
-apiRoute.get('/address/reverse', addressController.reverseGeocode);
-apiRoute.get('/address/detail', addressController.getAddressDetailByPlaceId);
 
 module.exports = apiRoute;

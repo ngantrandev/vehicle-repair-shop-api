@@ -17,24 +17,14 @@ const getAllServiceStations = async (req, res) => {
                 address.id AS address_id,
                 address.latitude,
                 address.longitude,
-                address.street,
-                ward.id AS ward_id,
-                ward.name AS ward_name,
-                district.id AS district_id,
-                district.name AS district_name,
-                province.id AS province_id,
-                province.name AS province_name
+                address.place_id,
+                address.address_name,
+                address.full_address
                 
             FROM
                 ${TABLE_NAMES.service_stations} AS ss
-            JOIN
+            LEFT JOIN
                 ${TABLE_NAMES.addresses} AS address ON ss.address_id = address.id
-            LEFT JOIN
-                ${TABLE_NAMES.wards} AS ward ON address.ward_id = ward.id
-            LEFT JOIN
-                ${TABLE_NAMES.districts} AS district ON ward.district_id = district.id
-            LEFT JOIN
-                ${TABLE_NAMES.provinces} AS province ON district.province_id = province.id
         `;
 
         const serviceStations = await selectData(query, []);
@@ -44,33 +34,19 @@ const getAllServiceStations = async (req, res) => {
                 address_id,
                 latitude,
                 longitude,
-                street,
-                ward_name,
-                district_name,
-                province_name,
-                ward_id,
-                district_id,
-                province_id,
+                place_id,
+                address_name,
+                full_address,
                 ...other
             }) => ({
                 ...other,
                 address: {
-                    id: address_id,
+                    address_id,
                     latitude,
                     longitude,
-                    street,
-                    ward: {
-                        id: ward_id,
-                        name: ward_name,
-                    },
-                    district: {
-                        id: district_id,
-                        name: district_name,
-                    },
-                    province: {
-                        id: province_id,
-                        name: province_name,
-                    },
+                    place_id,
+                    address_name,
+                    full_address,
                 },
             })
         );
@@ -96,26 +72,15 @@ const getStationById = async (req, res) => {
                 address.id AS address_id,
                 address.latitude,
                 address.longitude,
-                address.street,
-                ward.id AS ward_id,
-                ward.name AS ward_name,
-                district.id AS district_id,
-                district.name AS district_name,
-                province.id AS province_id,
-                province.name AS province_name
+                address.place_id,
+                address.address_name,
+                address.full_address
                 
-            FROM
-                ${TABLE_NAMES.service_stations} AS ss
-            JOIN
+            FROM (
+               SELECT * FROM ${TABLE_NAMES.service_stations} WHERE id = ?
+            ) AS ss
+            LEFT JOIN
                 ${TABLE_NAMES.addresses} AS address ON ss.address_id = address.id
-            LEFT JOIN
-                ${TABLE_NAMES.wards} AS ward ON address.ward_id = ward.id
-            LEFT JOIN
-                ${TABLE_NAMES.districts} AS district ON ward.district_id = district.id
-            LEFT JOIN
-                ${TABLE_NAMES.provinces} AS province ON district.province_id = province.id
-
-            WHERE ss.id = ?
         `;
 
         const serviceStations = await selectData(query, [stationId]);
@@ -124,13 +89,9 @@ const getStationById = async (req, res) => {
             address_id,
             latitude,
             longitude,
-            street,
-            ward_name,
-            district_name,
-            province_name,
-            ward_id,
-            district_id,
-            province_id,
+            place_id,
+            address_name,
+            full_address,
             ...other
         } = serviceStations[0];
 
@@ -140,19 +101,9 @@ const getStationById = async (req, res) => {
                 id: address_id,
                 latitude,
                 longitude,
-                street,
-                ward: {
-                    id: ward_id,
-                    name: ward_name,
-                },
-                district: {
-                    id: district_id,
-                    name: district_name,
-                },
-                province: {
-                    id: province_id,
-                    name: province_name,
-                },
+                place_id,
+                address_name,
+                full_address,
             },
         };
 
@@ -214,8 +165,9 @@ const updateStation = async (req, res) => {
     const {
         name: stationName,
         address_id: addressId,
-        street: stationStreet,
-        ward_id: wardId,
+        place_id,
+        address_name,
+        full_address,
         latitude,
         longitude,
     } = req.body;
@@ -223,12 +175,19 @@ const updateStation = async (req, res) => {
     try {
         const queries = [
             `UPDATE ${TABLE_NAMES.service_stations} SET name = ? WHERE id = ?`,
-            `UPDATE ${TABLE_NAMES.addresses} SET street = ?, ward_id = ?, latitude = ?, longitude = ? WHERE id = ?`,
+            `UPDATE ${TABLE_NAMES.addresses} SET place_id = ?, address_name = ?, full_address = ?, latitude = ?, longitude = ? WHERE id = ?`,
         ];
 
         const params = [
             [stationName, stationId],
-            [stationStreet, wardId, latitude, longitude, addressId],
+            [
+                place_id,
+                address_name,
+                full_address,
+                latitude,
+                longitude,
+                addressId,
+            ],
         ];
 
         await executeTransaction(queries, params);

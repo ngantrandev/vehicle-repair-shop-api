@@ -14,7 +14,7 @@ const {
     getIdOfNearestStation,
 } = require('../ultil/ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const { TABLE_NAMES, BOOKING_STATE } = require('../configs/constants.config');
+const { TABLE_NAMES, BOOKING_STATE, USER_ROLES } = require('../configs/constants.config');
 
 const getBookingById = async (req, res) => {
     if (!req.params.booking_id) {
@@ -60,7 +60,7 @@ const getBookingById = async (req, res) => {
                 st_addr.address_name AS station_address_name
             FROM ( SELECT *
                     FROM ${TABLE_NAMES.bookings}
-                    WHERE id = ? AND user_id = ?) AS b
+                    WHERE id = ?) AS b
             LEFT JOIN
                 ${TABLE_NAMES.services} AS s ON s.id = b.service_id
             LEFT JOIN
@@ -75,7 +75,10 @@ const getBookingById = async (req, res) => {
                 ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
         `;
 
-        const bookings = await selectData(selectQuery, [req.params.booking_id, req.tokenPayload.user_id]);
+        const bookings = await selectData(selectQuery, [
+            req.params.booking_id,
+            req.tokenPayload.user_id,
+        ]);
 
         if (bookings.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
@@ -163,7 +166,7 @@ const getBookingById = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };
@@ -275,6 +278,8 @@ const createBooking = async (req, res) => {
 };
 
 const cancelBooking = async (req, res) => {
+    console.log(req.params);
+    console.log(req.body);
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
         return;
@@ -296,8 +301,8 @@ const cancelBooking = async (req, res) => {
     // }
 
     try {
-        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND user_id = ?`;
-        const bookings = await selectData(selectQuery, [req.params.booking_id, req.tokenPayload.user_id]);
+        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
+        const bookings = await selectData(selectQuery, [req.params.booking_id]);
         if (bookings.length === 0) {
             sendResponse(
                 res,
@@ -361,8 +366,22 @@ const undoBooking = async (req, res) => {
     }
 
     try {
-        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND user_id = ?`;
-        const bookings = await selectData(selectQuery, [req.params.booking_id, req.tokenPayload.user_id]);
+
+        let where = '';
+
+        if(req.tokenPayload.role === USER_ROLES.customer) {
+            where = `WHERE id = ? AND user_id = ?`;
+        }
+        else if(req.tokenPayload.role === USER_ROLES.admin) {
+            where = `WHERE id = ?`;
+        }
+
+        const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} ${where}`;
+   
+        const bookings = await selectData(selectQuery, [
+            req.params.booking_id,
+        ]);
+
 
         if (bookings.length === 0) {
             sendResponse(

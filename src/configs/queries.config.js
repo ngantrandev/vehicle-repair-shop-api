@@ -56,11 +56,12 @@ const QUERY_SELECT_USER_BY_USERNAME = `
         addr.place_id AS place_id,
         addr.address_name AS address_name,
         addr.full_address AS full_address
-
-    FROM ${TABLE_NAMES.users} AS u
+    FROM (
+        SELECT * FROM ${TABLE_NAMES.users} WHERE username = ?
+    ) AS u
     LEFT JOIN
         ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
-    WHERE username = ?
+
 `;
 
 module.exports = {
