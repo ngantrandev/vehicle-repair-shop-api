@@ -10,9 +10,11 @@ const getAllNotifications = async (req, res) => {
                 users.firstname AS user_firstname,
                 users.lastname AS user_lastname
 
-            FROM ${TABLE_NAMES.notifications} AS noti
+            FROM (
+                SELECT * FROM ${TABLE_NAMES.notifications} WHERE receiver_id = ?
+            ) AS noti
             INNER JOIN ${TABLE_NAMES.users} AS users ON users.id = noti.receiver_id
-            WHERE noti.receiver_id = ?
+           
         
         `;
 

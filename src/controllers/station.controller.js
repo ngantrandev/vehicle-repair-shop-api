@@ -201,21 +201,22 @@ const updateStation = async (req, res) => {
 const createStation = async (req, res) => {
     const {
         name: stationName,
-        street: stationStreet,
-        ward_id: wardId,
+        place_id: placeId,
         latitude,
         longitude,
+        address_name,
+        full_address,
     } = req.body;
 
     try {
         const queries = [
-            `INSERT INTO ${TABLE_NAMES.addresses} (street, ward_id, latitude, longitude) VALUES (?, ?, ?, ?);`,
+            `INSERT INTO ${TABLE_NAMES.addresses} (place_id, address_name, full_address, latitude, longitude) VALUES (?, ?, ?, ?, ?);`,
             'SET @address_id = LAST_INSERT_ID();',
             `INSERT INTO ${TABLE_NAMES.service_stations} (name, address_id) VALUES (?, @address_id);`,
         ];
 
         const params = [
-            [stationStreet, wardId, latitude, longitude],
+            [placeId, address_name, full_address, latitude, longitude],
             [],
             [stationName],
         ];
@@ -224,6 +225,7 @@ const createStation = async (req, res) => {
 
         sendResponse(res, STATUS_CODE.OK, 'Create station successfully!');
     } catch (error) {
+        console.log(error.message);
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
     }
 };
