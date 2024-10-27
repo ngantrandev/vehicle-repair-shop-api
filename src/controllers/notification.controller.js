@@ -2,18 +2,17 @@ const { TABLE_NAMES } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const { sendResponse, selectData } = require('../ultil/ultil.lib');
 
-const getAllNotifications = async (req, res) => {
+const userGetAllNotifications = async (req, res) => {
     try {
         const query = `
             SELECT
                 noti.*,
-                users.firstname AS user_firstname,
-                users.lastname AS user_lastname
+                res.is_read
 
             FROM (
-                SELECT * FROM ${TABLE_NAMES.notifications} WHERE receiver_id = ?
-            ) AS noti
-            INNER JOIN ${TABLE_NAMES.users} AS users ON users.id = noti.receiver_id
+                SELECT * FROM ${TABLE_NAMES.user_notifications} WHERE user_id = ?
+            ) AS res
+            INNER JOIN ${TABLE_NAMES.notifications} AS noti ON noti.id = res.notification_id
            
         
         `;
@@ -22,17 +21,9 @@ const getAllNotifications = async (req, res) => {
             req.tokenPayload.user_id,
         ]);
 
-        const newList = notifications.map(
-            ({ receiver_id, user_firstname, user_lastname, ...other }) => {
-                other.receiver = {
-                    id: receiver_id,
-                    firstname: user_firstname,
-                    lastname: user_lastname,
-                };
-
-                return other;
-            }
-        );
+        const newList = notifications.map((item) => {
+            return item;
+        });
 
         sendResponse(res, STATUS_CODE.OK, 'success', newList);
     } catch (error) {
@@ -44,15 +35,18 @@ const getAllNotifications = async (req, res) => {
     }
 };
 
-const markNotificationAsRead = async (req, res) => {
+const userMarkNotificationAsRead = async (req, res) => {
     try {
         const query = `
-            UPDATE ${TABLE_NAMES.notifications}
+            UPDATE ${TABLE_NAMES.user_notifications}
             SET is_read = 1
-            WHERE id = ? AND receiver_id = ?
+            WHERE notification_id = ? AND user_id = ?
         `;
 
-        await selectData(query, [req.params.notification_id, req.tokenPayload.user_id]);
+        await selectData(query, [
+            req.params.notification_id,
+            req.tokenPayload.user_id,
+        ]);
 
         sendResponse(res, STATUS_CODE.OK, 'success');
     } catch (error) {
@@ -64,12 +58,12 @@ const markNotificationAsRead = async (req, res) => {
     }
 };
 
-const markAllNotificationsAsRead = async (req, res) => {
+const userMarkAllNotificationsAsRead = async (req, res) => {
     try {
         const query = `
-            UPDATE ${TABLE_NAMES.notifications}
+            UPDATE ${TABLE_NAMES.user_notifications}
             SET is_read = 1
-            WHERE receiver_id = ? AND is_read = 0
+            WHERE user_id = ? AND is_read = 0
         `;
 
         await selectData(query, [req.tokenPayload.user_id]);
@@ -82,12 +76,91 @@ const markAllNotificationsAsRead = async (req, res) => {
             'something went wrong!' + error
         );
     }
-}
+};
+
+const staffGetAllNotifications = async (req, res) => {
+    try {
+        const query = `
+            SELECT
+                noti.*,
+                res.is_read
+
+            FROM (
+                SELECT * FROM ${TABLE_NAMES.staff_notifications} WHERE staff_id = ?
+            ) AS res
+            INNER JOIN ${TABLE_NAMES.notifications} AS noti ON noti.id = res.notification_id
+           
+        
+        `;
+
+        const notifications = await selectData(query, [
+            req.tokenPayload.user_id,
+        ]);
+
+        const newList = notifications.map((item) => {
+            return item;
+        });
+
+        sendResponse(res, STATUS_CODE.OK, 'success', newList);
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrong!' + error
+        );
+    }
+};
+
+const staffMarkNotificationAsRead = async (req, res) => {
+    try {
+        const query = `
+            UPDATE ${TABLE_NAMES.staff_notifications}
+            SET is_read = 1
+            WHERE notification_id = ? AND staff_id = ?
+        `;
+
+        await selectData(query, [
+            req.params.notification_id,
+            req.tokenPayload.user_id,
+        ]);
+
+        sendResponse(res, STATUS_CODE.OK, 'success');
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrong!' + error
+        );
+    }
+};
+
+const staffMarkAllNotificationsAsRead = async (req, res) => {
+    try {
+        const query = `
+            UPDATE ${TABLE_NAMES.staff_notifications}
+            SET is_read = 1
+            WHERE staff_id = ? AND is_read = 0
+        `;
+
+        await selectData(query, [req.tokenPayload.user_id]);
+
+        sendResponse(res, STATUS_CODE.OK, 'success');
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrong!' + error
+        );
+    }
+};
 
 const notificationController = {
-    getAllNotifications,
-    markNotificationAsRead,
-    markAllNotificationsAsRead
+    userGetAllNotifications,
+    userMarkNotificationAsRead,
+    userMarkAllNotificationsAsRead,
+    staffGetAllNotifications,
+    staffMarkNotificationAsRead,
+    staffMarkAllNotificationsAsRead,
 };
 
 module.exports = notificationController;

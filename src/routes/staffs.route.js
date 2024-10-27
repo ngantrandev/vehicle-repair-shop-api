@@ -3,23 +3,29 @@ const router = require('express').Router();
 const bookingController = require('../controllers/booking.controller');
 const staffBookingController = require('../controllers/staff.booking.controller');
 const middlewareControllers = require('../middlewares/verify.middleware');
+const notificationController = require('../controllers/notification.controller');
 
-router.get(
-    '/:staff_id/bookings',
-    middlewareControllers.verifyCurrentStaff,
-    staffBookingController.getAllBookingAssignedToStaff
-);
+router.get('/bookings', staffBookingController.getAllBookingAssignedToStaff);
 
 router.patch(
-    '/:staff_id/bookings/:booking_id/set_fixing',
-    middlewareControllers.verifyCurrentStaff,
+    '/bookings/:booking_id/set_fixing',
     staffBookingController.setBookingStatusToFixing
 );
 
 router.patch(
-    '/:staff_id/bookings/:booking_id/set_done',
-    middlewareControllers.verifyCurrentStaff,
+    '/bookings/:booking_id/set_done',
     bookingController.setBookingStatusToDone
+);
+
+// Notification routes
+router.get('/notifications', notificationController.staffGetAllNotifications);
+router.patch(
+    '/notifications/:notification_id/mark_read',
+    notificationController.staffMarkNotificationAsRead
+);
+router.patch(
+    '/notifications/mark_all_read',
+    notificationController.staffMarkAllNotificationsAsRead
 );
 
 module.exports = router;

@@ -41,17 +41,17 @@ router.post(
     bookingController.createBooking
 );
 
-router.patch(
-    '/bookings/:booking_id/cancel',
-    bookingController.cancelBooking
-);
+router.patch('/bookings/:booking_id/cancel', bookingController.cancelBooking);
 
 // Notification routes
-router.get('/notifications', notificationController.getAllNotifications);
+router.get('/notifications', notificationController.userGetAllNotifications);
 router.patch(
     '/notifications/:notification_id/mark_read',
-    notificationController.markNotificationAsRead
+    notificationController.userMarkNotificationAsRead
 );
-router.patch('/notifications/mark_all_read', notificationController.markAllNotificationsAsRead);
+router.patch(
+    '/notifications/mark_all_read',
+    notificationController.userMarkAllNotificationsAsRead
+);
 
 module.exports = router;

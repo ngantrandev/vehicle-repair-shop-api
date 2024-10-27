@@ -20,6 +20,8 @@ const TABLE_NAMES = {
     districts: 'districts',
     provinces: 'provinces',
     notifications: 'notifications',
+    user_notifications: 'user_notifications',
+    staff_notifications: 'staff_notifications',
 };
 
 const USER_ROLES = {

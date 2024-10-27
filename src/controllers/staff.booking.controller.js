@@ -179,53 +179,74 @@ const getAllBookingAssignedToStaff = async (req, res) => {
     try {
         const query = `
             SELECT
-                b.*,
-                s.id AS service_id,
-                s.name AS service_name,
-                s.price AS service_price,
-                addr.street AS address_street,
-                addr.latitude AS address_latitude,
-                addr.longitude AS address_longitude,
-                w.name AS ward_name,
-                d.name AS district_name,
-                p.name AS province_name,
-                u.id AS user_id,
-                u.firstname AS user_firstname,
-                u.lastname AS user_lastname,
-                u.email AS user_email,
-                u.phone AS user_phone
+                  b.*,
+            s.name AS service_name,
+            s.price AS service_price,
+            s.image_url AS service_image_url,
+            s.estimated_time AS service_estimated_time,
+            stf.id AS staff_id,
+            stf.firstname AS staff_firstname,
+            stf.lastname AS staff_lastname,
+            addr.address_name,
+            addr.full_address,
+            addr.latitude as address_latitude,
+            addr.longitude as address_longitude,
+            u.id AS user_id,
+            u.firstname AS user_firstname,
+            u.lastname AS user_lastname,
+            u.phone AS user_phone,
+            st.id AS station_id,
+            st.name AS station_name,
+            st_addr.latitude AS station_latitude,
+            st_addr.longitude AS station_longitude,
+            st_addr.full_address AS station_address,
+            st_addr.address_name AS station_address_name
 
             FROM ( SELECT *
                     FROM ${TABLE_NAMES.bookings}
                     WHERE staff_id = ? ) AS b
-            JOIN ${TABLE_NAMES.users} AS u ON b.user_id = u.id
-            JOIN ${TABLE_NAMES.services} AS s ON b.service_id = s.id
-            JOIN ${TABLE_NAMES.addresses} AS addr ON addr.id = b.address_id
-            JOIN ${TABLE_NAMES.wards} AS w ON w.id = addr.ward_id
-            JOIN ${TABLE_NAMES.districts} AS d ON d.id = w.district_id
-            JOIN ${TABLE_NAMES.provinces} AS p ON p.id = d.province_id
+            LEFT JOIN
+                ${TABLE_NAMES.services} AS s ON s.id = b.service_id
+            LEFT JOIN
+                ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
+            LEFT JOIN
+                ${TABLE_NAMES.addresses} AS addr ON addr.id = b.address_id
+            LEFT JOIN
+                ${TABLE_NAMES.users} AS u ON u.id = b.user_id
+            LEFT JOIN
+                ${TABLE_NAMES.service_stations} AS st ON st.id = stf.station_id
+            LEFT JOIN
+                ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
         `;
 
-        const bookings = await selectData(query, [req.params.staff_id]);
+        const bookings = await selectData(query, [req.tokenPayload.user_id]);
 
         const newBookings = bookings.map(
             ({
-                staff_id,
                 service_name,
                 service_id,
                 service_price,
+                service_image_url,
+                service_estimated_time,
                 address_id,
-                address_street,
                 address_latitude,
                 address_longitude,
-                ward_name,
-                district_name,
-                province_name,
+                address_name,
+                full_address,
                 user_id,
                 user_firstname,
                 user_lastname,
                 user_email,
                 user_phone,
+                station_id,
+                station_name,
+                station_longitude,
+                station_latitude,
+                station_address,
+                station_address_name,
+                staff_id,
+                staff_firstname,
+                staff_lastname,
                 ...other
             }) => {
                 other.created_at = convertTimeToGMT7(other.created_at);
@@ -235,16 +256,16 @@ const getAllBookingAssignedToStaff = async (req, res) => {
                     id: service_id,
                     name: service_name,
                     price: service_price,
+                    image_url: service_image_url,
+                    estimated_time: service_estimated_time,
                 };
 
                 other.address = {
                     id: address_id,
-                    street: address_street,
                     latitude: address_latitude,
                     longitude: address_longitude,
-                    ward: ward_name,
-                    district: district_name,
-                    province: province_name,
+                    address_name: address_name,
+                    full_address: full_address,
                 };
 
                 other.user = {
@@ -253,6 +274,22 @@ const getAllBookingAssignedToStaff = async (req, res) => {
                     lastname: user_lastname,
                     email: user_email,
                     phone: user_phone,
+                };
+
+                other.staff = {
+                    id: staff_id,
+                    firstname: staff_firstname,
+                    lastname: staff_lastname,
+                    station: {
+                        id: station_id,
+                        name: station_name,
+                        address: {
+                            latitude: station_latitude,
+                            longitude: station_longitude,
+                            address_name: station_address_name,
+                            full_address: station_address,
+                        },
+                    },
                 };
 
                 return other;
