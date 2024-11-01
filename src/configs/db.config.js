@@ -1,4 +1,4 @@
-const { createPool, createConnection } = require('mysql2');
+const { createPool, createConnection } = require('mysql');
 
 // const pool = createPool({
 //     post: process.env.DB_PORT,
@@ -19,7 +19,7 @@ const { createPool, createConnection } = require('mysql2');
 // });
 
 function createDatabaseConnection() {
-    const pool = createPool({
+    const pool = createConnection({
         port: process.env.DB_PORT,
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -29,20 +29,18 @@ function createDatabaseConnection() {
         connectTimeout: 10000,
     });
 
-    // check connection
-    pool.getConnection((err, connection) => {
+    pool.connect((err) => {
         if (err) {
-            console.error('Không thể kết nối với cơ sở dữ liệu:', err.message);
+            console.error('Lỗi kết nối tới db: ', err.message);
+            console.log('Thử kết nối lại sau 2 giây...');
             setTimeout(createDatabaseConnection, 2000);
         } else {
             console.log('Kết nối thành công với cơ sở dữ liệu!');
-            connection.release();
         }
     });
 
     // Xử lý sự kiện lỗi cho kết nối sau này
     pool.on('error', (err) => {
-        console.log('error', err);
         console.error('Mất kết nối đến cơ sở dữ liệu:', err.message);
         if (
             err.code === 'PROTOCOL_CONNECTION_LOST' ||
