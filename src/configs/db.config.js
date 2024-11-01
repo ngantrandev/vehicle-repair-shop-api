@@ -1,4 +1,4 @@
-const { createPool, createConnection } = require('mysql');
+const { createPool, createConnection } = require('mysql2');
 
 // const pool = createPool({
 //     post: process.env.DB_PORT,
@@ -19,36 +19,42 @@ const { createPool, createConnection } = require('mysql');
 // });
 
 function createDatabaseConnection() {
-    const pool = createConnection({
+    const pool = createPool({
         port: process.env.DB_PORT,
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
         password: process.env.DB_PASS,
         database: process.env.DB_NAME,
+        connectionLimit: 10,
+        connectTimeout: 10000,
     });
 
-    // Thử kết nối với cơ sở dữ liệu
-    pool.connect((err) => {
+    // check connection
+    pool.getConnection((err, connection) => {
         if (err) {
-            console.error('Không thể kết nối với csdl:', err.message);
-            console.log('Trying re connect...');
-
+            console.error('Không thể kết nối với cơ sở dữ liệu:', err.message);
             setTimeout(createDatabaseConnection, 2000);
         } else {
-            console.log('Kết nối thành công với csdl!');
+            console.log('Kết nối thành công với cơ sở dữ liệu!');
+            connection.release();
         }
     });
 
+    // Xử lý sự kiện lỗi cho kết nối sau này
     pool.on('error', (err) => {
-        if (err.code == 'ECONNRESET') {
-            console.log('Mất kết nối. Đang thử kết nối lại...');
+        console.log('error', err);
+        console.error('Mất kết nối đến cơ sở dữ liệu:', err.message);
+        if (
+            err.code === 'PROTOCOL_CONNECTION_LOST' ||
+            err.code === 'ECONNRESET'
+        ) {
+            console.log('Đang thử kết nối lại sau 2 giây...');
             setTimeout(createDatabaseConnection, 2000);
         }
     });
 
     return pool;
 }
-
 const pool = createDatabaseConnection();
 
 module.exports = pool;

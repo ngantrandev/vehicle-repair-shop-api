@@ -1,6 +1,6 @@
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const goongServices = require('../services/goongServices');
-const { sendResponse } = require('../ultil/ultil.lib');
+const { sendResponse, decodePolyline } = require('../ultil/ultil.lib');
 
 const autocompleteAddress = async (req, res) => {
     try {
@@ -119,10 +119,60 @@ const getAddressDetailByPlaceId = async (req, res) => {
     }
 };
 
+const getGeoJsonCoordinatesDirection = async (req, res) => {
+    let { origin, destination, vehicle } = req.query;
+
+    if (!vehicle) {
+        vehicle = 'bike';
+    }
+
+    if (!origin || !destination) {
+        sendResponse(
+            res,
+            STATUS_CODE.BAD_REQUEST,
+            'origin and destination are required!'
+        );
+        return;
+    }
+
+    const data = await goongServices.getDirection(origin, destination, vehicle);
+
+    let geojson = {
+        type: 'Feature',
+        geometry: {
+            type: 'LineString',
+            coordinates: [],
+        },
+    };
+
+    let coordinates = [];
+
+    // Assuming res.routes[0].overview_polyline.points contains the encoded polyline
+    if (data.routes && data.routes[0]) {
+        const overviewPolyline = data.routes[0].overview_polyline.points;
+        coordinates = decodePolyline(overviewPolyline);
+        geojson = {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates,
+            },
+        };
+    }
+
+    sendResponse(
+        res,
+        STATUS_CODE.OK,
+        'Get direction successfully!',
+        coordinates
+    );
+};
+
 const addressController = {
     autocompleteAddress,
     reverseGeocode,
     getAddressDetailByPlaceId,
+    getGeoJsonCoordinatesDirection,
 };
 
 module.exports = addressController;

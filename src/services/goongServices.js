@@ -103,12 +103,34 @@ const getAddressDetailByPlaceId = async (place_id) => {
     return resData;
 };
 
+const getDirection = async (origin, destination, vehicle) => {
+    const apiPath = '/Direction';
+    const params = {
+        origin,
+        destination,
+        vehicle,
+        api_key: process.env.GOONG_API_KEY,
+    };
+
+    const res = await goongHttpRequests.get(apiPath, params);
+
+    if (!res || res.status !== STATUS_CODE.OK) {
+        return null;
+    }
+
+    const resData = res.data;
+
+    return resData;
+
+}
+
 const goongServices = {
     getDistanceMatrixFromUserAddrToOtherStations,
     autocompleteAddress,
     forwardGeocode,
     reverseGeocode,
     getAddressDetailByPlaceId,
+    getDirection,
 };
 
 module.exports = goongServices;

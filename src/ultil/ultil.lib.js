@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
+const polyline = require('@mapbox/polyline');
 
 const connection = require('../configs/db.config');
 const {
@@ -17,6 +18,10 @@ const executeTransaction = async (queries, listParamArray) => {
         );
     }
     return new Promise((resolve, reject) => {
+        if (!connection || connection.state === 'disconnected') {
+            throw new Error('Không thể kết nối đến cơ sở dữ liệu');
+        }
+
         connection.beginTransaction(async (err) => {
             if (err) {
                 return reject(err);
@@ -62,6 +67,10 @@ const executeTransaction = async (queries, listParamArray) => {
 
 const excuteQuery = async (query, listPagrams) => {
     return new Promise((resolve, reject) => {
+        if (!connection || connection.state === 'disconnected') {
+            throw new Error('Không thể kết nối đến cơ sở dữ liệu');
+        }
+
         connection.query(query, listPagrams, function (error, results) {
             if (error) reject(error);
             resolve(results);
@@ -69,13 +78,15 @@ const excuteQuery = async (query, listPagrams) => {
     });
 };
 
-const selectData = async (query, listPagrams = []) => {
+const selectData = async (query, listParams = []) => {
     return new Promise((resolve, reject) => {
-        connection.query(query, listPagrams, function (error, results) {
-            if (error) reject(error);
-            let payload = [];
-            payload = parseToJSONFrDB(results);
-            resolve(payload);
+        connection.query(query, listParams, (error, results) => {
+            if (error) {
+                reject(error); // throw lỗi nếu query thất bại
+            } else {
+                let payload = parseToJSONFrDB(results);
+                resolve(payload);
+            }
         });
     });
 };
@@ -270,6 +281,15 @@ const getIdOfTheMostFreeStaff = async (stationId) => {
     return staffId;
 };
 
+/**
+ *
+ * @param {*} str example {x`aA{{wiSo@HsARY{AUD
+ * @returns
+ */
+const decodePolyline = (str) => {
+    return polyline.decode(str).map(([lat, lng]) => [lng, lat]);
+};
+
 module.exports = {
     executeTransaction,
     excuteQuery,
@@ -286,4 +306,5 @@ module.exports = {
     isValidDouble,
     getIdOfNearestStation,
     getIdOfTheMostFreeStaff,
+    decodePolyline,
 };

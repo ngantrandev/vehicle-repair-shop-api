@@ -1,6 +1,6 @@
 const { TABLE_NAMES } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const { sendResponse, selectData } = require('../ultil/ultil.lib');
+const { sendResponse, selectData, convertTimeToGMT7 } = require('../ultil/ultil.lib');
 
 const userGetAllNotifications = async (req, res) => {
     try {
@@ -21,8 +21,10 @@ const userGetAllNotifications = async (req, res) => {
             req.tokenPayload.user_id,
         ]);
 
-        const newList = notifications.map((item) => {
-            return item;
+        const newList = notifications.map(({date, ...other}) => {
+            other.date = convertTimeToGMT7(date);
+
+            return other;
         });
 
         sendResponse(res, STATUS_CODE.OK, 'success', newList);
@@ -97,8 +99,10 @@ const staffGetAllNotifications = async (req, res) => {
             req.tokenPayload.user_id,
         ]);
 
-        const newList = notifications.map((item) => {
-            return item;
+        const newList = notifications.map(({date, ...other}) => {
+            other.date = convertTimeToGMT7(date);
+
+            return other;
         });
 
         sendResponse(res, STATUS_CODE.OK, 'success', newList);
