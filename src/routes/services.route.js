@@ -6,6 +6,8 @@ const router = require('express').Router();
 
 router.get('/', servicesControllers.getAllServices);
 
+router.get('/top', servicesControllers.getTopServices);
+
 router.get('/categories', categoriesController.getServiceCategory);
 
 router.get('/:service_id', serviceControllers.getServiceById);
