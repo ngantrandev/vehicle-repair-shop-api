@@ -19,7 +19,7 @@ const { createPool, createConnection } = require('mysql');
 // });
 
 function createDatabaseConnection() {
-    const pool = createConnection({
+    const pool = createPool({
         port: process.env.DB_PORT,
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -29,13 +29,14 @@ function createDatabaseConnection() {
         connectTimeout: 10000,
     });
 
-    pool.connect((err) => {
+    pool.getConnection((err, connection) => {
         if (err) {
-            console.error('Lỗi kết nối tới db: ', err.message);
+            console.error('Lỗi kết nối tới db:', err.message);
             console.log('Thử kết nối lại sau 2 giây...');
             setTimeout(createDatabaseConnection, 2000);
         } else {
             console.log('Kết nối thành công với cơ sở dữ liệu!');
+            connection.release(); // Trả lại kết nối về pool sau khi kiểm tra
         }
     });
 

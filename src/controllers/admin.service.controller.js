@@ -1,3 +1,6 @@
+const path = require('path');
+const sharp = require('sharp');
+
 const { TABLE_NAMES } = require('../configs/constants.config');
 const { QUERY_SELECT_SERVICE_BY_ID } = require('../configs/queries.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
@@ -57,14 +60,35 @@ const createService = async (req, res) => {
     /** CREATE SERVICE */
 
     try {
-        const insertedFields = requiredFields.map((field) => ` ${field}`);
+        let fileName = '';
+        let relativePath = ''; /** path from root dir to image */
+
+        if (req.file) {
+            const buffer = req.file.buffer;
+            fileName = Date.now() + '.webp';
+            relativePath = path.join('./uploads', fileName);
+
+            try {
+                await sharp(buffer).webp({ quality: 20 }).toFile(relativePath);
+            } catch (error) {
+                sendResponse(
+                    res,
+                    STATUS_CODE.INTERNAL_SERVER_ERROR,
+                    'cannot create booking at this time' + error
+                );
+                return;
+            }
+        }
+       
         const insertedValues = [];
 
-        const queryCreate = `INSERT INTO ${TABLE_NAMES.services} (${insertedFields}) VALUES (?, ?, ?, ?, ?)`;
+        const queryCreate = `INSERT INTO ${TABLE_NAMES.services} (category_id, name, description, price, estimated_time, image_url) VALUES (?, ?, ?, ?, ?, ?)`;
 
         for (const field of requiredFields) {
             insertedValues.push(req.body[field]);
         }
+
+        insertedValues.push(relativePath);
 
         const result = await excuteQuery(queryCreate, insertedValues);
 
@@ -83,7 +107,7 @@ const createService = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Something went wrongs!' + error
         );
     }
 };
@@ -139,6 +163,26 @@ const updateService = async (req, res) => {
             'active',
         ];
 
+        let fileName = '';
+        let relativePath = ''; /** path from root dir to image */
+
+        if (req.file) {
+            const buffer = req.file.buffer;
+            fileName = Date.now() + '.webp';
+            relativePath = path.join('./uploads', fileName);
+
+            try {
+                await sharp(buffer).webp({ quality: 20 }).toFile(relativePath);
+            } catch (error) {
+                sendResponse(
+                    res,
+                    STATUS_CODE.INTERNAL_SERVER_ERROR,
+                    'cannot create booking at this time' + error
+                );
+                return;
+            }
+        }
+
         const updateFields = [];
         const updateValues = [];
 
@@ -158,6 +202,9 @@ const updateService = async (req, res) => {
                 updateValues.push(req.body[field]);
             }
         }
+
+        updateFields.push("image_url = ?")
+        updateValues.push(relativePath)
 
         if (updateFields.length === 0) {
             sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
@@ -209,7 +256,7 @@ const updateService = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Something went wrongs!' + error
         );
     }
 };

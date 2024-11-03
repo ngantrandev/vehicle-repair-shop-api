@@ -3,7 +3,7 @@ const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
 const polyline = require('@mapbox/polyline');
 
-const connection = require('../configs/db.config');
+const pool = require('../configs/db.config');
 const {
     BOOKING_STATE,
     TABLE_NAMES,
@@ -17,61 +17,70 @@ const executeTransaction = async (queries, listParamArray) => {
             'PAY ATTENTION Queries length must equal to listParamArray length!!!!'
         );
     }
-    return new Promise((resolve, reject) => {
-        if (!connection || connection.state === 'disconnected') {
-            throw new Error('Không thể kết nối đến cơ sở dữ liệu');
-        }
 
-        connection.beginTransaction(async (err) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
             if (err) {
                 return reject(err);
             }
 
-            try {
-                const results = [];
-
-                for (let i = 0; i < queries.length; i++) {
-                    const result = await new Promise((resolve, reject) => {
-                        connection.query(
-                            queries[i],
-                            listParamArray[i],
-                            (error, result) => {
-                                if (error) {
-                                    return reject(error);
-                                }
-                                resolve(result);
-                            }
-                        );
-                    });
-                    results.push(result);
+            // Bắt đầu giao dịch
+            connection.beginTransaction(async (err) => {
+                if (err) {
+                    connection.release(); // Giải phóng kết nối khi có lỗi
+                    return reject(err);
                 }
 
-                connection.commit((err) => {
-                    if (err) {
-                        connection.rollback(() => {
-                            connection.end();
-                            reject(err);
+                try {
+                    const results = [];
+
+                    for (let i = 0; i < queries.length; i++) {
+                        const result = await new Promise((resolve, reject) => {
+                            connection.query(
+                                queries[i],
+                                listParamArray[i],
+                                (error, result) => {
+                                    if (error) {
+                                        return reject(error);
+                                    }
+                                    resolve(result);
+                                }
+                            );
                         });
-                        return;
+                        results.push(result);
                     }
-                    resolve(results);
-                });
-            } catch (err) {
-                connection.rollback(() => {
-                    reject(err);
-                });
-            }
+
+                    // Commit giao dịch
+                    connection.commit((err) => {
+                        if (err) {
+                            connection.rollback(() => {
+                                connection.release();
+                                reject(err);
+                            });
+                            return;
+                        }
+                        connection.release(); // Giải phóng kết nối sau khi commit thành công
+                        resolve(results);
+                    });
+                } catch (err) {
+                    // Rollback nếu có lỗi
+                    connection.rollback(() => {
+                        connection.release();
+                        reject(err);
+                    });
+                }
+            });
         });
     });
 };
 
 const excuteQuery = async (query, listPagrams) => {
     return new Promise((resolve, reject) => {
-        if (!connection || connection.state === 'disconnected') {
+        if (!pool || pool.state === 'disconnected') {
             throw new Error('Không thể kết nối đến cơ sở dữ liệu');
         }
 
-        connection.query(query, listPagrams, function (error, results) {
+        pool.query(query, listPagrams, function (error, results) {
             if (error) reject(error);
             resolve(results);
         });
@@ -80,7 +89,7 @@ const excuteQuery = async (query, listPagrams) => {
 
 const selectData = async (query, listParams = []) => {
     return new Promise((resolve, reject) => {
-        connection.query(query, listParams, (error, results) => {
+        pool.query(query, listParams, (error, results) => {
             if (error) {
                 reject(error); // throw lỗi nếu query thất bại
             } else {
@@ -158,7 +167,10 @@ const isValidDouble = (value) => {
 };
 
 const isValidTime = (time) => {
-    return moment(time, 'HH:mm:ss', true).isValid();
+    return (
+        moment(time, 'HH:mm', true).isValid() ||
+        moment(time, 'HH:mm:ss', true).isValid()
+    );
 };
 
 const sendResponse = (res, statusCode, message, data) => {
