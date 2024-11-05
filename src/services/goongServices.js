@@ -121,8 +121,7 @@ const getDirection = async (origin, destination, vehicle) => {
     const resData = res.data;
 
     return resData;
-
-}
+};
 
 const goongServices = {
     getDistanceMatrixFromUserAddrToOtherStations,

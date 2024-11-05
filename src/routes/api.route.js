@@ -43,7 +43,11 @@ apiRoute.use('/address', addressesRoute);
 
 apiRoute.use('/stations', stationsRoutes);
 
-apiRoute.get('/bookings/:booking_id', middlewareControllers.verifyToken, bookingController.getBookingById);
+apiRoute.get(
+    '/bookings/:booking_id',
+    middlewareControllers.verifyToken,
+    bookingController.getBookingById
+);
 
 apiRoute.get('/profile/:username', profileController.getUserByUsername);
 

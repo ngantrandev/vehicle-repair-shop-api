@@ -11,6 +11,9 @@ router.get(
     '/:brand_id/motorcycles',
     motorcycleBrandController.getAllMotorcyclesByBrandId
 );
-router.get('/:brand_id/services', motorcycleBrandController.getAllServicesByBrandId);
+router.get(
+    '/:brand_id/services',
+    motorcycleBrandController.getAllServicesByBrandId
+);
 
 module.exports = router;

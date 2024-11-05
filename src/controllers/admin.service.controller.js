@@ -79,7 +79,7 @@ const createService = async (req, res) => {
                 return;
             }
         }
-       
+
         const insertedValues = [];
 
         const queryCreate = `INSERT INTO ${TABLE_NAMES.services} (category_id, name, description, price, estimated_time, image_url) VALUES (?, ?, ?, ?, ?, ?)`;
@@ -203,8 +203,8 @@ const updateService = async (req, res) => {
             }
         }
 
-        updateFields.push("image_url = ?")
-        updateValues.push(relativePath)
+        updateFields.push('image_url = ?');
+        updateValues.push(relativePath);
 
         if (updateFields.length === 0) {
             sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');

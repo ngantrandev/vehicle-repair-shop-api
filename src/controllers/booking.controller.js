@@ -14,7 +14,11 @@ const {
     getIdOfNearestStation,
 } = require('../ultil/ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const { TABLE_NAMES, BOOKING_STATE, USER_ROLES } = require('../configs/constants.config');
+const {
+    TABLE_NAMES,
+    BOOKING_STATE,
+    USER_ROLES,
+} = require('../configs/constants.config');
 
 const getBookingById = async (req, res) => {
     if (!req.params.booking_id) {
@@ -366,22 +370,17 @@ const undoBooking = async (req, res) => {
     }
 
     try {
-
         let where = '';
 
-        if(req.tokenPayload.role === USER_ROLES.customer) {
+        if (req.tokenPayload.role === USER_ROLES.customer) {
             where = `WHERE id = ? AND user_id = ?`;
-        }
-        else if(req.tokenPayload.role === USER_ROLES.admin) {
+        } else if (req.tokenPayload.role === USER_ROLES.admin) {
             where = `WHERE id = ?`;
         }
 
         const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} ${where}`;
-   
-        const bookings = await selectData(selectQuery, [
-            req.params.booking_id,
-        ]);
 
+        const bookings = await selectData(selectQuery, [req.params.booking_id]);
 
         if (bookings.length === 0) {
             sendResponse(

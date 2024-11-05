@@ -19,6 +19,9 @@ router.get(
 router.get('/autocomplete', addressController.autocompleteAddress);
 router.get('/reverse', addressController.reverseGeocode);
 router.get('/detail', addressController.getAddressDetailByPlaceId);
-router.get('/GeoJsonLineDirection', addressController.getGeoJsonCoordinatesDirection);
+router.get(
+    '/GeoJsonLineDirection',
+    addressController.getGeoJsonCoordinatesDirection
+);
 
 module.exports = router;

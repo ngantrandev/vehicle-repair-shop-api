@@ -8,10 +8,7 @@ router.get('/', bookingsController.getAllBooking);
 
 router.patch('/:booking_id/undo', bookingController.undoBooking);
 
-router.patch(
-    '/:booking_id/confirm',
-    adminBookingController.confirmBooking
-);
+router.patch('/:booking_id/confirm', adminBookingController.confirmBooking);
 
 router.patch(
     '/:booking_id/assign',
