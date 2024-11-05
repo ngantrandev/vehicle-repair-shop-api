@@ -43,14 +43,9 @@ const register = async (req, res) => {
 
         const selectQuery = `
             SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
-            UNION
-            SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ?;
         `;
 
-        const users = await selectData(selectQuery, [
-            req.body.username,
-            req.body.username,
-        ]);
+        const users = await selectData(selectQuery, [req.body.username]);
 
         if (users.length > 0) {
             sendResponse(
@@ -65,7 +60,7 @@ const register = async (req, res) => {
 
         const fields = requiredFields.map((field) => ` ${field}`);
 
-        const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, '${ACCOUNT_STATE.active}')`;
+        const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '${ACCOUNT_STATE.active}')`;
 
         const values = [];
 
@@ -270,7 +265,11 @@ const staffSignin = async (req, res) => {
             name: station_name,
         };
 
-        const token = generateJWT(staffs[0].id, inputUsername, USER_ROLES.staff);
+        const token = generateJWT(
+            staffs[0].id,
+            inputUsername,
+            USER_ROLES.staff
+        );
 
         res.status(STATUS_CODE.OK).json({
             success: true,
