@@ -302,6 +302,10 @@ const decodePolyline = (str) => {
     return polyline.decode(str).map(([lat, lng]) => [lng, lat]);
 };
 
+const isValidDate = (date) => {
+    return moment(date, 'YYYY-MM-DD', true).isValid();
+};
+
 module.exports = {
     executeTransaction,
     excuteQuery,
@@ -319,4 +323,5 @@ module.exports = {
     getIdOfNearestStation,
     getIdOfTheMostFreeStaff,
     decodePolyline,
+    isValidDate,
 };

@@ -33,8 +33,8 @@ app.get(BASE_URL_PATH, (req, res) => {
 
 app.use(BASE_URL_PATH, apiRoute);
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}!!`);
+app.listen(process.env.APP_PORT, () => {
+    console.log(`Server is running on port ${process.env.APP_PORT}!!`);
 });
 
 module.exports = app;

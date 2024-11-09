@@ -4,7 +4,7 @@
     "description": "this is a restful api for vehicle repair shop website",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js",
+        "start": "nodemon index.js",
         "test": "echo \"Error: no test specified\" && exit 1",
         "format": "npx prettier . --write"
     },
@@ -28,6 +28,7 @@
         "sharp": "^0.33.4"
     },
     "devDependencies": {
+        "nodemon": "^3.1.7",
         "prettier": "3.3.3"
     }
 }
