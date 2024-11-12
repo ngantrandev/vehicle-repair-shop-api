@@ -306,6 +306,15 @@ const isValidDate = (date) => {
     return moment(date, 'YYYY-MM-DD', true).isValid();
 };
 
+const isValidUrl = (url) => {
+    try {
+        new URL(url); // Kiểm tra xem URL có hợp lệ không
+        return true;
+    } catch (_) {
+        return false;
+    }
+};
+
 module.exports = {
     executeTransaction,
     excuteQuery,
@@ -324,4 +333,5 @@ module.exports = {
     getIdOfTheMostFreeStaff,
     decodePolyline,
     isValidDate,
+    isValidUrl,
 };

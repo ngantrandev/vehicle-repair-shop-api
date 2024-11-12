@@ -6,7 +6,7 @@ const router = require('express').Router();
 
 router.get('/', bookingsController.getAllBooking);
 
-router.get("/latest", bookingsController.getLatestBooking);
+router.get('/latest', bookingsController.getLatestBooking);
 
 router.patch('/:booking_id/undo', bookingController.undoBooking);
 
