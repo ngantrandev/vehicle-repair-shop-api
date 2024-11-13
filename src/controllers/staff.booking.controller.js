@@ -27,20 +27,27 @@ const setBookingStatusToFixing = async (req, res) => {
     }
 
     try {
-        const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND staff_id = ?`;
+        const checkExistBooking = `
+            SELECT 
+                b.*,
+                s.name AS service_name
+            FROM ${TABLE_NAMES.bookings} AS b
+            JOIN ${TABLE_NAMES.services} AS s ON b.service_id = s.id
+            WHERE b.id = ?
+        
+        `;
         const bookingsFound = await selectData(checkExistBooking, [
             req.params.booking_id,
-            req.tokenPayload.user_id,
         ]);
 
-        if (bookingsFound.length === 0) {
-            sendResponse(
-                res,
-                STATUS_CODE.NOT_FOUND,
-                'this booking does not belong to this staff!'
-            );
-            return;
-        }
+        // if (bookingsFound.length === 0) {
+        //     sendResponse(
+        //         res,
+        //         STATUS_CODE.NOT_FOUND,
+        //         'this booking does not belong to this staff!'
+        //     );
+        //     return;
+        // }
 
         if (bookingsFound[0].status === BOOKING_STATE.pending) {
             sendResponse(
@@ -87,10 +94,9 @@ const setBookingStatusToFixing = async (req, res) => {
         ]);
 
         const title = 'Bắt đầu sửa chữa';
-        const message =
-            'Nhân viên đã bắt đầu sửa chữa. Vui lòng chờ trong giây lát!';
+        const message = `Nhân viên đã bắt đầu dịch vụ ${bookingsFound[0].service_name}. Vui lòng chờ trong giây lát!`;
         const userId = bookingsFound[0].user_id;
-        const ok = await createUserNotification(userId, title, message);
+        await createUserNotification(userId, title, message);
         sendNotificationToTopic(title, message, `customer_${userId}`);
 
         sendResponse(
@@ -102,7 +108,7 @@ const setBookingStatusToFixing = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };
@@ -311,7 +317,7 @@ const getAllBookingAssignedToStaff = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };

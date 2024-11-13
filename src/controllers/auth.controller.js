@@ -96,7 +96,7 @@ const register = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrong!'
+            'something went wrong!' + error
         );
     }
 };

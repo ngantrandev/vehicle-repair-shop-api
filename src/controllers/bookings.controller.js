@@ -232,6 +232,8 @@ const getAllBooking = async (req, res) => {
             LEFT JOIN
                 ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
         ${where}
+
+        ORDER BY created_at DESC
  `;
 
         const bookings = await selectData(selectQuery, params);
@@ -322,7 +324,7 @@ const getAllBooking = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrong'
+            'something went wrong' + error
         );
     }
 };

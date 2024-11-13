@@ -2,7 +2,6 @@ const router = require('express').Router();
 
 const bookingController = require('../controllers/booking.controller');
 const staffBookingController = require('../controllers/staff.booking.controller');
-const middlewareControllers = require('../middlewares/verify.middleware');
 const notificationController = require('../controllers/notification.controller');
 
 router.get('/bookings', staffBookingController.getAllBookingAssignedToStaff);

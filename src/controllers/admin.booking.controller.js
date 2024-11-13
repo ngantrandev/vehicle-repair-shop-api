@@ -79,7 +79,7 @@ const confirmBooking = async (req, res) => {
         const title = 'Xác nhận lịch hẹn';
         const message = `Lịch hẹn ${bookingsFound[0].service_name} đã được xác nhận và sẽ được thực hiện đúng giờ. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`;
         const userId = bookingsFound[0].user_id;
-        const ok = await createUserNotification(userId, title, message);
+        await createUserNotification(userId, title, message);
         sendNotificationToTopic(title, message, `customer_${userId}`);
 
         sendResponse(res, STATUS_CODE.OK, 'booking confirmed successfully!');
@@ -87,12 +87,13 @@ const confirmBooking = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrong'
+            'something went wrong' + error
         );
     }
 };
 
 const assignBookingToEmployee = async (req, res) => {
+    console.log(req.body);
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
         return;
@@ -160,17 +161,11 @@ const assignBookingToEmployee = async (req, res) => {
             return;
         }
 
-        let updateBooking = '';
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET staff_id = ?, note = ? WHERE id = ?`;
         const bodyData = [];
+
         bodyData.push(req.body.employee_id);
-
-        if (req.body.note) {
-            updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET staff_id = ?, note = ? WHERE id = ?`;
-            bodyData.push(req.body.note);
-        } else {
-            updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET staff_id = ? WHERE id = ?`;
-        }
-
+        bodyData.push(req.body.note);
         bodyData.push(req.params.booking_id);
 
         await excuteQuery(updateBooking, bodyData);
@@ -184,7 +179,7 @@ const assignBookingToEmployee = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrong'
+            'something went wrong' + error
         );
         return;
     }

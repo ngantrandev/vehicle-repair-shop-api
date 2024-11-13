@@ -17,6 +17,7 @@ const userGetAllNotifications = async (req, res) => {
                 SELECT * FROM ${TABLE_NAMES.user_notifications} WHERE user_id = ?
             ) AS res
             INNER JOIN ${TABLE_NAMES.notifications} AS noti ON noti.id = res.notification_id
+            ORDER BY noti.date DESC
            
         
         `;
@@ -95,6 +96,7 @@ const staffGetAllNotifications = async (req, res) => {
                 SELECT * FROM ${TABLE_NAMES.staff_notifications} WHERE staff_id = ?
             ) AS res
             INNER JOIN ${TABLE_NAMES.notifications} AS noti ON noti.id = res.notification_id
+            ORDER BY noti.date DESC
            
         
         `;

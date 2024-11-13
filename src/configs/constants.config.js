@@ -10,7 +10,6 @@ const TABLE_NAMES = {
     service_categories: 'service_categories',
     service_motorcycles: 'service_motorcycles',
     spare_parts_services: 'spare_parts_services',
-    staffs: 'staffs',
     addresses: 'goong_map_addresses',
     motorcycle_brands: 'motorcycle_brands',
     motorcycles: 'motorcycles',

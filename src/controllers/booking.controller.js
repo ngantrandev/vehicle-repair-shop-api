@@ -229,7 +229,7 @@ const createBooking = async (req, res) => {
                 sendResponse(
                     res,
                     STATUS_CODE.INTERNAL_SERVER_ERROR,
-                    'cannot create booking at this time'
+                    'cannot create booking at this time' + error
                 );
                 return;
             }
@@ -280,11 +280,7 @@ const createBooking = async (req, res) => {
 
         const title = 'Tạo lịch hẹn thành công';
         const message = `Lịch hẹn "${services[0].name}" đã được tạo thành công!`;
-        const ok = await createUserNotification(
-            req.tokenPayload.user_id,
-            title,
-            message
-        );
+        await createUserNotification(req.tokenPayload.user_id, title, message);
         sendNotificationToTopic(
             title,
             message,
@@ -436,7 +432,7 @@ const undoBooking = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrong'
+            'something went wrong' + error
         );
     }
 };
@@ -516,7 +512,7 @@ const setBookingStatusToDone = async (req, res) => {
         const title = 'Quá trình sửa chữa hoàn tất!';
         const message = `Nhân viên đã hoàn tất dịch vụ ${bookingsFound[0]?.service_name}`;
         const userId = bookingsFound[0].user_id;
-        const ok = await createUserNotification(userId, title, message);
+        await createUserNotification(userId, title, message);
         sendNotificationToTopic(title, message, `customer_${userId}`);
 
         sendResponse(
@@ -528,7 +524,7 @@ const setBookingStatusToDone = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };
