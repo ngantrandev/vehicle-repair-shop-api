@@ -4,6 +4,8 @@ const {
     ACCOUNT_STATE,
 } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
+const { createUserNotification } = require('../services/notificationService');
+const { sendNotificationToTopic } = require('../ultil/firebaseServices');
 const {
     isValidInteger,
     selectData,
@@ -37,7 +39,14 @@ const confirmBooking = async (req, res) => {
     }
 
     try {
-        const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
+        const checkExistBooking = `
+         SELECT 
+            b.*,
+            s.name AS service_name
+        FROM ${TABLE_NAMES.bookings} AS b
+        JOIN ${TABLE_NAMES.services} AS s ON b.service_id = s.id
+        WHERE b.id = ?
+        `;
         const bookingsFound = await selectData(checkExistBooking, [
             req.params.booking_id,
         ]);
@@ -47,15 +56,15 @@ const confirmBooking = async (req, res) => {
             return;
         }
 
-        if (bookingsFound[0].status === BOOKING_STATE.accepted) {
-            sendResponse(
-                res,
-                STATUS_CODE.CONFLICT,
-                'booking has been already confirmed!'
-            );
+        // if (bookingsFound[0].status === BOOKING_STATE.accepted) {
+        //     sendResponse(
+        //         res,
+        //         STATUS_CODE.CONFLICT,
+        //         'booking has been already confirmed!'
+        //     );
 
-            return;
-        }
+        //     return;
+        // }
 
         const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?,pre_status = ?, staff_id = ?, note = ? WHERE id = ?`;
 
@@ -66,6 +75,12 @@ const confirmBooking = async (req, res) => {
             req.body.note,
             req.params.booking_id,
         ]);
+
+        const title = 'Xác nhận lịch hẹn';
+        const message = `Lịch hẹn ${bookingsFound[0].service_name} đã được xác nhận và sẽ được thực hiện đúng giờ. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`;
+        const userId = bookingsFound[0].user_id;
+        const ok = await createUserNotification(userId, title, message);
+        sendNotificationToTopic(title, message, `customer_${userId}`);
 
         sendResponse(res, STATUS_CODE.OK, 'booking confirmed successfully!');
     } catch (error) {

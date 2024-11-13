@@ -8,6 +8,9 @@ const {
     convertTimeToGMT7,
 } = require('../ultil/ultil.lib');
 
+const { createUserNotification } = require('../services/notificationService');
+const { sendNotificationToTopic } = require('../ultil/firebaseServices');
+
 const setBookingStatusToFixing = async (req, res) => {
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
@@ -27,7 +30,7 @@ const setBookingStatusToFixing = async (req, res) => {
         const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ? AND staff_id = ?`;
         const bookingsFound = await selectData(checkExistBooking, [
             req.params.booking_id,
-            req.params.staff_id,
+            req.tokenPayload.user_id,
         ]);
 
         if (bookingsFound.length === 0) {
@@ -66,14 +69,14 @@ const setBookingStatusToFixing = async (req, res) => {
             return;
         }
 
-        if (bookingsFound[0].status === BOOKING_STATE.fixing) {
-            sendResponse(
-                res,
-                STATUS_CODE.CONFLICT,
-                'booking has been already set to fixing status!'
-            );
-            return;
-        }
+        // if (bookingsFound[0].status === BOOKING_STATE.fixing) {
+        //     sendResponse(
+        //         res,
+        //         STATUS_CODE.CONFLICT,
+        //         'booking has been already set to fixing status!'
+        //     );
+        //     return;
+        // }
 
         const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, pre_status = ?, note = ? WHERE id = ?`;
         await excuteQuery(updateBooking, [
@@ -82,6 +85,13 @@ const setBookingStatusToFixing = async (req, res) => {
             req.body.note,
             req.params.booking_id,
         ]);
+
+        const title = 'Bắt đầu sửa chữa';
+        const message =
+            'Nhân viên đã bắt đầu sửa chữa. Vui lòng chờ trong giây lát!';
+        const userId = bookingsFound[0].user_id;
+        const ok = await createUserNotification(userId, title, message);
+        sendNotificationToTopic(title, message, `customer_${userId}`);
 
         sendResponse(
             res,

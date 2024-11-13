@@ -19,6 +19,8 @@ const {
     BOOKING_STATE,
     USER_ROLES,
 } = require('../configs/constants.config');
+const { createUserNotification } = require('../services/notificationService');
+const { sendNotificationToTopic } = require('../ultil/firebaseServices');
 
 const getBookingById = async (req, res) => {
     if (!req.params.booking_id) {
@@ -271,6 +273,24 @@ const createBooking = async (req, res) => {
 
         await executeTransaction(queries, params);
 
+        const services = await selectData(
+            'SELECT * FROM services WHERE id = ?',
+            [req.body.service_id]
+        );
+
+        const title = 'Tạo lịch hẹn thành công';
+        const message = `Lịch hẹn "${services[0].name}" đã được tạo thành công!`;
+        const ok = await createUserNotification(
+            req.tokenPayload.user_id,
+            title,
+            message
+        );
+        sendNotificationToTopic(
+            title,
+            message,
+            `user_${req.tokenPayload.user_id}`
+        );
+
         sendResponse(res, STATUS_CODE.OK, 'Created booking successfully!');
     } catch (error) {
         sendResponse(
@@ -437,7 +457,14 @@ const setBookingStatusToDone = async (req, res) => {
     }
 
     try {
-        const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
+        const checkExistBooking = `
+        SELECT 
+            b.*,
+            s.name AS service_name
+        FROM ${TABLE_NAMES.bookings} AS b
+        JOIN ${TABLE_NAMES.services} AS s ON b.service_id = s.id
+        WHERE b.id = ?
+        `;
         const bookingsFound = await selectData(checkExistBooking, [
             req.params.booking_id,
         ]);
@@ -469,14 +496,14 @@ const setBookingStatusToDone = async (req, res) => {
             return;
         }
 
-        if (bookingsFound[0].status === BOOKING_STATE.done) {
-            sendResponse(
-                res,
-                STATUS_CODE.CONFLICT,
-                'booking has been already set to done status!'
-            );
-            return;
-        }
+        // if (bookingsFound[0].status === BOOKING_STATE.done) {
+        //     sendResponse(
+        //         res,
+        //         STATUS_CODE.CONFLICT,
+        //         'booking has been already set to done status!'
+        //     );
+        //     return;
+        // }
 
         const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?, pre_status = ?, note = ? WHERE id = ?`;
         await excuteQuery(updateBooking, [
@@ -485,6 +512,12 @@ const setBookingStatusToDone = async (req, res) => {
             req.body.note,
             req.params.booking_id,
         ]);
+
+        const title = 'Quá trình sửa chữa hoàn tất!';
+        const message = `Nhân viên đã hoàn tất dịch vụ ${bookingsFound[0]?.service_name}`;
+        const userId = bookingsFound[0].user_id;
+        const ok = await createUserNotification(userId, title, message);
+        sendNotificationToTopic(title, message, `customer_${userId}`);
 
         sendResponse(
             res,
