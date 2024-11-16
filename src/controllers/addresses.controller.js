@@ -12,12 +12,7 @@ const getProvinces = async (req, res) => {
 
         const data = await selectData(query);
 
-        sendResponse(
-            res,
-            STATUS_CODE.OK,
-            (message = 'Get provinces successfully'),
-            data
-        );
+        sendResponse(res, STATUS_CODE.OK, 'Get provinces successfully', data);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -28,11 +23,7 @@ const getDistrictsByProvinceId = async (req, res) => {
         const { provinceId } = req.params;
 
         if (!isValidInteger(provinceId)) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                (message = 'Invalid provinceId')
-            );
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Invalid provinceId');
             return;
         }
 
@@ -45,12 +36,7 @@ const getDistrictsByProvinceId = async (req, res) => {
 
         const data = await selectData(query, [provinceId]);
 
-        sendResponse(
-            res,
-            STATUS_CODE.OK,
-            (message = 'Get districts successfully'),
-            data
-        );
+        sendResponse(res, STATUS_CODE.OK, 'Get districts successfully', data);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -61,11 +47,7 @@ const getWardsByDistrictId = async (req, res) => {
         const { districtId } = req.params;
 
         if (!isValidInteger(districtId)) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                (message = 'Invalid districtId')
-            );
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Invalid districtId');
 
             return;
         }
@@ -74,12 +56,7 @@ const getWardsByDistrictId = async (req, res) => {
 
         const data = await selectData(query, [districtId]);
 
-        sendResponse(
-            res,
-            STATUS_CODE.OK,
-            (message = 'Get wards successfully'),
-            data
-        );
+        sendResponse(res, STATUS_CODE.OK, 'Get wards successfully', data);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

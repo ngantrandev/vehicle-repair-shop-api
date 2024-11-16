@@ -81,7 +81,7 @@ const getUserById = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };
@@ -170,7 +170,7 @@ const createUser = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };
@@ -195,15 +195,6 @@ const updateUser = async (req, res) => {
 
         if (usersFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
-            return;
-        }
-
-        if (usersFound[0].active == ACCOUNT_STATE.deactive) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                'user account is deactivated!'
-            );
             return;
         }
 
@@ -240,6 +231,7 @@ const updateUser = async (req, res) => {
             'address_id',
             'phone',
             'role',
+            'active',
         ];
 
         const updateFields = [];
@@ -247,6 +239,7 @@ const updateUser = async (req, res) => {
 
         for (const field of possibleFields) {
             if (!req.body[field]) {
+                console.log('khong co field: '+ field);
                 continue;
             }
 
@@ -297,61 +290,12 @@ const updateUser = async (req, res) => {
             return;
         }
 
-        const querySelect = QUERY_SELECT_USER_BY_ID;
-        const updatedUsers = await selectData(querySelect, [
-            req.params.user_id,
-        ]);
-
-        const {
-            password,
-            address_id,
-            address_street,
-            address_latitude,
-            address_longitude,
-            ward_id,
-            ward_name,
-            district_id,
-            district_name,
-            province_id,
-            province_name,
-            ...other
-        } = updatedUsers[0];
-        other.created_at = convertTimeToGMT7(other.created_at);
-        other.birthday = convertDateToGMT7(other.birthday);
-
-        other.address =
-            address_id === null
-                ? null
-                : {
-                      id: address_id,
-                      street: address_street,
-                      latitude: address_latitude,
-                      longitude: address_longitude,
-                      ward: {
-                          id: ward_id,
-                          name: ward_name,
-                      },
-                      district: {
-                          id: district_id,
-                          name: district_name,
-                      },
-                      province: {
-                          id: province_id,
-                          name: province_name,
-                      },
-                  };
-
-        sendResponse(
-            res,
-            STATUS_CODE.OK,
-            'Updated user info successfully!',
-            other
-        );
+        sendResponse(res, STATUS_CODE.OK, 'Updated user info successfully!');
     } catch (error) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };
@@ -451,7 +395,7 @@ const deactivateUser = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Something went wrongs!' + error
         );
     }
 };
