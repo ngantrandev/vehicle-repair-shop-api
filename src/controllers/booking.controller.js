@@ -12,6 +12,7 @@ const {
     executeTransaction,
     getIdOfTheMostFreeStaff,
     getIdOfNearestStation,
+    convertDateToGMT7,
 } = require('../ultil/ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
@@ -21,6 +22,7 @@ const {
 } = require('../configs/constants.config');
 const { createUserNotification } = require('../services/notificationService');
 const { sendNotificationToTopic } = require('../ultil/firebaseServices');
+const { createInvoice } = require('../services/invoice.service');
 
 const getBookingById = async (req, res) => {
     if (!req.params.booking_id) {
@@ -298,8 +300,6 @@ const createBooking = async (req, res) => {
 };
 
 const cancelBooking = async (req, res) => {
-    console.log(req.params);
-    console.log(req.body);
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
         return;
@@ -456,9 +456,17 @@ const setBookingStatusToDone = async (req, res) => {
         const checkExistBooking = `
         SELECT 
             b.*,
-            s.name AS service_name
+            s.name AS service_name,
+            s.price AS service_price,
+            u.lastname AS user_lastname,
+            u.firstname AS user_firstname,
+            u.phone AS user_phone,
+            addr.full_address,
+            addr.address_name
         FROM ${TABLE_NAMES.bookings} AS b
         JOIN ${TABLE_NAMES.services} AS s ON b.service_id = s.id
+        JOIN ${TABLE_NAMES.users} AS u ON b.user_id = u.id
+        JOIN ${TABLE_NAMES.addresses} AS addr ON b.address_id = addr.id
         WHERE b.id = ?
         `;
         const bookingsFound = await selectData(checkExistBooking, [
@@ -509,11 +517,55 @@ const setBookingStatusToDone = async (req, res) => {
             req.params.booking_id,
         ]);
 
+        const {
+            user_phone,
+            user_firstname,
+            user_lastname,
+            address_name,
+            full_address,
+            service_name,
+            service_price,
+        } = bookingsFound[0];
+
+        const items = await selectData(
+            `
+            SELECT
+                i.id AS id,
+                i.name AS name,
+                i.price AS price,
+                COUNT(id) AS quantity
+            FROM ${TABLE_NAMES.booking_items} AS bi
+            JOIN ${TABLE_NAMES.items} AS i ON bi.item_id = i.id
+            WHERE bi.booking_id = ?
+            GROUP BY i.id, i.name, i.price  
+        `,
+            [req.params.booking_id]
+        );
+
+        const invoice = {
+            booking_id: req.params.booking_id,
+            full_address: address_name + ', ' + full_address,
+            items: items || [],
+            service: {
+                name: service_name,
+                price: service_price,
+            },
+            user: {
+                fullname: user_lastname + ' ' + user_firstname,
+                phone: user_phone,
+            },
+        };
+
+        await createInvoice(
+            invoice,
+            `invoice_${req.params.booking_id}_${convertDateToGMT7(new Date())}.pdf`
+        );
+
         const title = 'Quá trình sửa chữa hoàn tất!';
         const message = `Nhân viên đã hoàn tất dịch vụ ${bookingsFound[0]?.service_name}`;
         const userId = bookingsFound[0].user_id;
         await createUserNotification(userId, title, message);
-        sendNotificationToTopic(title, message, `customer_${userId}`);
+        await sendNotificationToTopic(title, message, `customer_${userId}`);
 
         sendResponse(
             res,

@@ -1,11 +1,6 @@
-const { TABLE_NAMES } = require('../configs/constants.config');
+const { TABLE_NAMES, BOOKING_STATE } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const {
-    isValidDate,
-    sendResponse,
-    selectData,
-    convertDateToGMT7,
-} = require('../ultil/ultil.lib');
+const { sendResponse, selectData } = require('../ultil/ultil.lib');
 
 const getRevenue = async (req, res) => {
     try {
@@ -64,26 +59,41 @@ const getRevenue = async (req, res) => {
 
         let groupClause = '';
         if (mode === 'day') {
-            groupClause = 'DATE_FORMAT(bookings.created_at, "%d-%m-%Y")';
+            groupClause = 'DATE_FORMAT(b.created_at, "%d-%m-%Y")';
         } else if (mode === 'month') {
-            groupClause = 'DATE_FORMAT(bookings.created_at, "%m-%Y")';
+            groupClause = 'DATE_FORMAT(b.created_at, "%m-%Y")';
         } else if (mode === 'year') {
-            groupClause = 'DATE_FORMAT(bookings.created_at, "%Y")';
+            groupClause = 'DATE_FORMAT(b.created_at, "%Y")';
         }
 
         const query = `
-            SELECT ${groupClause} AS date, SUM(services.price) AS revenue
-            FROM ${TABLE_NAMES.bookings}
-            JOIN services ON ${TABLE_NAMES.bookings}.service_id = services.id
-            WHERE DATE(${TABLE_NAMES.bookings}.created_at) BETWEEN ? AND ?
-            GROUP BY ${groupClause}
-            ORDER BY ${groupClause};
+            SELECT 
+                ${groupClause} AS date,
+                b.id AS booking_id,
+                b.created_at,
+                services.price AS service_price,
+                IFNULL(SUM(items.price), 0) AS total_item_price,
+                (services.price + IFNULL(SUM(items.price), 0)) AS total_price
+            FROM 
+                ${TABLE_NAMES.bookings} b
+            LEFT JOIN 
+                booking_items ON b.id = booking_items.booking_id
+            LEFT JOIN 
+                items ON booking_items.item_id = items.id
+            LEFT JOIN 
+                services ON b.service_id = services.id 
+            WHERE b.status = '${BOOKING_STATE.done}'
+            GROUP BY
+                b.id, services.price, ${groupClause}
+
         `;
 
         const data = await selectData(query, [start, end]);
 
         const revenueData = data.reduce((acc, item) => {
-            acc[item.date] = item.revenue;
+            const { date, total_price } = item;
+
+            acc[date] = (acc[date] || 0) + total_price;
             return acc;
         }, {});
 

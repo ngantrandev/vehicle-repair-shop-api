@@ -93,7 +93,6 @@ const confirmBooking = async (req, res) => {
 };
 
 const assignBookingToEmployee = async (req, res) => {
-    console.log(req.body);
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
         return;

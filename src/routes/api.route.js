@@ -10,9 +10,9 @@ const usersRoutes = require('../routes/users.route');
 const staffsRoutes = require('../routes/staffs.route');
 const stationsRoutes = require('../routes/stations.route');
 const addressesRoute = require('../routes/addresses.route');
-const bookingController = require('../controllers/booking.controller');
-const profileController = require('../controllers/profile.controller');
-const { upload } = require('../services/uploadImageService');
+const itemsRoute = require('../routes/items.route');
+const bookingsRoute = require('../routes/bookings.route');
+const profileRoute = require('../routes/profile.route');
 
 const apiRoute = express();
 
@@ -43,18 +43,10 @@ apiRoute.use('/address', addressesRoute);
 
 apiRoute.use('/stations', stationsRoutes);
 
-apiRoute.get(
-    '/bookings/:booking_id',
-    middlewareControllers.verifyToken,
-    bookingController.getBookingById
-);
+apiRoute.use('/items', itemsRoute);
 
-apiRoute.get('/profile/:username', profileController.getUserByUsername);
+apiRoute.use('/bookings', bookingsRoute);
 
-apiRoute.patch(
-    '/profile/:user_id',
-    upload.single('file'),
-    profileController.updateUserProfile
-);
+apiRoute.use('/profile', profileRoute);
 
 module.exports = apiRoute;

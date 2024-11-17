@@ -177,7 +177,7 @@ const updateUserProfile = async (req, res) => {
                 sendResponse(
                     res,
                     STATUS_CODE.INTERNAL_SERVER_ERROR,
-                    'cannot update user info at this time'
+                    'cannot update user info at this time' + error
                 );
                 return;
             }
@@ -213,7 +213,7 @@ const updateUserProfile = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Cannot update user profile at this time!'
+            'Cannot update user profile at this time!' + error
         );
     }
 };

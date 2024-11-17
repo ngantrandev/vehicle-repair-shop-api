@@ -2,6 +2,7 @@
 .env
 
 /uploads
+/invoices
 
 /logs
 *.log
