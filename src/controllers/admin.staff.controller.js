@@ -183,15 +183,6 @@ const updateStaff = async (req, res) => {
             return;
         }
 
-        if (staffsFound[0].active == ACCOUNT_STATE.deactive) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                'Staff account is deactivated!'
-            );
-            return;
-        }
-
         const possibleFields = [
             'username',
             'password',
@@ -301,7 +292,7 @@ const updateStaff = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Something went wrongs!' + error
         );
     }
 };

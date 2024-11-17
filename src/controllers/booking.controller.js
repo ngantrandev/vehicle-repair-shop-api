@@ -286,7 +286,7 @@ const createBooking = async (req, res) => {
         await sendNotificationToTopic(
             title,
             message,
-            `user_${req.tokenPayload.user_id}`
+            `${req.tokenPayload.role}_${req.tokenPayload.user_id}`
         );
 
         sendResponse(res, STATUS_CODE.OK, 'Created booking successfully!');
