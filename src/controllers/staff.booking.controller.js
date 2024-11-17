@@ -220,7 +220,7 @@ const getAllBookingAssignedToStaff = async (req, res) => {
 
             FROM ( SELECT *
                     FROM ${TABLE_NAMES.bookings}
-                    WHERE staff_id = ? ) AS b
+                    WHERE staff_id = ? AND status != '${BOOKING_STATE.pending}' ) AS b
             LEFT JOIN
                 ${TABLE_NAMES.services} AS s ON s.id = b.service_id
             LEFT JOIN
@@ -233,6 +233,7 @@ const getAllBookingAssignedToStaff = async (req, res) => {
                 ${TABLE_NAMES.service_stations} AS st ON st.id = stf.station_id
             LEFT JOIN
                 ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
+            ORDER BY created_at DESC
         `;
 
         const bookings = await selectData(query, [req.tokenPayload.user_id]);

@@ -283,7 +283,7 @@ const createBooking = async (req, res) => {
         const title = 'Tạo lịch hẹn thành công';
         const message = `Lịch hẹn "${services[0].name}" đã được tạo thành công!`;
         await createUserNotification(req.tokenPayload.user_id, title, message);
-        sendNotificationToTopic(
+        await sendNotificationToTopic(
             title,
             message,
             `user_${req.tokenPayload.user_id}`
