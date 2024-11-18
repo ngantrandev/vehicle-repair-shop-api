@@ -1,4 +1,4 @@
-const { createPool, createConnection } = require('mysql');
+const { createPool } = require('mysql');
 
 // const pool = createPool({
 //     post: process.env.DB_PORT,

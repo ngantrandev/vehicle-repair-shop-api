@@ -239,7 +239,7 @@ const updateUser = async (req, res) => {
 
         for (const field of possibleFields) {
             if (!req.body[field]) {
-                console.log('khong co field: '+ field);
+                console.log('khong co field: ' + field);
                 continue;
             }
 
