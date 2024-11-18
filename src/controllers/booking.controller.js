@@ -387,16 +387,22 @@ const undoBooking = async (req, res) => {
 
     try {
         let where = '';
+        const args = [];
 
         if (req.tokenPayload.role === USER_ROLES.customer) {
             where = `WHERE id = ? AND user_id = ?`;
+            args.push(req.params.booking_id);
+            args.push(req.tokenPayload.user_id);
         } else if (req.tokenPayload.role === USER_ROLES.admin) {
             where = `WHERE id = ?`;
+            args.push(req.params.booking_id);
         }
 
         const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} ${where}`;
 
-        const bookings = await selectData(selectQuery, [req.params.booking_id]);
+        console.log(selectQuery);
+
+        const bookings = await selectData(selectQuery, args);
 
         if (bookings.length === 0) {
             sendResponse(
