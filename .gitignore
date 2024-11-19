@@ -4,5 +4,7 @@
 /uploads
 /invoices
 
+fcm.serviceaccount.key.json
+
 /logs
 *.log
