@@ -165,6 +165,8 @@ const updateService = async (req, res) => {
 
         let fileName = '';
         let relativePath = ''; /** path from root dir to image */
+        const updateFields = [];
+        const updateValues = [];
 
         if (req.file) {
             const buffer = req.file.buffer;
@@ -173,6 +175,9 @@ const updateService = async (req, res) => {
 
             try {
                 await sharp(buffer).webp({ quality: 20 }).toFile(relativePath);
+
+                updateFields.push('image_url = ?');
+                updateValues.push(relativePath);
             } catch (error) {
                 sendResponse(
                     res,
@@ -182,9 +187,6 @@ const updateService = async (req, res) => {
                 return;
             }
         }
-
-        const updateFields = [];
-        const updateValues = [];
 
         for (const field of possibleFields) {
             if (!req.body[field]) {
@@ -202,9 +204,6 @@ const updateService = async (req, res) => {
                 updateValues.push(req.body[field]);
             }
         }
-
-        updateFields.push('image_url = ?');
-        updateValues.push(relativePath);
 
         if (updateFields.length === 0) {
             sendResponse(res, STATUS_CODE.BAD_REQUEST, 'No fields to update');
@@ -308,7 +307,7 @@ const deleteService = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Something went wrongs!' + error
         );
     }
 };
