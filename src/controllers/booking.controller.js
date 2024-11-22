@@ -400,8 +400,6 @@ const undoBooking = async (req, res) => {
 
         const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} ${where}`;
 
-        console.log(selectQuery);
-
         const bookings = await selectData(selectQuery, args);
 
         if (bookings.length === 0) {

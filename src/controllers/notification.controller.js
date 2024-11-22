@@ -1,4 +1,4 @@
-const { TABLE_NAMES } = require('../configs/constants.config');
+const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
 const {
     sendResponse,
@@ -14,7 +14,7 @@ const userGetAllNotifications = async (req, res) => {
                 res.is_read
 
             FROM (
-                SELECT * FROM ${TABLE_NAMES.user_notifications} WHERE user_id = ?
+                SELECT * FROM ${TABLE_NAMES.notifications_users} WHERE user_id = ? AND recipient_type = '${USER_ROLES.customer}'
             ) AS res
             INNER JOIN ${TABLE_NAMES.notifications} AS noti ON noti.id = res.notification_id
             ORDER BY noti.date DESC
@@ -45,9 +45,9 @@ const userGetAllNotifications = async (req, res) => {
 const userMarkNotificationAsRead = async (req, res) => {
     try {
         const query = `
-            UPDATE ${TABLE_NAMES.user_notifications}
+            UPDATE ${TABLE_NAMES.notifications_users}
             SET is_read = 1
-            WHERE notification_id = ? AND user_id = ?
+            WHERE notification_id = ? AND user_id = ? AND recipient_type = '${USER_ROLES.customer}'
         `;
 
         await selectData(query, [
@@ -70,7 +70,7 @@ const userMarkAllNotificationsAsRead = async (req, res) => {
         const query = `
             UPDATE ${TABLE_NAMES.user_notifications}
             SET is_read = 1
-            WHERE user_id = ? AND is_read = 0
+            WHERE user_id = ? AND is_read = 0 AND recipient_type = '${USER_ROLES.customer}'
         `;
 
         await selectData(query, [req.tokenPayload.user_id]);
@@ -93,7 +93,7 @@ const staffGetAllNotifications = async (req, res) => {
                 res.is_read
 
             FROM (
-                SELECT * FROM ${TABLE_NAMES.staff_notifications} WHERE staff_id = ?
+                SELECT * FROM ${TABLE_NAMES.notifications_users} WHERE user_id = ? AND recipient_type = '${USER_ROLES.staff}'
             ) AS res
             INNER JOIN ${TABLE_NAMES.notifications} AS noti ON noti.id = res.notification_id
             ORDER BY noti.date DESC
@@ -124,9 +124,9 @@ const staffGetAllNotifications = async (req, res) => {
 const staffMarkNotificationAsRead = async (req, res) => {
     try {
         const query = `
-            UPDATE ${TABLE_NAMES.staff_notifications}
+            UPDATE ${TABLE_NAMES.notifications_users}
             SET is_read = 1
-            WHERE notification_id = ? AND staff_id = ?
+            WHERE notification_id = ? AND user_id = ? AND recipient_type = '${USER_ROLES.staff}'
         `;
 
         await selectData(query, [
@@ -147,9 +147,9 @@ const staffMarkNotificationAsRead = async (req, res) => {
 const staffMarkAllNotificationsAsRead = async (req, res) => {
     try {
         const query = `
-            UPDATE ${TABLE_NAMES.staff_notifications}
+            UPDATE ${TABLE_NAMES.notifications_users}
             SET is_read = 1
-            WHERE staff_id = ? AND is_read = 0
+            WHERE user_id = ? AND is_read = 0 AND recipient_type = '${USER_ROLES.staff}'
         `;
 
         await selectData(query, [req.tokenPayload.user_id]);

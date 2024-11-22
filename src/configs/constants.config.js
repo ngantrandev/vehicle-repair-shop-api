@@ -19,8 +19,7 @@ const TABLE_NAMES = {
     districts: 'districts',
     provinces: 'provinces',
     notifications: 'notifications',
-    user_notifications: 'user_notifications',
-    staff_notifications: 'staff_notifications',
+    notifications_users: 'notifications_users',
     items: 'items',
     booking_items: 'booking_items',
 };
