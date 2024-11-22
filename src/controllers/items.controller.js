@@ -30,7 +30,7 @@ const addItemToBooking = async (req, res) => {
         }
 
         const query = `
-            INSERT INTO ${TABLE_NAMES.booking_items} (item_id, booking_id)
+            INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id)
             VALUES (?, ?)
         `;
 
@@ -56,7 +56,7 @@ const removeItemFromBooking = async (req, res) => {
         }
 
         const query = `
-            DELETE FROM ${TABLE_NAMES.booking_items}
+            DELETE FROM ${TABLE_NAMES.bookings_items}
             WHERE item_id = ? AND booking_id = ?
             LIMIT 1
         `;
@@ -73,7 +73,7 @@ const removeItemFromBooking = async (req, res) => {
     }
 };
 
-const getBookingItems = async (req, res) => {
+const getAllItemOfBooking = async (req, res) => {
     try {
         const { booking_id: bookingId } = req.query;
 
@@ -89,7 +89,7 @@ const getBookingItems = async (req, res) => {
                 i.price,
                 i.image_url,
                 COUNT(i.id) as quantity
-            FROM ${TABLE_NAMES.booking_items} bi
+            FROM ${TABLE_NAMES.bookings_items} bi
             JOIN ${TABLE_NAMES.items} i ON bi.item_id = i.id
             WHERE bi.booking_id = ?
             GROUP BY i.id, i.name, i.price
@@ -108,9 +108,103 @@ const getBookingItems = async (req, res) => {
     }
 };
 
+const addItemToService = async (req, res) => {
+    try {
+        const { item_id: itemId, service_id: serviceId } = req.body;
+
+        if (!itemId || !serviceId) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                'Missing item_id or service_id'
+            );
+            return;
+        }
+
+        const query = `
+            INSERT INTO ${TABLE_NAMES.services_items} (item_id, service_id)
+            VALUES (?, ?)
+        `;
+
+        await excuteQuery(query, [itemId, serviceId]);
+
+        sendResponse(res, STATUS_CODE.OK, 'Add item to service successfully');
+    } catch (error) {
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
+const removeItemFromService = async (req, res) => {
+    try {
+        const { item_id: itemId, service_id: serviceId } = req.body;
+
+        if (!itemId || !serviceId) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                'Missing item_id or service_id'
+            );
+            return;
+        }
+
+        const query = `
+            DELETE FROM ${TABLE_NAMES.services_items}
+            WHERE item_id = ? AND service_id = ?
+            LIMIT 1
+        `;
+
+        await excuteQuery(query, [itemId, serviceId]);
+
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Remove item from service successfully'
+        );
+    } catch (error) {
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
+const getAllItemOfService = async (req, res) => {
+    try {
+        const { service_id: serviceId } = req.query;
+
+        if (!serviceId) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing service_id');
+            return;
+        }
+
+        const query = `
+            SELECT
+                i.id,
+                i.name,
+                i.price,
+                i.image_url
+            FROM ${TABLE_NAMES.services_items} si
+            JOIN ${TABLE_NAMES.items} i ON si.item_id = i.id
+            WHERE si.service_id = ?
+            GROUP BY i.id, i.name, i.price
+        `;
+
+        const items = await selectData(query, [serviceId]);
+
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Get service items successfully',
+            items
+        );
+    } catch (error) {
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
 module.exports = {
     getAllItem,
     addItemToBooking,
     removeItemFromBooking,
-    getBookingItems,
+    getAllItemOfBooking,
+    addItemToService,
+    removeItemFromService,
+    getAllItemOfService,
 };

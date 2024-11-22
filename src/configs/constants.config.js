@@ -21,7 +21,8 @@ const TABLE_NAMES = {
     notifications: 'notifications',
     notifications_users: 'notifications_users',
     items: 'items',
-    booking_items: 'booking_items',
+    bookings_items: 'bookings_items',
+    services_items: 'services_items',
 };
 
 const USER_ROLES = {

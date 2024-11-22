@@ -77,9 +77,9 @@ const getRevenue = async (req, res) => {
             FROM 
                 ${TABLE_NAMES.bookings} b
             LEFT JOIN 
-                booking_items ON b.id = booking_items.booking_id
+                ${TABLE_NAMES.bookings_items} AS bi ON b.id = bi.booking_id
             LEFT JOIN 
-                items ON booking_items.item_id = items.id
+                items ON bi.item_id = items.id
             LEFT JOIN 
                 services ON b.service_id = services.id 
             WHERE b.status = '${BOOKING_STATE.done}'

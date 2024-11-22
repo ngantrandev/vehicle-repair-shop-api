@@ -538,7 +538,7 @@ const setBookingStatusToDone = async (req, res) => {
                 i.name AS name,
                 i.price AS price,
                 COUNT(id) AS quantity
-            FROM ${TABLE_NAMES.booking_items} AS bi
+            FROM ${TABLE_NAMES.bookings_items} AS bi
             JOIN ${TABLE_NAMES.items} AS i ON bi.item_id = i.id
             WHERE bi.booking_id = ?
             GROUP BY i.id, i.name, i.price  
