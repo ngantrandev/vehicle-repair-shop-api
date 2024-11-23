@@ -179,6 +179,8 @@ const getBookingById = async (req, res) => {
     }
 };
 const createBooking = async (req, res) => {
+    const { items } = req.body;
+
     /**VALIDATE VALUE */
     if (!req.body.service_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, `service_id is required`);
@@ -273,7 +275,25 @@ const createBooking = async (req, res) => {
             ],
         ];
 
-        await executeTransaction(queries, params);
+        const transactionRes = await executeTransaction(queries, params);
+
+        const bookingId = transactionRes[2].insertId;
+
+        if (items && items.length > 0) {
+            const args = [];
+            const addItemToBookingQuery = `
+                INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id) VALUES 
+                ${items
+                    .map((item) => {
+                        args.push(item);
+                        args.push(bookingId);
+                        return '(?, ?)';
+                    })
+                    .join(', ')}
+            `;
+
+            await excuteQuery(addItemToBookingQuery, args);
+        }
 
         const services = await selectData(
             'SELECT * FROM services WHERE id = ?',

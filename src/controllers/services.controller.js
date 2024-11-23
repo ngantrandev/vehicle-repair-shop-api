@@ -79,7 +79,7 @@ const getAllServices = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrongs!'
+            'something went wrongs!' + error
         );
     }
 };

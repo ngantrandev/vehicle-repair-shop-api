@@ -122,7 +122,7 @@ const addItemToService = async (req, res) => {
         }
 
         const query = `
-            INSERT INTO ${TABLE_NAMES.services_items} (item_id, service_id)
+            REPLACE INTO ${TABLE_NAMES.services_items} (item_id, service_id)
             VALUES (?, ?)
         `;
 

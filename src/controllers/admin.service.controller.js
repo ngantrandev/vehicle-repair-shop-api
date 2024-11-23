@@ -10,6 +10,7 @@ const {
     excuteQuery,
     selectData,
     sendResponse,
+    executeTransaction,
 } = require('../ultil/ultil.lib');
 
 const createService = async (req, res) => {
@@ -113,6 +114,8 @@ const createService = async (req, res) => {
 };
 
 const updateService = async (req, res) => {
+    const { items } = req.body;
+
     if (!req.params.service_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'service_id is required');
         return;
@@ -220,6 +223,28 @@ const updateService = async (req, res) => {
             ...updateValues,
             req.params.service_id,
         ]);
+
+        if (items && items.length > 0) {
+            const args = [];
+            const updateServiceItemsQuery = `
+                INSERT INTO ${TABLE_NAMES.services_items} (item_id, service_id) VALUES 
+                ${items
+                    .map((item) => {
+                        args.push(item);
+                        args.push(req.params.service_id);
+                        return '(?, ?)';
+                    })
+                    .join(', ')}
+            `;
+
+            await executeTransaction(
+                [
+                    ` DELETE FROM ${TABLE_NAMES.services_items} WHERE service_id = ${req.params.service_id}`,
+                    updateServiceItemsQuery,
+                ],
+                [[], args]
+            );
+        }
 
         if (!result) {
             sendResponse(
