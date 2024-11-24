@@ -4,13 +4,18 @@ const {
     ACCOUNT_STATE,
 } = require('../configs/constants.config');
 const { STATUS_CODE } = require('../configs/status.codes.config');
-const { createUserNotification } = require('../services/notificationService');
+const {
+    createUserNotification,
+    createStaffNotification,
+} = require('../services/notificationService');
 const { sendNotificationToTopic } = require('../ultil/firebaseServices');
 const {
     isValidInteger,
     selectData,
     excuteQuery,
     sendResponse,
+    getIdOfNearestStation,
+    getIdOfTheMostFreeStaff,
 } = require('../ultil/ultil.lib');
 
 const confirmBooking = async (req, res) => {
@@ -28,12 +33,12 @@ const confirmBooking = async (req, res) => {
         return;
     }
 
-    if (!req.body.employee_id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
-        return;
-    }
+    // if (!req.body.employee_id) {
+    //     sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
+    //     return;
+    // }
 
-    if (!isValidInteger(req.body.employee_id)) {
+    if (req.body.employee_id && !isValidInteger(req.body.employee_id)) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id must be integer');
         return;
     }
@@ -42,9 +47,12 @@ const confirmBooking = async (req, res) => {
         const checkExistBooking = `
          SELECT 
             b.*,
-            s.name AS service_name
+            s.name AS service_name,
+            addr.latitude AS address_latitude,
+            addr.longitude AS address_longitude
         FROM ${TABLE_NAMES.bookings} AS b
         JOIN ${TABLE_NAMES.services} AS s ON b.service_id = s.id
+        INNER JOIN ${TABLE_NAMES.addresses} AS addr ON b.address_id = addr.id
         WHERE b.id = ?
         `;
         const bookingsFound = await selectData(checkExistBooking, [
@@ -66,13 +74,22 @@ const confirmBooking = async (req, res) => {
         //     return;
         // }
 
-        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?,pre_status = ?, staff_id = ?, note = ? WHERE id = ?`;
+        /** auto choose staffid if user give latitude and longitude */
+        const stationId = await getIdOfNearestStation(
+            bookingsFound[0].address_latitude,
+            bookingsFound[0].address_longitude
+        );
+
+        const staffId = await getIdOfTheMostFreeStaff(stationId);
+
+        const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?,pre_status = ?, staff_id = ?, note = ?, staff_id = ? WHERE id = ?`;
 
         await excuteQuery(updateBooking, [
             BOOKING_STATE.accepted,
             BOOKING_STATE.accepted,
             req.body.employee_id,
             req.body.note,
+            staffId,
             req.params.booking_id,
         ]);
 
@@ -80,7 +97,23 @@ const confirmBooking = async (req, res) => {
         const message = `Lịch hẹn ${bookingsFound[0].service_name} đã được xác nhận và sẽ được thực hiện đúng giờ. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`;
         const userId = bookingsFound[0].user_id;
         await createUserNotification(userId, title, message);
-        sendNotificationToTopic(title, message, `customer_${userId}`);
+        await sendNotificationToTopic(title, message, `customer_${userId}`);
+
+        if (staffId) {
+            const staffNotiTitle = 'Bạn có nhiệm vụ mới';
+            const staffMessage = `Bạn có lịch hẹn ${bookingsFound[0].service_name} mới cần thực hiện!`;
+            await createStaffNotification(
+                staffId,
+                staffNotiTitle,
+                staffMessage
+            );
+
+            await sendNotificationToTopic(
+                staffNotiTitle,
+                staffMessage,
+                `staff_${staffId}`
+            );
+        }
 
         sendResponse(res, STATUS_CODE.OK, 'booking confirmed successfully!');
     } catch (error) {

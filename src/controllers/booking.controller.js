@@ -10,8 +10,6 @@ const {
     getCurrentTimeInGMT7,
     isValidDouble,
     executeTransaction,
-    getIdOfTheMostFreeStaff,
-    getIdOfNearestStation,
     convertDateToGMT7,
 } = require('../ultil/ultil.lib');
 const { STATUS_CODE } = require('../configs/status.codes.config');
@@ -239,18 +237,10 @@ const createBooking = async (req, res) => {
             }
         }
 
-        /** auto choose staffid if user give latitude and longitude */
-        const stationId = await getIdOfNearestStation(
-            req.body.latitude,
-            req.body.longitude
-        );
-
-        const staffId = await getIdOfTheMostFreeStaff(stationId);
-
         const queries = [
             `INSERT INTO ${TABLE_NAMES.addresses} (latitude, longitude, place_id, address_name, full_address) VALUES (?, ?, ?, ?, ?);`,
             'SET @address_id = LAST_INSERT_ID();',
-            `INSERT INTO ${TABLE_NAMES.bookings} (service_id, note, user_id, created_at, modified_at, address_id, status, staff_id, image_url) VALUES (?, ?, ?, ?, ?, @address_id, ?, ?, ?);`,
+            `INSERT INTO ${TABLE_NAMES.bookings} (service_id, note, user_id, created_at, modified_at, address_id, status, image_url) VALUES (?, ?, ?, ?, ?, @address_id, ?, ?);`,
         ];
         const createdTime = getCurrentTimeInGMT7();
 
@@ -270,7 +260,6 @@ const createBooking = async (req, res) => {
                 createdTime,
                 createdTime,
                 BOOKING_STATE.pending,
-                staffId ? staffId.toString() : null,
                 relativePath,
             ],
         ];
