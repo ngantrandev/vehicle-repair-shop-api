@@ -3,13 +3,13 @@ const {
     USER_ROLES,
     TABLE_NAMES,
     ACCOUNT_STATE,
-} = require('../configs/constants.config');
+} = require('@/src/configs/constants.config');
 const {
     selectData,
     isValidInteger,
     sendResponse,
-} = require('../ultil/ultil.lib');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+} = require('@/src/ultil/ultil.lib');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const verifyToken = (req, res, next) => {
     const token = req.headers.token;

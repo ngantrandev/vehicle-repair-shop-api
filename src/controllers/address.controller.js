@@ -1,6 +1,6 @@
-const { STATUS_CODE } = require('../configs/status.codes.config');
-const goongServices = require('../services/goongServices');
-const { sendResponse, decodePolyline } = require('../ultil/ultil.lib');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+const goongServices = require('@/src/services/goongServices');
+const { sendResponse, decodePolyline } = require('@/src/ultil/ultil.lib');
 
 const autocompleteAddress = async (req, res) => {
     try {

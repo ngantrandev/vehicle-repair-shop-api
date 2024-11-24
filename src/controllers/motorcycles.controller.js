@@ -1,6 +1,6 @@
-const { TABLE_NAMES } = require('../configs/constants.config');
-const { selectData, sendResponse } = require('../ultil/ultil.lib');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+const { TABLE_NAMES } = require('@/src/configs/constants.config');
+const { selectData, sendResponse } = require('@/src/ultil/ultil.lib');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const getAllMotorcycles = async (req, res) => {
     try {

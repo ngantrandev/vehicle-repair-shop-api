@@ -1,12 +1,15 @@
-const { TABLE_NAMES, ACCOUNT_STATE } = require('../configs/constants.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+const {
+    TABLE_NAMES,
+    ACCOUNT_STATE,
+} = require('@/src/configs/constants.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     sendResponse,
     selectData,
     isValidInteger,
     executeTransaction,
     excuteQuery,
-} = require('../ultil/ultil.lib');
+} = require('@/src/ultil/ultil.lib');
 
 const getAllServiceStations = async (req, res) => {
     try {

@@ -1,5 +1,8 @@
-const { TABLE_NAMES, BOOKING_STATE } = require('../configs/constants.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+const {
+    TABLE_NAMES,
+    BOOKING_STATE,
+} = require('@/src/configs/constants.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     sendResponse,
     isValidInteger,
@@ -9,7 +12,7 @@ const {
     executeTransaction,
     getIdOfNearestStation,
     getIdOfTheMostFreeStaff,
-} = require('../ultil/ultil.lib');
+} = require('@/src/ultil/ultil.lib');
 
 const createCart = async (req, res) => {
     const requiredFields = ['service_id'];

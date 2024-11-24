@@ -1,6 +1,9 @@
-const { TABLE_NAMES, BOOKING_STATE } = require('../configs/constants.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
-const { sendResponse, selectData } = require('../ultil/ultil.lib');
+const {
+    TABLE_NAMES,
+    BOOKING_STATE,
+} = require('@/src/configs/constants.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+const { sendResponse, selectData } = require('@/src/ultil/ultil.lib');
 
 const getRevenue = async (req, res) => {
     try {

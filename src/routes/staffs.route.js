@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const bookingController = require('../controllers/booking.controller');
-const staffBookingController = require('../controllers/staff.booking.controller');
-const notificationController = require('../controllers/notification.controller');
+const bookingController = require('@/src/controllers/booking.controller');
+const staffBookingController = require('@/src/controllers/staff.booking.controller');
+const notificationController = require('@/src/controllers/notification.controller');
 
 router.get('/bookings', staffBookingController.getAllBookingAssignedToStaff);
 

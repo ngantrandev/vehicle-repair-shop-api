@@ -3,8 +3,8 @@ const router = require('express').Router();
 const {
     getBookingById,
     undoBooking,
-} = require('../controllers/booking.controller');
-const { verifyToken } = require('../middlewares/verify.middleware');
+} = require('@/src/controllers/booking.controller');
+const { verifyToken } = require('@/src/middlewares/verify.middleware');
 
 router.get('/:booking_id', verifyToken, getBookingById);
 

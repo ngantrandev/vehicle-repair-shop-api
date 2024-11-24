@@ -1,6 +1,9 @@
-const { TABLE_NAMES, ACCOUNT_STATE } = require('../configs/constants.config');
-const { QUERY_SELECT_STAFF_BY_ID } = require('../configs/queries.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+const {
+    TABLE_NAMES,
+    ACCOUNT_STATE,
+} = require('@/src/configs/constants.config');
+const { QUERY_SELECT_STAFF_BY_ID } = require('@/src/configs/queries.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     selectData,
     isValidInteger,
@@ -10,7 +13,7 @@ const {
     getCurrentTimeInGMT7,
     excuteQuery,
     sendResponse,
-} = require('../ultil/ultil.lib');
+} = require('@/src/ultil/ultil.lib');
 
 const getStaffById = async (req, res) => {
     if (!req.params.staff_id) {

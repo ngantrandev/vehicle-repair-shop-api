@@ -8,7 +8,7 @@ const {
     addItemToService,
     removeItemFromService,
     getAllItemOfService,
-} = require('../controllers/items.controller');
+} = require('@/src/controllers/items.controller');
 
 router.get('/', getAllItem);
 

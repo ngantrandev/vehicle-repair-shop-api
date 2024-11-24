@@ -1,5 +1,5 @@
-const adminStaffsController = require('../controllers/admin.staffs.controller');
-const adminStaffController = require('../controllers/admin.staff.controller');
+const adminStaffsController = require('@/src/controllers/admin.staffs.controller');
+const adminStaffController = require('@/src/controllers/admin.staff.controller');
 
 const router = require('express').Router();
 

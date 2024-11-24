@@ -3,13 +3,13 @@ const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
 const polyline = require('@mapbox/polyline');
 
-const pool = require('../configs/db.config');
+const pool = require('@/src/configs/db.config');
 const {
     BOOKING_STATE,
     TABLE_NAMES,
     ACCOUNT_STATE,
-} = require('../configs/constants.config');
-const goongServices = require('../services/goongServices');
+} = require('@/src/configs/constants.config');
+const goongServices = require('@/src/services/goongServices');
 
 const executeTransaction = async (queries, listParamArray) => {
     if (queries.length !== listParamArray.length) {

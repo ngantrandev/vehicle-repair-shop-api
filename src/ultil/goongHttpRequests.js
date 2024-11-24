@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const httpRequest = axios.create({
     baseURL: process.env.GOONG_MAP_BASE_API_ENPOINT,

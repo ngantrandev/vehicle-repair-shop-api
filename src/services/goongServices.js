@@ -1,5 +1,5 @@
-const { STATUS_CODE } = require('../configs/status.codes.config');
-const goongHttpRequests = require('../ultil/goongHttpRequests');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+const goongHttpRequests = require('@/src/ultil/goongHttpRequests');
 
 const getDistanceMatrixFromUserAddrToOtherStations = async (
     origins,

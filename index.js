@@ -8,8 +8,8 @@ const fs = require('fs');
 dotenv.config();
 const app = express();
 
-const apiRoute = require('~/routes/api.route');
-const { BASE_URL_PATH, APP_NAME } = require('~/configs/constants.config');
+const apiRoute = require('@/src/routes/api.route');
+const { BASE_URL_PATH, APP_NAME } = require('@/src/configs/constants.config');
 
 app.use(cors());
 app.use(morgan('common'));

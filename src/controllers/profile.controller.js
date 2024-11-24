@@ -1,8 +1,8 @@
 const path = require('path');
 const sharp = require('sharp');
 
-const { TABLE_NAMES } = require('../configs/constants.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+const { TABLE_NAMES } = require('@/src/configs/constants.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     sendResponse,
     selectData,
@@ -10,8 +10,10 @@ const {
     isValidInteger,
     convertTimeToGMT7,
     convertDateToGMT7,
-} = require('../ultil/ultil.lib');
-const { QUERY_SELECT_USER_BY_USERNAME } = require('../configs/queries.config');
+} = require('@/src/ultil/ultil.lib');
+const {
+    QUERY_SELECT_USER_BY_USERNAME,
+} = require('@/src/configs/queries.config');
 
 const getUserByUsername = async (req, res) => {
     if (!req.params.username) {

@@ -1,6 +1,6 @@
-const bookingController = require('../controllers/booking.controller');
-const bookingsController = require('../controllers/bookings.controller');
-const adminBookingController = require('../controllers/admin.booking.controller');
+const bookingController = require('@/src/controllers/booking.controller');
+const bookingsController = require('@/src/controllers/bookings.controller');
+const adminBookingController = require('@/src/controllers/admin.booking.controller');
 
 const router = require('express').Router();
 

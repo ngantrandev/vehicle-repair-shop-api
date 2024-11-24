@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
-const motorcycleController = require('../controllers/motorcycle.controller');
-const motorcyclesController = require('../controllers/motorcycles.controller');
+const motorcycleController = require('@/src/controllers/motorcycle.controller');
+const motorcyclesController = require('@/src/controllers/motorcycles.controller');
 
 router.get('/', motorcyclesController.getAllMotorcycles);
 

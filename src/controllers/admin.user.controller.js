@@ -2,9 +2,9 @@ const {
     TABLE_NAMES,
     USER_ROLES,
     ACCOUNT_STATE,
-} = require('../configs/constants.config');
-const { QUERY_SELECT_USER_BY_ID } = require('../configs/queries.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+} = require('@/src/configs/constants.config');
+const { QUERY_SELECT_USER_BY_ID } = require('@/src/configs/queries.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     selectData,
     excuteQuery,
@@ -14,7 +14,7 @@ const {
     hashPassWord,
     isValidInteger,
     sendResponse,
-} = require('../ultil/ultil.lib');
+} = require('@/src/ultil/ultil.lib');
 
 const getUserById = async (req, res) => {
     if (!req.params.user_id) {

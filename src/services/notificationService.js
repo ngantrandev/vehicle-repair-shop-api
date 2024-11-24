@@ -1,5 +1,8 @@
-const { TABLE_NAMES, USER_ROLES } = require('../configs/constants.config');
-const { convertTimeToGMT7, executeTransaction } = require('../ultil/ultil.lib');
+const { TABLE_NAMES, USER_ROLES } = require('@/src/configs/constants.config');
+const {
+    convertTimeToGMT7,
+    executeTransaction,
+} = require('@/src/ultil/ultil.lib');
 
 const createUserNotification = async (userId, title, message) => {
     try {
@@ -53,7 +56,7 @@ const createStaffNotification = async (staffId, title, message) => {
         console.log('send message error', error);
         return false;
     }
-}
+};
 
 module.exports = {
     createUserNotification,

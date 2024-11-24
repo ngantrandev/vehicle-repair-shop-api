@@ -5,7 +5,7 @@
             "module-resolver",
             {
                 "alias": {
-                    "~": "./src",
+                    "@": "./",
                     "@utils": "./src/utils",
                     "@models": "./src/models"
                 }

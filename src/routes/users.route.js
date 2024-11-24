@@ -1,12 +1,12 @@
 const router = require('express').Router();
 
-const cartsController = require('../controllers/carts.controller');
-const bookingController = require('../controllers/booking.controller');
-const bookingsController = require('../controllers/bookings.controller');
-const middlewareControllers = require('../middlewares/verify.middleware');
-const cartController = require('../controllers/cart.controller');
-const uploadImgService = require('../services/uploadImageService');
-const notificationController = require('../controllers/notification.controller');
+const cartsController = require('@/src/controllers/carts.controller');
+const bookingController = require('@/src/controllers/booking.controller');
+const bookingsController = require('@/src/controllers/bookings.controller');
+const middlewareControllers = require('@/src/middlewares/verify.middleware');
+const cartController = require('@/src/controllers/cart.controller');
+const uploadImgService = require('@/src/services/uploadImageService');
+const notificationController = require('@/src/controllers/notification.controller');
 
 router.get(
     '/:user_id/carts',

@@ -2,13 +2,13 @@ const {
     BOOKING_STATE,
     TABLE_NAMES,
     ACCOUNT_STATE,
-} = require('../configs/constants.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+} = require('@/src/configs/constants.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     createUserNotification,
     createStaffNotification,
-} = require('../services/notificationService');
-const { sendNotificationToTopic } = require('../ultil/firebaseServices');
+} = require('@/src/services/notificationService');
+const { sendNotificationToTopic } = require('@/src/ultil/firebaseServices');
 const {
     isValidInteger,
     selectData,
@@ -16,7 +16,7 @@ const {
     sendResponse,
     getIdOfNearestStation,
     getIdOfTheMostFreeStaff,
-} = require('../ultil/ultil.lib');
+} = require('@/src/ultil/ultil.lib');
 
 const confirmBooking = async (req, res) => {
     if (!req.params.booking_id) {

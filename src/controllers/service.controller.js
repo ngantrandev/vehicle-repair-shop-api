@@ -1,10 +1,10 @@
-const { QUERY_SELECT_SERVICE_BY_ID } = require('../configs/queries.config');
+const { QUERY_SELECT_SERVICE_BY_ID } = require('@/src/configs/queries.config');
 const {
     selectData,
     isValidInteger,
     sendResponse,
-} = require('../ultil/ultil.lib');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+} = require('@/src/ultil/ultil.lib');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const getServiceById = async (req, res) => {
     if (!req.params.service_id) {

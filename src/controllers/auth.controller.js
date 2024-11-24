@@ -2,9 +2,12 @@ const {
     TABLE_NAMES,
     USER_ROLES,
     ACCOUNT_STATE,
-} = require('../configs/constants.config');
-const { QUERY_SELECT_USER_BY_USERNAME } = require('../configs/queries.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+} = require('@/src/configs/constants.config');
+const {
+    QUERY_SELECT_USER_BY_USERNAME,
+} = require('@/src/configs/queries.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+
 const {
     selectData,
     comparePassWord,
@@ -15,30 +18,29 @@ const {
     convertDateToGMT7,
     generateJWT,
     sendResponse,
-} = require('../ultil/ultil.lib');
+} = require('@/src/ultil/ultil.lib');
 
 const register = async (req, res) => {
-    const requiredFields = [
-        'username',
-        'password',
-        'firstname',
-        'lastname',
-        'phone',
-        'email',
-    ];
-
-    for (const field of requiredFields) {
-        if (!req.body[field]) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                `Missing required field: ${field}`
-            );
-            return;
-        }
-    }
-
     try {
+        const requiredFields = [
+            'username',
+            'password',
+            'firstname',
+            'lastname',
+            'phone',
+        ];
+
+        for (const field of requiredFields) {
+            if (!req.body[field]) {
+                sendResponse(
+                    res,
+                    STATUS_CODE.BAD_REQUEST,
+                    `Missing required field: ${field}`
+                );
+                return;
+            }
+        }
+
         /* FIND USER */
 
         const selectQuery = `
@@ -60,7 +62,7 @@ const register = async (req, res) => {
 
         const fields = requiredFields.map((field) => ` ${field}`);
 
-        const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '${ACCOUNT_STATE.active}')`;
+        const insertQuery = `INSERT INTO ${TABLE_NAMES.users} (${fields}, role, created_at, active) VALUES (?, ?, ?, ?, ?, ?, ?, '${ACCOUNT_STATE.active}')`;
 
         const values = [];
 
@@ -93,6 +95,7 @@ const register = async (req, res) => {
 
         sendResponse(res, STATUS_CODE.OK, 'Created account successfully!');
     } catch (error) {
+        console.log(error);
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,

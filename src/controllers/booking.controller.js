@@ -11,16 +11,18 @@ const {
     isValidDouble,
     executeTransaction,
     convertDateToGMT7,
-} = require('../ultil/ultil.lib');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+} = require('@/src/ultil/ultil.lib');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     TABLE_NAMES,
     BOOKING_STATE,
     USER_ROLES,
-} = require('../configs/constants.config');
-const { createUserNotification } = require('../services/notificationService');
-const { sendNotificationToTopic } = require('../ultil/firebaseServices');
-const { createInvoice } = require('../services/invoice.service');
+} = require('@/src/configs/constants.config');
+const {
+    createUserNotification,
+} = require('@/src/services/notificationService');
+const { sendNotificationToTopic } = require('@/src/ultil/firebaseServices');
+const { createInvoice } = require('@/src/services/invoice.service');
 
 const getBookingById = async (req, res) => {
     if (!req.params.booking_id) {

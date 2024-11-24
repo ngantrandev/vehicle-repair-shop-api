@@ -1,9 +1,9 @@
 const path = require('path');
 const sharp = require('sharp');
 
-const { TABLE_NAMES } = require('../configs/constants.config');
-const { QUERY_SELECT_SERVICE_BY_ID } = require('../configs/queries.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
+const { TABLE_NAMES } = require('@/src/configs/constants.config');
+const { QUERY_SELECT_SERVICE_BY_ID } = require('@/src/configs/queries.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     isValidInteger,
     isValidTime,
@@ -11,7 +11,7 @@ const {
     selectData,
     sendResponse,
     executeTransaction,
-} = require('../ultil/ultil.lib');
+} = require('@/src/ultil/ultil.lib');
 
 const createService = async (req, res) => {
     const requiredFields = [

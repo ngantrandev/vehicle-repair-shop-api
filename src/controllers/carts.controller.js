@@ -1,10 +1,6 @@
-const { TABLE_NAMES } = require('../configs/constants.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
-const {
-    selectData,
-    isValidInteger,
-    sendResponse,
-} = require('../ultil/ultil.lib');
+const { TABLE_NAMES } = require('@/src/configs/constants.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+const { selectData, sendResponse } = require('@/src/ultil/ultil.lib');
 
 const getAllUserCarts = async (req, res) => {
     /**NO NEED TO FIND USER
@@ -66,7 +62,7 @@ const getAllUserCarts = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'something went wrong'
+            'something went wrong' + error
         );
     }
 };

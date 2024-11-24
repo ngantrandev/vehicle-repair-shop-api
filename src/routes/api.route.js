@@ -2,21 +2,21 @@ const express = require('express');
 
 const authRoutes = require('./auth.route');
 const adminRoutes = require('./admin.route');
-const motorcycleBrandsRoute = require('../routes/motorcycle.brands.route');
-const servicesRoute = require('../routes/services.route');
-const motorcyclesRoute = require('../routes/motorcycles.route');
-const usersRoutes = require('../routes/users.route');
-const staffsRoutes = require('../routes/staffs.route');
-const stationsRoutes = require('../routes/stations.route');
-const addressesRoute = require('../routes/addresses.route');
-const itemsRoute = require('../routes/items.route');
-const bookingsRoute = require('../routes/bookings.route');
-const profileRoute = require('../routes/profile.route');
+const motorcycleBrandsRoute = require('@/src/routes/motorcycle.brands.route');
+const servicesRoute = require('@/src/routes/services.route');
+const motorcyclesRoute = require('@/src/routes/motorcycles.route');
+const usersRoutes = require('@/src/routes/users.route');
+const staffsRoutes = require('@/src/routes/staffs.route');
+const stationsRoutes = require('@/src/routes/stations.route');
+const addressesRoute = require('@/src/routes/addresses.route');
+const itemsRoute = require('@/src/routes/items.route');
+const bookingsRoute = require('@/src/routes/bookings.route');
+const profileRoute = require('@/src/routes/profile.route');
 const {
     verifyToken,
     verifyAdminRole,
     verifyStaffRole,
-} = require('../middlewares/verify.middleware');
+} = require('@/src/middlewares/verify.middleware');
 
 const apiRoute = express();
 

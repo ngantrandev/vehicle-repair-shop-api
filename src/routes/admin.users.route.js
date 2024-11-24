@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const adminUserControllers = require('../controllers/admin.user.controller');
-const adminUsersController = require('../controllers/admin.users.controller');
+const adminUserControllers = require('@/src/controllers/admin.user.controller');
+const adminUsersController = require('@/src/controllers/admin.users.controller');
 
 router.get('/', adminUsersController.getAllUser);
 

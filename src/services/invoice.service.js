@@ -1,6 +1,6 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
-const { convertDateToGMT7 } = require('../ultil/ultil.lib');
+const { convertDateToGMT7 } = require('@/src/ultil/ultil.lib');
 
 const fontPath = './src/assets/fonts/Roboto-Regular.ttf';
 const logoPath = './src/assets/logo.png';

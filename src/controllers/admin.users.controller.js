@@ -1,11 +1,6 @@
-const { TABLE_NAMES } = require('../configs/constants.config');
-const { STATUS_CODE } = require('../configs/status.codes.config');
-const {
-    selectData,
-    convertDateToGMT7,
-    convertTimeToGMT7,
-    sendResponse,
-} = require('../ultil/ultil.lib');
+const { TABLE_NAMES } = require('@/src/configs/constants.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+const { selectData, sendResponse } = require('@/src/ultil/ultil.lib');
 
 const getAllUser = async (req, res) => {
     try {
@@ -40,9 +35,6 @@ const getAllUser = async (req, res) => {
                     full_address,
                     ...other
                 }) => {
-                    other.birthday = convertDateToGMT7(other.birthday);
-                    other.created_at = convertTimeToGMT7(other.created_at);
-
                     if (!address_id) {
                         other.address = null;
                         return other;
