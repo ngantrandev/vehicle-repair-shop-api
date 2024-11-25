@@ -33,8 +33,14 @@ const autocompleteAddress = async (req, res) => {
             },
             []
         );
-        sendResponse(res, 200, 'Get address successfully!', newList);
-    } catch (error) {}
+        sendResponse(res, STATUS_CODE.OK, 'Get address successfully!', newList);
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'Something went wrong!' + error
+        );
+    }
 };
 
 const reverseGeocode = async (req, res) => {
@@ -68,7 +74,7 @@ const reverseGeocode = async (req, res) => {
             },
             []
         );
-        sendResponse(res, 200, 'Get reverse geocode successfully!', newList);
+        sendResponse(res, STATUS_CODE.OK, 'Get reverse geocode successfully!', newList);
     } catch (error) {
         sendResponse(
             res,
@@ -106,7 +112,7 @@ const getAddressDetailByPlaceId = async (req, res) => {
 
         sendResponse(
             res,
-            200,
+            STATUS_CODE.OK,
             'Get address by place id successfully!',
             address
         );

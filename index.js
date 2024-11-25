@@ -10,6 +10,7 @@ const app = express();
 
 const apiRoute = require('@/src/routes/api.route');
 const { BASE_URL_PATH, APP_NAME } = require('@/src/configs/constants.config');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 app.use(cors());
 app.use(morgan('common'));
@@ -32,11 +33,11 @@ app.use(`${BASE_URL_PATH}/uploads`, express.static('uploads'));
 app.use(`${BASE_URL_PATH}/invoices`, express.static('invoices'));
 
 app.get('/', (req, res) => {
-    res.status(200).json('Hello World!');
+    res.status(STATUS_CODE.OK).json('Hello World!');
 });
 
 app.get(BASE_URL_PATH, (req, res) => {
-    res.status(200).json(`Welcome to the ${APP_NAME}!`);
+    res.status(STATUS_CODE.OK).json(`Welcome to the ${APP_NAME}!`);
 });
 
 app.use(BASE_URL_PATH, apiRoute);

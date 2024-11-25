@@ -10,6 +10,7 @@ const {
     ACCOUNT_STATE,
 } = require('@/src/configs/constants.config');
 const goongServices = require('@/src/services/goongServices');
+const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const executeTransaction = async (queries, listParamArray) => {
     if (queries.length !== listParamArray.length) {
@@ -178,7 +179,7 @@ const sendResponse = (res, statusCode, message, data) => {
         throw new Error('statusCode must be integer');
     }
 
-    if (statusCode != 200) {
+    if (statusCode != STATUS_CODE.OK) {
         res.status(statusCode).json({
             success: false,
             message,
@@ -310,7 +311,8 @@ const isValidUrl = (url) => {
     try {
         new URL(url); // Kiểm tra xem URL có hợp lệ không
         return true;
-    } catch (_) {
+    } catch (error) {
+        console.log(error);
         return false;
     }
 };
