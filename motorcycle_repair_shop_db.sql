@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 22, 2024 lúc 04:56 AM
+-- Thời gian đã tạo: Th10 25, 2024 lúc 12:09 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -44,10 +44,10 @@ CREATE TABLE `bookings` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `booking_items`
+-- Cấu trúc bảng cho bảng `bookings_items`
 --
 
-CREATE TABLE `booking_items` (
+CREATE TABLE `bookings_items` (
   `booking_id` int(30) DEFAULT NULL,
   `item_id` int(30) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -153,11 +153,22 @@ CREATE TABLE `services` (
   `id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
+  `description` longtext NOT NULL,
   `price` int(11) NOT NULL,
   `estimated_time` time NOT NULL,
   `image_url` varchar(255) DEFAULT NULL,
   `active` smallint(6) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `services_items`
+--
+
+CREATE TABLE `services_items` (
+  `service_id` int(30) NOT NULL,
+  `item_id` int(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -234,7 +245,7 @@ CREATE TABLE `users` (
   `address_id` int(11) DEFAULT NULL,
   `phone` varchar(255) DEFAULT NULL,
   `role` varchar(255) NOT NULL,
-  `created_at` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `active` smallint(6) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -248,10 +259,8 @@ CREATE TABLE `users` (
 ALTER TABLE `bookings`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`),
-  ADD KEY `user_id` (`user_id`),
   ADD KEY `service_id` (`service_id`),
-  ADD KEY `address_id` (`address_id`),
-  ADD KEY `staff_id` (`staff_id`);
+  ADD KEY `address_id` (`address_id`);
 
 --
 -- Chỉ mục cho bảng `carts`
@@ -303,6 +312,12 @@ ALTER TABLE `services`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`),
   ADD KEY `category_id` (`category_id`);
+
+--
+-- Chỉ mục cho bảng `services_items`
+--
+ALTER TABLE `services_items`
+  ADD PRIMARY KEY (`service_id`,`item_id`);
 
 --
 -- Chỉ mục cho bảng `service_categories`
@@ -421,15 +436,6 @@ ALTER TABLE `users`
 --
 -- Các ràng buộc cho các bảng đã đổ
 --
-
---
--- Các ràng buộc cho bảng `bookings`
---
-ALTER TABLE `bookings`
-  ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `bookings_ibfk_3` FOREIGN KEY (`address_id`) REFERENCES `goong_map_addresses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `bookings_ibfk_4` FOREIGN KEY (`staff_id`) REFERENCES `staffs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Các ràng buộc cho bảng `carts`
