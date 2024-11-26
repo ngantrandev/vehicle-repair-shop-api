@@ -10,6 +10,7 @@ const {
     isValidInteger,
     convertTimeToGMT7,
     convertDateToGMT7,
+    hashPassWord,
 } = require('@/src/ultil/ultil.lib');
 const {
     QUERY_SELECT_USER_BY_USERNAME,
@@ -33,15 +34,11 @@ const getUserByUsername = async (req, res) => {
         const {
             password,
             address_id,
-            address_street,
             address_latitude,
             address_longitude,
-            ward_id,
-            ward_name,
-            district_id,
-            district_name,
-            province_id,
-            province_name,
+            address_name,
+            full_address,
+            place_id,
 
             ...other
         } = users[0];
@@ -54,21 +51,11 @@ const getUserByUsername = async (req, res) => {
                 ? null
                 : {
                       id: address_id,
-                      street: address_street,
                       latitude: address_latitude,
                       longitude: address_longitude,
-                      ward: {
-                          id: ward_id,
-                          name: ward_name,
-                      },
-                      district: {
-                          id: district_id,
-                          name: district_name,
-                      },
-                      province: {
-                          id: province_id,
-                          name: province_name,
-                      },
+                      address_name,
+                      full_address,
+                      place_id,
                   };
 
         sendResponse(
@@ -87,45 +74,45 @@ const getUserByUsername = async (req, res) => {
 };
 
 const updateUserProfile = async (req, res) => {
-    if (!req.params.user_id) {
-        sendResponse(
-            res,
-            STATUS_CODE.BAD_REQUEST,
-            'Missing user_id in params!'
-        );
-        return;
-    }
-
-    if (!isValidInteger(req.params.user_id)) {
-        sendResponse(
-            res,
-            STATUS_CODE.BAD_REQUEST,
-            'user_id must be an integer!'
-        );
-
-        return;
-    }
-    const requiredFields = [
-        'username',
-        'firstname',
-        'lastname',
-        'birthday',
-        'email',
-        'phone',
-    ];
-
-    for (const field of requiredFields) {
-        if (!req.body[field]) {
+    try {
+        if (!req.params.user_id) {
             sendResponse(
                 res,
                 STATUS_CODE.BAD_REQUEST,
-                `Missing required field: ${field}`
+                'Missing user_id in params!'
             );
             return;
         }
-    }
 
-    try {
+        if (!isValidInteger(req.params.user_id)) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                'user_id must be an integer!'
+            );
+
+            return;
+        }
+        const requiredFields = [
+            'username',
+            'firstname',
+            'lastname',
+            'birthday',
+            'email',
+            'phone',
+        ];
+
+        for (const field of requiredFields) {
+            if (!req.body[field]) {
+                sendResponse(
+                    res,
+                    STATUS_CODE.BAD_REQUEST,
+                    `Missing required field: ${field}`
+                );
+                return;
+            }
+        }
+
         const updateFields = [];
         const updateValues = [];
 

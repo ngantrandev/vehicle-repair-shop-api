@@ -38,6 +38,7 @@ const getUserById = async (req, res) => {
         }
 
         const {
+            // eslint-disable-next-line no-unused-vars
             password,
             address_id,
             address_street,

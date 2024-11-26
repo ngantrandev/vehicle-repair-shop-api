@@ -36,6 +36,7 @@ const getStaffById = async (req, res) => {
             return;
         }
 
+        // eslint-disable-next-line no-unused-vars
         const { password, station_id, service_station_name, ...other } =
             staffs[0];
         other.birthday = convertDateToGMT7(other.birthday);
@@ -51,7 +52,7 @@ const getStaffById = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Something went wrongs!' + error
         );
     }
 };
@@ -156,7 +157,7 @@ const createStaff = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Something went wrongs!' + error
         );
     }
 };
@@ -199,6 +200,8 @@ const updateStaff = async (req, res) => {
             'station_id',
             'active',
         ];
+
+        console.log(req.body);
 
         const updateFields = [];
         const updateValues = [];
@@ -275,6 +278,7 @@ const updateStaff = async (req, res) => {
             req.params.staff_id,
         ]);
 
+        // eslint-disable-next-line no-unused-vars
         const { password, station_id, service_station_name, ...other } =
             updatedStaffs[0];
         other.created_at = convertTimeToGMT7(other.created_at);
@@ -363,7 +367,7 @@ const deactivateStaff = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Something went wrongs!'
+            'Something went wrongs!' + error
         );
     }
 };
