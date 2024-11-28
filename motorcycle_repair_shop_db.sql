@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 25, 2024 lúc 12:09 PM
+-- Thời gian đã tạo: Th10 26, 2024 lúc 05:48 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -436,6 +436,15 @@ ALTER TABLE `users`
 --
 -- Các ràng buộc cho các bảng đã đổ
 --
+
+--
+-- Các ràng buộc cho bảng `bookings`
+--
+ALTER TABLE `bookings`
+  ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `bookings_ibfk_3` FOREIGN KEY (`address_id`) REFERENCES `goong_map_addresses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `bookings_ibfk_4` FOREIGN KEY (`staff_id`) REFERENCES `staffs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Các ràng buộc cho bảng `carts`

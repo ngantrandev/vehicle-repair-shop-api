@@ -23,6 +23,8 @@ const TABLE_NAMES = {
     items: 'items',
     bookings_items: 'bookings_items',
     services_items: 'services_items',
+    invoices: 'invoices',
+    payments: 'payments',
 };
 
 const USER_ROLES = {
@@ -44,6 +46,11 @@ const BOOKING_STATE = {
     cancelled: 'cancelled',
 };
 
+const PAYMENT_TYPE = {
+    cash: 'cash',
+    vnpay: 'vnpay',
+};
+
 module.exports = {
     APP_NAME,
     TABLE_NAMES,
@@ -51,4 +58,5 @@ module.exports = {
     BASE_URL_PATH,
     ACCOUNT_STATE,
     BOOKING_STATE,
+    PAYMENT_TYPE,
 };

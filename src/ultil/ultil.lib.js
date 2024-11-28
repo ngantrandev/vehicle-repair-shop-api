@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
 const polyline = require('@mapbox/polyline');
+const crypto = require('crypto');
 
 const pool = require('@/src/configs/db.config');
 const {
@@ -11,6 +12,8 @@ const {
 } = require('@/src/configs/constants.config');
 const goongServices = require('@/src/services/goongServices');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+
+const SecretKey = process.env.VNP_SECRET_KEY || '';
 
 const executeTransaction = async (queries, listParamArray) => {
     if (queries.length !== listParamArray.length) {
@@ -120,8 +123,12 @@ var parseToJSONFrDB = function (a) {
     return JSON.parse(JSON.stringify(a));
 };
 
-const getCurrentTimeInGMT7 = () => {
-    return moment.tz('Asia/Bangkok').format('YYYY-MM-DD HH:mm:ss');
+const getCurrentTimeInGMT7 = (format = 'YYYY-MM-DD HH:mm:ss') => {
+    if (!format) {
+        format = 'YYYY-MM-DD HH:mm:ss';
+    }
+    console.log('format', format);
+    return moment.tz('Asia/Bangkok').format(format);
 };
 
 const convertTimeToGMT7 = (time) => {
@@ -317,6 +324,42 @@ const isValidUrl = (url) => {
     }
 };
 
+const sortObject = (obj) => {
+    const sortedKeys = Object.keys(obj).sort(); // Sắp xếp key theo thứ tự tăng dần
+    const sortedObj = {};
+    sortedKeys.forEach((key) => {
+        sortedObj[key] = obj[key]; // Gán giá trị vào object mới theo thứ tự key đã sắp xếp
+    });
+    return sortedObj;
+};
+
+// Hàm thay thế qs.stringify
+const buildQueryParams = (data) => {
+    const searchParams = new URLSearchParams();
+    const sortedEntries = Object.entries(data).sort(([key1], [key2]) =>
+        key1.localeCompare(key2)
+    );
+
+    for (const [key, value] of sortedEntries) {
+        if (value !== '' && value !== undefined && value !== null) {
+            searchParams.append(key, value.toString());
+        }
+    }
+    return searchParams;
+};
+
+const getChecksum = (data) => {
+    // Tính toán Secure Hash
+    const hmac = crypto.createHmac('sha512', SecretKey);
+    const signed = hmac.update(Buffer.from(data, 'utf-8')).digest('hex');
+
+    return signed;
+};
+
+const convertTimeFormat = (time, currFormat, targetFormat) => {
+    return moment(time, currFormat).format(targetFormat);
+};
+
 module.exports = {
     executeTransaction,
     excuteQuery,
@@ -336,4 +379,8 @@ module.exports = {
     decodePolyline,
     isValidDate,
     isValidUrl,
+    sortObject,
+    buildQueryParams,
+    getChecksum,
+    convertTimeFormat,
 };

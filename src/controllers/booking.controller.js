@@ -179,49 +179,80 @@ const getBookingById = async (req, res) => {
     }
 };
 const createBooking = async (req, res) => {
-    const { items } = req.body;
-
-    /**VALIDATE VALUE */
-    if (!req.body.service_id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `service_id is required`);
-        return;
-    }
-
-    /** VALIDATE VALUE TYPE */
-    if (!isValidInteger(req.body.service_id)) {
-        sendResponse(
-            res,
-            STATUS_CODE.BAD_REQUEST,
-            `service_id must be integer`
-        );
-        return;
-    }
-
-    if (req.body.latitude && !isValidDouble(req.body.latitude)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `latitude must be double`);
-        return;
-    }
-    if (req.body.longitude && !isValidDouble(req.body.longitude)) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `longitude must be double`);
-        return;
-    }
-    if (!req.body.address_name) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `address_name is required`);
-        return;
-    }
-    if (!req.body.full_address) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `full_address is required`);
-        return;
-    }
-    if (!req.body.place_id) {
-        sendResponse(res, STATUS_CODE.BAD_REQUEST, `place_id is required`);
-        return;
-    }
-
-    let fileName = '';
-    let relativePath = ''; /** path from root dir to image */
-
     try {
+        const bodyData = req.body;
+
+        const {
+            items,
+            service_id,
+            latitude,
+            longitude,
+            address_name,
+            full_address,
+            place_id,
+            note,
+        } = bodyData;
+
+        /**VALIDATE VALUE */
+        if (!service_id) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `service_id is required`
+            );
+            return;
+        }
+
+        /** VALIDATE VALUE TYPE */
+        if (!isValidInteger(service_id)) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `service_id must be integer`
+            );
+            return;
+        }
+
+        if (latitude && !isValidDouble(latitude)) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `latitude must be double`
+            );
+            return;
+        }
+        if (longitude && !isValidDouble(longitude)) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `longitude must be double`
+            );
+            return;
+        }
+        if (!address_name) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `address_name is required`
+            );
+            return;
+        }
+        if (!full_address) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                `full_address is required`
+            );
+            return;
+        }
+        if (!place_id) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, `place_id is required`);
+            return;
+        }
+
+        let fileName = '';
+        let relativePath = ''; /** path from root dir to image */
+
         if (req.file) {
             const buffer = req.file.buffer;
             fileName = Date.now() + '.webp';
@@ -247,17 +278,11 @@ const createBooking = async (req, res) => {
         const createdTime = getCurrentTimeInGMT7();
 
         const params = [
-            [
-                req.body.latitude,
-                req.body.longitude,
-                req.body.place_id,
-                req.body.address_name,
-                req.body.full_address,
-            ],
+            [latitude, longitude, place_id, address_name, full_address],
             [],
             [
-                req.body.service_id,
-                req.body.note,
+                service_id,
+                note,
                 req.tokenPayload.user_id,
                 createdTime,
                 createdTime,

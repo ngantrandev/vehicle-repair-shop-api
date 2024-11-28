@@ -12,6 +12,9 @@ const addressesRoute = require('@/src/routes/addresses.route');
 const itemsRoute = require('@/src/routes/items.route');
 const bookingsRoute = require('@/src/routes/bookings.route');
 const profileRoute = require('@/src/routes/profile.route');
+const invoicesRoute = require('@/src/routes/invoices.route');
+const paymentsRoute = require('@/src/routes/payments.route');
+
 const {
     verifyToken,
     verifyAdminRole,
@@ -42,5 +45,14 @@ apiRoute.use('/items', itemsRoute);
 apiRoute.use('/bookings', verifyToken, bookingsRoute);
 
 apiRoute.use('/profile', profileRoute);
+
+apiRoute.use('/invoices', invoicesRoute);
+
+apiRoute.use(
+    '/payments',
+    verifyToken,
+
+    paymentsRoute
+);
 
 module.exports = apiRoute;
