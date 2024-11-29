@@ -1,12 +1,5 @@
-const path = require('path');
-const sharp = require('sharp');
-
 const {
     sendResponse,
-    isValidInteger,
-    isValidDouble,
-    getCurrentTimeInGMT7,
-    executeTransaction,
     excuteQuery,
     selectData,
     sortObject,
@@ -17,146 +10,20 @@ const {
 
 const { createReturnUrl } = require('@/src/services/vnpay.service');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
-    TABLE_NAMES,
-    BOOKING_STATE,
-    PAYMENT_TYPE,
-} = require('@/src/configs/constants.config');
+const { TABLE_NAMES, PAYMENT_TYPE } = require('@/src/configs/constants.config');
 const { sendNotificationToTopic } = require('@/src/ultil/firebaseServices');
+const {
+    createUserNotification,
+} = require('@/src/services/notificationService');
 
 const VnpTmnCode = process.env.VNP_TMN_CODE || '';
 
 const createPayment = async (req, res) => {
     try {
-        const bodyData = req.body;
+        const { booking_id: bookingId } = req.body;
 
-        const {
-            items,
-            service_id,
-            latitude,
-            longitude,
-            address_name,
-            full_address,
-            place_id,
-            note,
-        } = bodyData;
-
-        /**VALIDATE VALUE */
-        if (!service_id) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                `service_id is required`
-            );
-            return;
-        }
-
-        /** VALIDATE VALUE TYPE */
-        if (!isValidInteger(service_id)) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                `service_id must be integer`
-            );
-            return;
-        }
-
-        if (latitude && !isValidDouble(latitude)) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                `latitude must be double`
-            );
-            return;
-        }
-        if (longitude && !isValidDouble(longitude)) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                `longitude must be double`
-            );
-            return;
-        }
-        if (!address_name) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                `address_name is required`
-            );
-            return;
-        }
-        if (!full_address) {
-            sendResponse(
-                res,
-                STATUS_CODE.BAD_REQUEST,
-                `full_address is required`
-            );
-            return;
-        }
-        if (!place_id) {
-            sendResponse(res, STATUS_CODE.BAD_REQUEST, `place_id is required`);
-            return;
-        }
-
-        let fileName = '';
-        let relativePath = ''; /** path from root dir to image */
-
-        if (req.file) {
-            const buffer = req.file.buffer;
-            fileName = Date.now() + '.webp';
-            relativePath = path.join('./uploads', fileName);
-
-            try {
-                await sharp(buffer).webp({ quality: 20 }).toFile(relativePath);
-            } catch (error) {
-                sendResponse(
-                    res,
-                    STATUS_CODE.INTERNAL_SERVER_ERROR,
-                    'cannot create booking at this time' + error
-                );
-                return;
-            }
-        }
-
-        const queries = [
-            `INSERT INTO ${TABLE_NAMES.addresses} (latitude, longitude, place_id, address_name, full_address) VALUES (?, ?, ?, ?, ?);`,
-            'SET @address_id = LAST_INSERT_ID();',
-            `INSERT INTO ${TABLE_NAMES.bookings} (service_id, note, user_id, created_at, modified_at, address_id, status, image_url) VALUES (?, ?, ?, ?, ?, @address_id, ?, ?);`,
-        ];
-        const createdTime = getCurrentTimeInGMT7();
-
-        const params = [
-            [latitude, longitude, place_id, address_name, full_address],
-            [],
-            [
-                service_id,
-                note,
-                req.tokenPayload.user_id,
-                createdTime,
-                createdTime,
-                BOOKING_STATE.pending,
-                relativePath,
-            ],
-        ];
-
-        const transactionRes = await executeTransaction(queries, params);
-
-        const bookingId = transactionRes[2].insertId;
-
-        if (items && items.length > 0) {
-            const args = [];
-            const addItemToBookingQuery = `
-                INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id) VALUES
-                ${items
-                    .map((item) => {
-                        args.push(item);
-                        args.push(bookingId);
-                        return '(?, ?)';
-                    })
-                    .join(', ')}
-            `;
-
-            await excuteQuery(addItemToBookingQuery, args);
+        if (!bookingId) {
+            throw new Error('booking_id is required');
         }
 
         const getBookingInfoQuery = `
@@ -174,14 +41,24 @@ const createPayment = async (req, res) => {
 
         const bookingInfo = await selectData(getBookingInfoQuery, [bookingId]);
 
-        const { service_amount, service_name } = bookingInfo[0];
+        const { service_amount, service_name, items_amount } = bookingInfo[0];
 
-        const amount = service_amount + service_amount;
+        const amount = items_amount + service_amount;
+
+        const date = new Date();
+
+        const insertRes = await excuteQuery(
+            `INSERT INTO ${TABLE_NAMES.invoices} (booking_id, total_price, final_price, invoice_date) VALUES (?, ?, ?, ?)`,
+            [bookingId, amount, amount, date]
+        );
+
+        const invoiceId = insertRes.insertId;
 
         const returnUrl = createReturnUrl({
             amount: amount,
             service_name,
-            booking_id: bookingId,
+            invoice_id: invoiceId,
+            date,
         });
 
         sendResponse(res, STATUS_CODE.OK, 'Success', {
@@ -189,6 +66,7 @@ const createPayment = async (req, res) => {
             tmn_code: VnpTmnCode,
         });
     } catch (error) {
+        console.log(error);
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
@@ -202,7 +80,12 @@ const getReturnInfo = async (req, res) => {
         // CHECK SUM
         let queryParams = req.query;
 
+        if (Object.keys(queryParams).length === 0) {
+            throw new Error('query params is required');
+        }
+
         const vnp_SecureHash = queryParams['vnp_SecureHash'];
+        const invoiceId = queryParams['vnp_TxnRef'].split('_')[1];
 
         delete queryParams['vnp_SecureHash'];
         delete queryParams['vnp_SecureHashType'];
@@ -216,19 +99,17 @@ const getReturnInfo = async (req, res) => {
         const secureHash = getChecksum(signData);
 
         if (secureHash !== vnp_SecureHash) {
-            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Invalid checksum');
-            return;
+            throw new Error("checksum don't match");
         }
 
         if (queryParams['vnp_ResponseCode'] !== '00') {
-            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Payment failed');
-            return;
+            throw new Error('payment failed');
         }
 
         // UPDATE payment status
         const paymentQuery = `
             INSERT INTO ${TABLE_NAMES.payments}
-            (booking_id, payment_date, payment_method, amount_paid, order_info, bank_code, bank_transaction_id, transaction_id, txn_ref, payment_status)
+            (invoice_id, payment_date, payment_method, amount_paid, order_info, bank_code, bank_transaction_id, transaction_id, txn_ref, payment_status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         `;
 
@@ -238,10 +119,9 @@ const getReturnInfo = async (req, res) => {
             'YYYY-MM-DD HH:mm:ss'
         );
 
-        const bookingId = queryParams['vnp_TxnRef'].split('_')[1];
         const paymentAmount = queryParams['vnp_Amount'] / 100;
         const data = [
-            bookingId,
+            invoiceId,
             paymentDate,
             PAYMENT_TYPE.vnpay,
             paymentAmount,
@@ -260,20 +140,26 @@ const getReturnInfo = async (req, res) => {
                 SELECT
                     s.name service_name,
                     b.user_id
-                FROM ${TABLE_NAMES.bookings} b
+                FROM ${TABLE_NAMES.invoices} i
+                INNER JOIN ${TABLE_NAMES.bookings} b ON i.booking_id = b.id
                 INNER JOIN ${TABLE_NAMES.services} s ON s.id = b.service_id
-                WHERE b.id = ?
+                WHERE i.id = ?
             `,
-            [bookingId]
+            [invoiceId]
         );
 
-        const title = 'Thanh toán thành công';
-        const message = `Thanh toán thành công dịch vụ ${bookingInfo[0].service_name} số tiền ${paymentAmount} VNĐ`;
         const userId = bookingInfo[0].user_id;
-        sendNotificationToTopic(title, message, `customer_${userId}`);
+        const serviceName = bookingInfo[0].service_name;
+        const title = 'Thanh toán thành công';
+        const message = `Thanh toán thành công dịch vụ ${serviceName} số tiền ${paymentAmount} VNĐ`;
+
+        await createUserNotification(userId, title, message);
+
+        await sendNotificationToTopic(title, message, `customer_${userId}`);
 
         sendResponse(res, STATUS_CODE.OK, 'create payment success');
     } catch (error) {
+        console.log(error.message);
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,

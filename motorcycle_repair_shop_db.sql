@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 26, 2024 lúc 05:48 PM
+-- Thời gian đã tạo: Th10 29, 2024 lúc 10:02 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -82,6 +82,21 @@ CREATE TABLE `goong_map_addresses` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `invoices`
+--
+
+CREATE TABLE `invoices` (
+  `id` int(11) NOT NULL,
+  `booking_id` int(11) NOT NULL,
+  `invoice_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `total_price` int(11) NOT NULL,
+  `final_price` int(11) NOT NULL,
+  `invoice_file` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `items`
 --
 
@@ -141,6 +156,26 @@ CREATE TABLE `notifications_users` (
   `notification_id` int(11) NOT NULL,
   `recipient_type` varchar(255) NOT NULL,
   `is_read` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `payments`
+--
+
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL,
+  `invoice_id` int(11) NOT NULL,
+  `payment_date` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `payment_method` varchar(255) NOT NULL COMMENT 'payment type: online, cash',
+  `amount_paid` int(11) NOT NULL,
+  `order_info` varchar(255) DEFAULT NULL,
+  `bank_code` varchar(255) DEFAULT NULL,
+  `bank_transaction_id` varchar(255) DEFAULT NULL,
+  `transaction_id` varchar(255) DEFAULT NULL COMMENT 'mã giao dịch trên cổng thanh toán',
+  `txn_ref` varchar(255) DEFAULT NULL COMMENT 'mã giao dịch tham chiếu trên hệ thống merchant',
+  `payment_status` varchar(255) NOT NULL COMMENT 'mã phản hồi kết quả thanh toán trên cổng thanh toán'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -260,7 +295,9 @@ ALTER TABLE `bookings`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`),
   ADD KEY `service_id` (`service_id`),
-  ADD KEY `address_id` (`address_id`);
+  ADD KEY `address_id` (`address_id`),
+  ADD KEY `bookings_ibfk_1` (`user_id`),
+  ADD KEY `bookings_ibfk_4` (`staff_id`);
 
 --
 -- Chỉ mục cho bảng `carts`
@@ -277,6 +314,13 @@ ALTER TABLE `carts`
 ALTER TABLE `goong_map_addresses`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`);
+
+--
+-- Chỉ mục cho bảng `invoices`
+--
+ALTER TABLE `invoices`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `booking_id` (`booking_id`);
 
 --
 -- Chỉ mục cho bảng `items`
@@ -303,6 +347,12 @@ ALTER TABLE `motorcycle_brands`
 -- Chỉ mục cho bảng `notifications`
 --
 ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `payments`
+--
+ALTER TABLE `payments`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -380,6 +430,12 @@ ALTER TABLE `goong_map_addresses`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `invoices`
+--
+ALTER TABLE `invoices`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `items`
 --
 ALTER TABLE `items`
@@ -401,6 +457,12 @@ ALTER TABLE `motorcycle_brands`
 -- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `payments`
+--
+ALTER TABLE `payments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -452,6 +514,12 @@ ALTER TABLE `bookings`
 ALTER TABLE `carts`
   ADD CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `carts_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Các ràng buộc cho bảng `invoices`
+--
+ALTER TABLE `invoices`
+  ADD CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`);
 
 --
 -- Các ràng buộc cho bảng `motorcycles`

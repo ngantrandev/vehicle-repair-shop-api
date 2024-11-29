@@ -11,18 +11,17 @@ const BaseUrl = process.env.VNP_BASE_URL || '';
 const VnpReturnUrl = process.env.VNP_RETURN_URL || '';
 
 /**
- * data = {amout, orderInfo}
+ * data = {amout, service_name, invoice_id, date}
  */
 const createReturnUrl = (data) => {
-    const { amount, service_name, booking_id } = data;
+    const { amount, service_name, invoice_id, date } = data;
 
-    const date = new Date();
     // create new date after 2 minus
     const newDate = new Date(date.getTime() + 20 * 60 * 1000); // Cộng thêm 2 phút
 
     const createDate = moment(date).format('YYYYMMDDHHmmss');
     const exprireTime = moment(newDate).format('YYYYMMDDHHmmss');
-    const txnRef = `GIAODICH_${booking_id}_${moment(date).format('DDHHmmss')}`;
+    const txnRef = `GIAODICH_${invoice_id}_${moment(date).format('DDHHmmss')}`;
     const orderInfo = `Thanh toán dịch vụ ${service_name} va cac san pham dat cung`;
 
     var vnp_Params = {};

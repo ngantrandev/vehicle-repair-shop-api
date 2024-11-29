@@ -48,11 +48,6 @@ apiRoute.use('/profile', profileRoute);
 
 apiRoute.use('/invoices', invoicesRoute);
 
-apiRoute.use(
-    '/payments',
-    verifyToken,
-
-    paymentsRoute
-);
+apiRoute.use('/payments', paymentsRoute);
 
 module.exports = apiRoute;
