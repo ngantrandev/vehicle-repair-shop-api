@@ -157,15 +157,29 @@ const getLatestBooking = async (req, res) => {
 
 const getAllBooking = async (req, res) => {
     try {
-        let where = '';
-        const params = [];
-        if (req.tokenPayload.role !== USER_ROLES.admin) {
-            where += 'WHERE user_id = ?';
-            params.push([req.tokenPayload.user_id]);
+        // Lấy `startDay` và `endDay` từ query params
+        const {
+            start_date: startDay,
+            end_date: endDay,
+            status,
+            station,
+            search,
+            sort,
+            limit,
+        } = req.query;
+
+        let cursor = req.query.cursor;
+
+        if (!cursor) {
+            cursor = 0;
         }
 
-        // Lấy `startDay` và `endDay` từ query params
-        const { start_date: startDay, end_date: endDay } = req.query;
+        let where = [];
+        const params = [];
+        if (req.tokenPayload.role !== USER_ROLES.admin) {
+            where.push('user_id = ?');
+            params.push([req.tokenPayload.user_id]);
+        }
 
         // Nếu có cả `startDay` và `endDay`
         if (startDay && endDay) {
@@ -175,21 +189,40 @@ const getAllBooking = async (req, res) => {
             // Trường hợp `startDay` và `endDay` là cùng một ngày
             if (startDate.toDateString() === endDate.toDateString()) {
                 const dateCondition = `DATE(b.created_at) = ?`;
-                where += where
-                    ? ` AND ${dateCondition}`
-                    : `WHERE ${dateCondition}`;
+
+                where.push(dateCondition);
 
                 params.push(startDay);
             }
             // Trường hợp `startDay` và `endDay` khác nhau
             else {
                 const dateRangeCondition = `DATE(b.created_at) BETWEEN ? AND ?`;
-                where += where
-                    ? ` AND ${dateRangeCondition}`
-                    : `WHERE ${dateRangeCondition}`;
+                where.push(dateRangeCondition);
 
                 params.push(startDay, endDay);
             }
+        }
+
+        if (status) {
+            where.push('b.status = ?');
+            params.push(status);
+        }
+
+        if (station) {
+            where.push('st.id = ?');
+            params.push(station);
+        }
+
+        if (search) {
+            where.push(
+                '(u.firstname LIKE ? OR u.lastname LIKE ? OR u.phone LIKE ? OR s.name LIKE ?)'
+            );
+            params.push(
+                `%${search}%`,
+                `%${search}%`,
+                `%${search}%`,
+                `%${search}%`
+            );
         }
 
         /**FIND SERVICE */
@@ -219,21 +252,23 @@ const getAllBooking = async (req, res) => {
             st_addr.address_name AS station_address_name
         FROM
             ${TABLE_NAMES.bookings} AS b
-        LEFT JOIN
+        INNER JOIN
                 ${TABLE_NAMES.services} AS s ON s.id = b.service_id
-            LEFT JOIN
-                ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
-            LEFT JOIN
-                ${TABLE_NAMES.addresses} AS addr ON addr.id = b.address_id
-            LEFT JOIN
-                ${TABLE_NAMES.users} AS u ON u.id = b.user_id
-            LEFT JOIN
-                ${TABLE_NAMES.service_stations} AS st ON st.id = stf.station_id
-            LEFT JOIN
-                ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
-        ${where}
+        LEFT JOIN
+            ${TABLE_NAMES.staffs} AS stf ON stf.id = b.staff_id
+        LEFT JOIN
+            ${TABLE_NAMES.addresses} AS addr ON addr.id = b.address_id
+        LEFT JOIN
+            ${TABLE_NAMES.users} AS u ON u.id = b.user_id
+        LEFT JOIN
+            ${TABLE_NAMES.service_stations} AS st ON st.id = stf.station_id
+        LEFT JOIN
+            ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
+        ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
 
-        ORDER BY created_at DESC
+        ${sort ? `ORDER BY created_at ${sort}` : ''}
+
+        ${limit ? `LIMIT ${cursor}, ${limit}` : ''}
  `;
 
         const bookings = await selectData(selectQuery, params);
@@ -317,7 +352,7 @@ const getAllBooking = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.OK,
-            'Get all bookings by user id successfully!',
+            'Get all bookings successfully!',
             newList
         );
     } catch (error) {

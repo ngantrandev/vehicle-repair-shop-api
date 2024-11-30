@@ -68,7 +68,7 @@ const userMarkNotificationAsRead = async (req, res) => {
 const userMarkAllNotificationsAsRead = async (req, res) => {
     try {
         const query = `
-            UPDATE ${TABLE_NAMES.user_notifications}
+            UPDATE ${TABLE_NAMES.notifications_users}
             SET is_read = 1
             WHERE user_id = ? AND is_read = 0 AND recipient_type = '${USER_ROLES.customer}'
         `;
