@@ -593,9 +593,13 @@ const setBookingStatusToDone = async (req, res) => {
             },
         };
 
-        await createInvoice(
-            invoice,
-            `invoice_${req.params.booking_id}_${convertDateToGMT7(new Date())}.pdf`
+        const invoicePath = `invoice_${req.params.booking_id}_${convertDateToGMT7(new Date())}.pdf`;
+
+        await createInvoice(invoice, invoicePath);
+
+        await excuteQuery(
+            `UPDATE ${TABLE_NAMES.invoices} SET invoice_file = ? WHERE booking_id = ?`,
+            [invoicePath, req.params.booking_id]
         );
 
         const title = 'Quá trình sửa chữa hoàn tất!';

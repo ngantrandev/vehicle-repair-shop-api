@@ -22,12 +22,15 @@ const getAllServiceStations = async (req, res) => {
                 address.longitude,
                 address.place_id,
                 address.address_name,
-                address.full_address
+                address.full_address,
+                COUNT(s.id) AS staff_count
                 
             FROM
                 ${TABLE_NAMES.service_stations} AS ss
             LEFT JOIN
                 ${TABLE_NAMES.addresses} AS address ON ss.address_id = address.id
+            LEFT JOIN ${TABLE_NAMES.staffs} AS s ON ss.id = s.station_id
+            GROUP BY ss.id
         `;
 
         const serviceStations = await selectData(query, []);

@@ -18,7 +18,65 @@ const {
 
 const VnpTmnCode = process.env.VNP_TMN_CODE || '';
 
-const createPayment = async (req, res) => {
+const prePayment = async (req, res) => {
+    try {
+        const { booking_id: bookingId } = req.body;
+
+        if (!bookingId) {
+            throw new Error('booking_id is required');
+        }
+
+        const getBookingInfoQuery = `
+            SELECT
+                IFNULL(SUM(items.price), 0) items_amount,
+                s.price service_amount,
+                s.name service_name
+                
+            FROM ${TABLE_NAMES.bookings} b
+            LEFT JOIN ${TABLE_NAMES.bookings_items} bi ON b.id = bi.booking_id
+            LEFT JOIN ${TABLE_NAMES.items} ON items.id = bi.item_id
+            INNER JOIN ${TABLE_NAMES.services} s ON s.id = b.service_id
+            WHERE b.id = ?
+       `;
+
+        const bookingInfo = await selectData(getBookingInfoQuery, [bookingId]);
+
+        const { service_amount, service_name, items_amount } = bookingInfo[0];
+
+        const amount = items_amount + service_amount;
+
+        const date = new Date();
+
+        const insertRes = await excuteQuery(
+            `INSERT INTO ${TABLE_NAMES.invoices} (booking_id, total_price, final_price, invoice_date) VALUES (?, ?, ?, ?)`,
+            [bookingId, amount, amount, date]
+        );
+
+        const invoiceId = insertRes.insertId;
+
+        const returnUrl = createReturnUrl({
+            amount: amount,
+            service_name,
+            invoice_id: invoiceId,
+            date,
+        });
+
+        sendResponse(res, STATUS_CODE.OK, 'Success', {
+            payment_url: returnUrl,
+            tmn_code: VnpTmnCode,
+        });
+    } catch (error) {
+        console.log(error);
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrongs!' + error
+        );
+    }
+};
+
+// create payment for booking
+const completePayment = async (req, res) => {
     try {
         const { booking_id: bookingId } = req.body;
 
@@ -169,8 +227,9 @@ const getReturnInfo = async (req, res) => {
 };
 
 const paymentsController = {
-    createPayment,
+    prePayment,
     getReturnInfo,
+    completePayment,
 };
 
 module.exports = paymentsController;

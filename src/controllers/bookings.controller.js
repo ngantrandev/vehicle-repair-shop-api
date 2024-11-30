@@ -249,7 +249,8 @@ const getAllBooking = async (req, res) => {
             st_addr.latitude AS station_latitude,
             st_addr.longitude AS station_longitude,
             st_addr.full_address AS station_address,
-            st_addr.address_name AS station_address_name
+            st_addr.address_name AS station_address_name,
+            IF(p.id IS NULL, 0, 1) AS is_paid
         FROM
             ${TABLE_NAMES.bookings} AS b
         INNER JOIN
@@ -264,9 +265,13 @@ const getAllBooking = async (req, res) => {
             ${TABLE_NAMES.service_stations} AS st ON st.id = stf.station_id
         LEFT JOIN
             ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
+        LEFT JOIN
+            ${TABLE_NAMES.invoices} AS inv ON inv.booking_id = b.id
+        LEFT JOIN
+            ${TABLE_NAMES.payments} AS p ON p.invoice_id = inv.id
         ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
 
-        ${sort ? `ORDER BY created_at ${sort}` : ''}
+        ${sort ? `ORDER BY created_at ${sort}` : 'ORDER BY created_at DESC'}
 
         ${limit ? `LIMIT ${cursor}, ${limit}` : ''}
  `;
@@ -299,6 +304,7 @@ const getAllBooking = async (req, res) => {
                 staff_id,
                 staff_firstname,
                 staff_lastname,
+                is_paid,
                 ...other
             }) => {
                 other.created_at = convertTimeToGMT7(other.created_at);
@@ -344,6 +350,12 @@ const getAllBooking = async (req, res) => {
                         },
                     },
                 };
+
+                if(is_paid == 0) {
+                    other.is_paid = false;
+                } else {
+                    other.is_paid = true;
+                }
 
                 return other;
             }
