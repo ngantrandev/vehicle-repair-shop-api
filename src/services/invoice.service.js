@@ -155,7 +155,7 @@ function formatCurrency(value) {
     return Math.round(value);
 }
 
-const createInvoice = async (invoice, fileName) => {
+const createInvoiceFile = async (invoice, fileName) => {
     let doc = new PDFDocument({ margin: 50 });
 
     const rows = generateRowsData(invoice);
@@ -175,5 +175,5 @@ const createInvoice = async (invoice, fileName) => {
 };
 
 module.exports = {
-    createInvoice,
+    createInvoiceFile,
 };

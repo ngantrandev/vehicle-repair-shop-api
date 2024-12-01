@@ -250,7 +250,8 @@ const getAllBooking = async (req, res) => {
             st_addr.longitude AS station_longitude,
             st_addr.full_address AS station_address,
             st_addr.address_name AS station_address_name,
-            IF(p.id IS NULL, 0, 1) AS is_paid
+            IF(p.id IS NULL, 0, 1) AS is_paid,
+            inv.invoice_file
         FROM
             ${TABLE_NAMES.bookings} AS b
         INNER JOIN
@@ -351,7 +352,7 @@ const getAllBooking = async (req, res) => {
                     },
                 };
 
-                if(is_paid == 0) {
+                if (is_paid == 0) {
                     other.is_paid = false;
                 } else {
                     other.is_paid = true;

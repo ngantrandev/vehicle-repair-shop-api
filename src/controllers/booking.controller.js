@@ -22,7 +22,7 @@ const {
     createUserNotification,
 } = require('@/src/services/notificationService');
 const { sendNotificationToTopic } = require('@/src/ultil/firebaseServices');
-const { createInvoice } = require('@/src/services/invoice.service');
+const { createInvoiceFile } = require('@/src/services/invoice.service');
 
 const getBookingById = async (req, res) => {
     if (!req.params.booking_id) {
@@ -65,7 +65,9 @@ const getBookingById = async (req, res) => {
                 st_addr.latitude AS station_latitude,
                 st_addr.longitude AS station_longitude,
                 st_addr.full_address AS station_address,
-                st_addr.address_name AS station_address_name
+                st_addr.address_name AS station_address_name,
+                IF(p.id IS NULL, 0, 1) AS is_paid,
+                inv.invoice_file
             FROM ( SELECT *
                     FROM ${TABLE_NAMES.bookings}
                     WHERE id = ?) AS b
@@ -81,6 +83,10 @@ const getBookingById = async (req, res) => {
                 ${TABLE_NAMES.service_stations} AS st ON st.id = stf.station_id
             LEFT JOIN
                 ${TABLE_NAMES.addresses} AS st_addr ON st_addr.id = st.address_id
+            LEFT JOIN
+                ${TABLE_NAMES.invoices} AS inv ON inv.booking_id = b.id
+            LEFT JOIN
+                ${TABLE_NAMES.payments} AS p ON p.invoice_id = inv.id
         `;
 
         const bookings = await selectData(selectQuery, [
@@ -595,7 +601,7 @@ const setBookingStatusToDone = async (req, res) => {
 
         const invoicePath = `invoice_${req.params.booking_id}_${convertDateToGMT7(new Date())}.pdf`;
 
-        await createInvoice(invoice, invoicePath);
+        await createInvoiceFile(invoice, invoicePath);
 
         await excuteQuery(
             `UPDATE ${TABLE_NAMES.invoices} SET invoice_file = ? WHERE booking_id = ?`,

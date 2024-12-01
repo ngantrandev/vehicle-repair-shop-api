@@ -1,7 +1,4 @@
-const {
-    TABLE_NAMES,
-    BOOKING_STATE,
-} = require('@/src/configs/constants.config');
+const { TABLE_NAMES } = require('@/src/configs/constants.config');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const { sendResponse, selectData } = require('@/src/ultil/ultil.lib');
 
@@ -74,20 +71,13 @@ const getRevenue = async (req, res) => {
                 ${groupClause} AS date,
                 b.id AS booking_id,
                 b.created_at,
-                services.price AS service_price,
-                IFNULL(SUM(items.price), 0) AS total_item_price,
-                (services.price + IFNULL(SUM(items.price), 0)) AS total_price
+                p.amount_paid AS total_price
+                
             FROM 
-                ${TABLE_NAMES.bookings} b
-            LEFT JOIN 
-                ${TABLE_NAMES.bookings_items} AS bi ON b.id = bi.booking_id
-            LEFT JOIN 
-                items ON bi.item_id = items.id
-            LEFT JOIN 
-                services ON b.service_id = services.id 
-            WHERE b.status = '${BOOKING_STATE.done}'
-            GROUP BY
-                b.id, services.price, ${groupClause}
+                ${TABLE_NAMES.payments} p
+            INNER JOIN ${TABLE_NAMES.invoices} i ON p.invoice_id = i.id
+            INNER JOIN ${TABLE_NAMES.bookings} b ON b.id = i.booking_id
+            GROUP BY b.id, ${groupClause}
 
         `;
 
