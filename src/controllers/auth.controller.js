@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const {
     TABLE_NAMES,
     USER_ROLES,
@@ -19,6 +21,9 @@ const {
     generateJWT,
     sendResponse,
 } = require('@/src/ultil/ultil.lib');
+const { sendMail } = require('../services/mailsender.service');
+
+const webUrl = process.env.WEB_URL;
 
 const register = async (req, res) => {
     try {
@@ -155,6 +160,7 @@ const signin = async (req, res) => {
         }
 
         const {
+            // eslint-disable-next-line no-unused-vars
             password,
             address_id,
             address_latitude,
@@ -181,7 +187,11 @@ const signin = async (req, res) => {
                       full_address: full_address,
                   };
 
-        const token = generateJWT(users[0].id, inputUsername, other.role);
+        const token = generateJWT({
+            user_id: users[0].id,
+            username: inputUsername,
+            role: other.role,
+        });
 
         res.cookie('token', token, {
             httpOnly: true,
@@ -257,6 +267,7 @@ const staffSignin = async (req, res) => {
             return;
         }
 
+        // eslint-disable-next-line no-unused-vars
         const { station_id, station_name, password, ...other } = staffs[0];
 
         other.created_at = convertTimeToGMT7(other.created_at);
@@ -268,11 +279,11 @@ const staffSignin = async (req, res) => {
             name: station_name,
         };
 
-        const token = generateJWT(
-            staffs[0].id,
-            inputUsername,
-            USER_ROLES.staff
-        );
+        const token = generateJWT({
+            user_id: staffs[0].id,
+            username: inputUsername,
+            role: USER_ROLES.staff,
+        });
 
         res.status(STATUS_CODE.OK).json({
             success: true,
@@ -286,6 +297,129 @@ const staffSignin = async (req, res) => {
     }
 };
 
-const authController = { signin, register, staffSignin };
+const userForgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing email');
+            return;
+        }
+
+        const users = await selectData(
+            `SELECT * FROM ${TABLE_NAMES.users} WHERE email = ?`,
+            [email]
+        );
+
+        if (users.length === 0) {
+            sendResponse(res, STATUS_CODE.NOT_FOUND, 'Email not found');
+            return;
+        }
+
+        const token = await generateJWT(
+            {
+                email: email,
+            },
+            '30s'
+        );
+
+        const emailHTML = `
+            <!doctype html>
+            <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0;">
+                    <div style="max-width: 600px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+                        <div style="text-align: center; background: #49a9ee; padding: 10px 0; color: #fff; font-size: 24px; border-radius: 8px 8px 0 0;">
+                            Yêu cầu đặt lại mật khẩu
+                        </div>
+                        <div style="padding: 20px; ">
+                            <p>Chào bạn,</p>
+                            <p>
+                                Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình. Để đặt lại mật khẩu, vui lòng nhập mã xác nhận sau đây:
+                            </p>
+                            <p style="text-align: center; font-size: 24px; color: #49a9ee; margin: 20px 0;">${webUrl + '/reset-password?token=' + token}</p>
+                            <p>Best regards,</p>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px; color: #777; font-size: 12px;">
+                            Đây là email tự động, vui lòng không trả lời.
+                        </div>
+                    </div>
+                </body>
+            </html>
+    `;
+
+        // Gửi email
+        await sendMail(email, 'Đặt lại mật khẩu', emailHTML);
+
+        sendResponse(res, STATUS_CODE.OK, 'Email sent successfully!');
+    } catch (error) {
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
+    }
+};
+
+const userResetPassword = async (req, res) => {
+    try {
+        const { password, repassword, token } = req.body;
+
+        if (!password || !repassword) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing password');
+            return;
+        }
+
+        if (!token) {
+            sendResponse(res, STATUS_CODE.UNAUTHORIZED, 'Missing token');
+            return;
+        }
+
+        if (password !== repassword) {
+            sendResponse(
+                res,
+                STATUS_CODE.BAD_REQUEST,
+                'Password and repassword are not the same'
+            );
+            return;
+        }
+
+        console.log(req.body);
+
+        const accessToken = token.split(' ')[1];
+
+        try {
+            const payload = await jwt.verify(
+                accessToken,
+                process.env.JWT_ACCESS_TOKEN
+            );
+
+            const { email } = payload;
+
+            const hashed = await hashPassWord(password);
+
+            await excuteQuery('UPDATE users SET password = ? WHERE email = ?', [
+                hashed,
+                email,
+            ]);
+
+            sendResponse(res, STATUS_CODE.OK, 'password reset successfully');
+            // eslint-disable-next-line no-unused-vars
+        } catch (error) {
+            sendResponse(
+                res,
+                STATUS_CODE.FORBIDDEN,
+                'Token is not valid' + error
+            );
+        }
+
+        // sendResponse(res, STATUS_CODE.OK, 'OTP is valid');
+    } catch (error) {
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
+const authController = {
+    signin,
+    register,
+    staffSignin,
+    userForgotPassword,
+    userResetPassword,
+};
 
 module.exports = authController;

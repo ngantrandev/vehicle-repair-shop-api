@@ -142,15 +142,16 @@ const convertDateToGMT7 = (date) => {
     return localDate.format('YYYY-MM-DD');
 };
 
-const generateJWT = (userId, username, role) => {
+const generateJWT = (
+    data,
+    expriresTime = process.env.EXPIRES_TIME_ACCESS_TOKEN
+) => {
     const tokent = jwt.sign(
         {
-            user_id: userId,
-            username,
-            role,
+            ...data,
         },
         process.env.JWT_ACCESS_TOKEN,
-        { expiresIn: process.env.EXPIRES_TIME_ACCESS_TOKEN }
+        { expiresIn: expriresTime }
     );
 
     return tokent;
