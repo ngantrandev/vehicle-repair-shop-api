@@ -20,6 +20,7 @@ const {
     convertDateToGMT7,
     generateJWT,
     sendResponse,
+    isValidEmail,
 } = require('@/src/ultil/ultil.lib');
 const { sendMail } = require('../services/mailsender.service');
 
@@ -306,6 +307,11 @@ const userForgotPassword = async (req, res) => {
             return;
         }
 
+        if (!isValidEmail(email)) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Invalid email');
+            return;
+        }
+
         const users = await selectData(
             `SELECT * FROM ${TABLE_NAMES.users} WHERE email = ?`,
             [email]
@@ -320,7 +326,7 @@ const userForgotPassword = async (req, res) => {
             {
                 email: email,
             },
-            '30s'
+            '5m'
         );
 
         const emailHTML = `

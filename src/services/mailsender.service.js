@@ -1,6 +1,9 @@
 const nodemailer = require('nodemailer');
 
 const shopName = process.env.SHOP_NAME || 'Shop Sửa Xe';
+const mailUser = process.env.EMAIL_USER || '';
+const mailPass = process.env.EMAIL_PASS || '';
+const mailHost = process.env.EMAIL_HOST || '';
 
 const sendMail = async (
     email,
@@ -9,15 +12,17 @@ const sendMail = async (
 ) => {
     try {
         const transporter = nodemailer.createTransport({
-            service: process.env.EMAIL_HOST,
+            service: mailHost,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
+                user: mailUser,
+                pass: mailPass,
             },
         });
 
+        const mailFrom = `${shopName} <${mailUser}>`;
+
         const mailOptions = {
-            from: shopName,
+            from: mailFrom,
             to: email,
             subject: subject,
             html: body,
