@@ -3,6 +3,8 @@ const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
 const polyline = require('@mapbox/polyline');
 const crypto = require('crypto');
+const fs = require('fs');
+const axios = require('axios');
 
 const pool = require('@/src/configs/db.config');
 const {
@@ -369,6 +371,18 @@ const isValidEmail = (email) => {
         );
 };
 
+const downloadFile = async (url, outputPath) => {
+    try {
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+
+        fs.writeFileSync(outputPath, Buffer.from(response.data));
+
+        console.log('File downloaded successfully!');
+    } catch (error) {
+        console.error('Error downloading the file:', error);
+    }
+};
+
 module.exports = {
     executeTransaction,
     excuteQuery,
@@ -393,4 +407,5 @@ module.exports = {
     getChecksum,
     convertTimeFormat,
     isValidEmail,
+    downloadFile,
 };
