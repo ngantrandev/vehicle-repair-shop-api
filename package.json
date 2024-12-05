@@ -4,7 +4,10 @@
     "description": "this is a restful api for vehicle repair shop website",
     "main": "index.js",
     "scripts": {
-        "start": "nodemon --exec babel-node index.js",
+        "build": "npx babel src --out-dir dist/src && npx babel index.js --out-dir dist && cp fcm.serviceaccount.key.json dist\\fcm.serviceaccount.key.json && cp .env dist\\.env",
+        "production": "cd dist && node index.js",
+        "start": "babel-node index.js",
+        "dev": "nodemon --exec babel-node index.js",
         "test": "echo \"Error: no test specified\" && exit 1",
         "format": "npx prettier . --write"
     },
@@ -32,6 +35,7 @@
         "sharp": "^0.33.4"
     },
     "devDependencies": {
+        "@babel/cli": "^7.25.9",
         "@babel/core": "^7.26.0",
         "@babel/node": "^7.26.0",
         "@babel/preset-env": "^7.26.0",

@@ -3,6 +3,7 @@
 
 /uploads
 /invoices
+/dist
 
 fcm.serviceaccount.key.json
 

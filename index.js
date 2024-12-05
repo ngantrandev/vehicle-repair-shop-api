@@ -19,12 +19,14 @@ app.use(bodyparser.json({ limit: '50mb' }));
 fs.access('./uploads', (error) => {
     if (error) {
         fs.mkdirSync('./uploads');
+        console.log('Uploads folder created successfully!');
     }
 });
 
 fs.access('./invoices', (error) => {
     if (error) {
         fs.mkdirSync('./invoices');
+        console.log('Invoices folder created successfully!');
     }
 });
 
