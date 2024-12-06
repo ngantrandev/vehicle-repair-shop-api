@@ -51,6 +51,13 @@ const PAYMENT_TYPE = {
     vnpay: 'vnpay',
 };
 
+const PAYMENT_STATUS = {
+    pending: 'pending',
+    success: 'success',
+    fail: 'fail',
+    refund: 'refund',
+};
+
 module.exports = {
     APP_NAME,
     TABLE_NAMES,
@@ -59,4 +66,5 @@ module.exports = {
     ACCOUNT_STATE,
     BOOKING_STATE,
     PAYMENT_TYPE,
+    PAYMENT_STATUS,
 };

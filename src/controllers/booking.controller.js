@@ -297,33 +297,59 @@ const createBooking = async (req, res) => {
             ],
         ];
 
-        const transactionRes = await executeTransaction(queries, params);
-
-        const bookingId = transactionRes[2].insertId;
-
         if (items && items.length > 0) {
             const args = [];
-            const addItemToBookingQuery = `
+            const query = `
                 INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id) VALUES 
                 ${items
                     .map((item) => {
                         args.push(item);
-                        args.push(bookingId);
-                        return '(?, ?)';
+                        return '(?, @booking_id)';
                     })
                     .join(', ')}
             `;
 
-            await excuteQuery(addItemToBookingQuery, args);
+            queries.push('SET @booking_id = LAST_INSERT_ID();');
+            params.push([]);
+
+            queries.push(query);
+            params.push(args);
         }
 
-        const services = await selectData(
-            'SELECT * FROM services WHERE id = ?',
-            [req.body.service_id]
+        const transactionRes = await executeTransaction(queries, params);
+
+        const bookingId = transactionRes[2].insertId;
+
+        const bookingsData = await selectData(
+            `
+            SELECT
+                b.id booking_id,
+                s.price service_price,
+                s.name service_name,
+                IFNULL(SUM(i.price), 0) as items_price
+            FROM bookings b
+            INNER JOIN services s ON s.id = b.service_id
+            LEFT JOIN bookings_items bi ON bi.booking_id = b.id 
+            LEFT JOIN items i ON i.id = bi.item_id
+            WHERE b.id = ?
+            GROUP BY s.id, b.id
+            
+            `,
+            [bookingId]
+        );
+
+        const { service_name, service_price, items_price } = bookingsData[0];
+
+        const totalAmount = service_price + items_price;
+
+        // create invoice
+        await excuteQuery(
+            `INSERT INTO ${TABLE_NAMES.invoices} (booking_id, total_price, final_price, invoice_date) VALUES (?, ?, ?, ?)`,
+            [bookingId, totalAmount, totalAmount, createdTime]
         );
 
         const title = 'Tạo lịch hẹn thành công';
-        const message = `Lịch hẹn "${services[0].name}" đã được tạo thành công!`;
+        const message = `Lịch hẹn "${service_name}" đã được tạo thành công!`;
         await createUserNotification(req.tokenPayload.user_id, title, message);
 
         sendResponse(res, STATUS_CODE.OK, 'Created booking successfully!', {

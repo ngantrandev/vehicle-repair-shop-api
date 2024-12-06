@@ -360,6 +360,12 @@ const getChecksum = (data) => {
 };
 
 const convertTimeFormat = (time, currFormat, targetFormat) => {
+    if (!targetFormat) {
+        throw new Error('Target format is required');
+    }
+    if (!currFormat) {
+        return moment(time).format(targetFormat);
+    }
     return moment(time, currFormat).format(targetFormat);
 };
 

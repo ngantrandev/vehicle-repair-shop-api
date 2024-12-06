@@ -1,15 +1,15 @@
 const router = require('express').Router();
 
 const {
-    prePayment,
-    getReturnInfo,
-    completePayment,
+    createPaymentUrl,
+    getVNPayReturn,
+    getVNPayIPN,
 } = require('@/src/controllers/payments.controller');
 
-router.post('/create', prePayment);
+router.post('/create-url', createPaymentUrl);
 
-router.post('/complete', completePayment);
+router.get('/vnpay-result', getVNPayReturn);
 
-router.get('/result', getReturnInfo);
+router.get('/vnpay-ipn', getVNPayIPN);
 
 module.exports = router;
