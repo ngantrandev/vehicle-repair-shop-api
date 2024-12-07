@@ -129,7 +129,6 @@ const getCurrentTimeInGMT7 = (format = 'YYYY-MM-DD HH:mm:ss') => {
     if (!format) {
         format = 'YYYY-MM-DD HH:mm:ss';
     }
-    console.log('format', format);
     return moment.tz('Asia/Bangkok').format(format);
 };
 

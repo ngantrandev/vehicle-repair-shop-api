@@ -201,8 +201,6 @@ const updateStaff = async (req, res) => {
             'active',
         ];
 
-        console.log(req.body);
-
         const updateFields = [];
         const updateValues = [];
 

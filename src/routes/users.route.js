@@ -35,6 +35,8 @@ router.post(
 // Bookings routes
 router.get('/bookings', bookingsController.getAllBooking);
 
+router.get('/bookings/:booking_id', bookingController.getBookingById);
+
 router.post(
     '/bookings',
     uploadImgService.upload.single('file'),

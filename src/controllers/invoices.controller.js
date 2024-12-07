@@ -11,7 +11,6 @@ const { TABLE_NAMES } = require('../configs/constants.config');
 const { createInvoiceFile } = require('../services/invoice.service');
 
 const getAllInvoices = async (req, res) => {
-    console.log(req.body);
     var files = fs.readdirSync('./invoices');
 
     // for (var i = 0; i < files.length; i++) {
@@ -58,11 +57,7 @@ WHERE b.id = 79
 GROUP BY (items.id)
          */
 
-        console.log(bookings);
-
         const query = `INSERT INTO invoices (booking_id, invoice_date, total_price, final_price, status) VALUES (?, ?, ?, ?, ?)`;
-
-        console.log(query);
 
         sendResponse(res, STATUS_CODE.OK, 'Create invoice');
     } catch (error) {

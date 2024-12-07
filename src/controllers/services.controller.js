@@ -6,6 +6,7 @@ const getAllServices = async (req, res) => {
     const {
         category_id: categoryId,
         motorcycle_brand: motocycleBrand,
+        max_price: maxPrice,
         key,
         active,
     } = req.query;
@@ -23,6 +24,10 @@ const getAllServices = async (req, res) => {
     }
     if (motocycleBrand) {
         wheres.push(`sm.motorcycle_id = '${motocycleBrand}'`);
+    }
+
+    if (maxPrice) {
+        wheres.push(`s.price <= ${maxPrice}`);
     }
 
     if (key) {

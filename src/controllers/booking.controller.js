@@ -124,6 +124,7 @@ const getBookingById = async (req, res) => {
             staff_id,
             staff_firstname,
             staff_lastname,
+            is_paid,
             ...other
         } = bookings[0];
         other.created_at = convertTimeToGMT7(other.created_at);
@@ -169,6 +170,12 @@ const getBookingById = async (req, res) => {
                 },
             },
         };
+
+        if (is_paid == 0) {
+            other.is_paid = false;
+        } else {
+            other.is_paid = true;
+        }
 
         sendResponse(
             res,

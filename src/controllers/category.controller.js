@@ -18,7 +18,7 @@ const getServiceCategory = async (req, res) => {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
-            'Internal Server Error'
+            'Internal Server Error' + error
         );
     }
 };

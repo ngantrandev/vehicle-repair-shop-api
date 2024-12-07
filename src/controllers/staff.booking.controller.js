@@ -198,6 +198,16 @@ const setBookingStatusToFixing = async (req, res) => {
 
 const getAllBookingAssignedToStaff = async (req, res) => {
     try {
+        const { status } = req.query;
+
+        const where = [`staff_id = ?`];
+        const params = [req.tokenPayload.user_id];
+
+        if (status) {
+            where.push('status = ?');
+            params.push(status);
+        }
+
         const query = `
             SELECT
                   b.*,
@@ -226,7 +236,7 @@ const getAllBookingAssignedToStaff = async (req, res) => {
 
             FROM ( SELECT *
                     FROM ${TABLE_NAMES.bookings}
-                    WHERE staff_id = ? AND status != '${BOOKING_STATE.pending}' ) AS b
+                    ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''} ) AS b
             LEFT JOIN
                 ${TABLE_NAMES.services} AS s ON s.id = b.service_id
             LEFT JOIN
@@ -246,7 +256,7 @@ const getAllBookingAssignedToStaff = async (req, res) => {
             ORDER BY created_at DESC
         `;
 
-        const bookings = await selectData(query, [req.tokenPayload.user_id]);
+        const bookings = await selectData(query, params);
 
         const newBookings = bookings.map(
             ({
@@ -320,7 +330,7 @@ const getAllBookingAssignedToStaff = async (req, res) => {
                     },
                 };
 
-                if(is_paid == 0) {
+                if (is_paid == 0) {
                     other.is_paid = false;
                 } else {
                     other.is_paid = true;
@@ -332,6 +342,7 @@ const getAllBookingAssignedToStaff = async (req, res) => {
 
         sendResponse(res, STATUS_CODE.OK, 'success', newBookings);
     } catch (error) {
+        console.log(error);
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
