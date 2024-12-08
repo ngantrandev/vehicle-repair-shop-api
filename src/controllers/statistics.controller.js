@@ -1,4 +1,7 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
+const {
+    TABLE_NAMES,
+    PAYMENT_STATUS,
+} = require('@/src/configs/constants.config');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const { sendResponse, selectData } = require('@/src/ultil/ultil.lib');
 
@@ -77,6 +80,7 @@ const getRevenue = async (req, res) => {
                 ${TABLE_NAMES.payments} p
             INNER JOIN ${TABLE_NAMES.invoices} i ON p.invoice_id = i.id
             INNER JOIN ${TABLE_NAMES.bookings} b ON b.id = i.booking_id
+            WHERE p.status = '${PAYMENT_STATUS.success}'
             GROUP BY b.id, ${groupClause}
 
         `;

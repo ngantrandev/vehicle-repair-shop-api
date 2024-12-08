@@ -193,7 +193,12 @@ const getBookingById = async (req, res) => {
 };
 const createBooking = async (req, res) => {
     try {
-        const bodyData = req.body;
+        if (!req?.body?.data) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, `data is required`);
+            return;
+        }
+
+        const bodyData = JSON.parse(req?.body?.data);
 
         const {
             items,
@@ -363,6 +368,7 @@ const createBooking = async (req, res) => {
             id: bookingId,
         });
     } catch (error) {
+        console.log(error);
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,

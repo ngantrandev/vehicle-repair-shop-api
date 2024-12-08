@@ -5,9 +5,6 @@ const {
     USER_ROLES,
     ACCOUNT_STATE,
 } = require('@/src/configs/constants.config');
-const {
-    QUERY_SELECT_USER_BY_USERNAME,
-} = require('@/src/configs/queries.config');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const {
@@ -112,20 +109,43 @@ const register = async (req, res) => {
 
 const signin = async (req, res) => {
     try {
-        const inputUsername = req.body.username;
-        const inputPassword = req.body.password;
-
-        if (!inputUsername) {
+        if (!req.body.username) {
             sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing username');
             return;
         }
 
-        if (!inputPassword) {
+        if (!req.body.password) {
             sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing password');
             return;
         }
 
-        const query = QUERY_SELECT_USER_BY_USERNAME;
+        let whereClause = '';
+
+        if (isValidEmail(req.body.username.trim())) {
+            whereClause = 'WHERE email = ?';
+        } else {
+            whereClause = 'WHERE username = ?';
+        }
+        const inputUsername = req.body.username;
+        const inputPassword = req.body.password;
+
+        const query = `
+            SELECT
+                u.*,
+                addr.latitude AS address_latitude,
+                addr.longitude AS address_longitude,
+                addr.id AS address_id,
+                addr.place_id AS place_id,
+                addr.address_name AS address_name,
+                addr.full_address AS full_address
+            FROM (
+                SELECT * FROM ${TABLE_NAMES.users} ${whereClause}
+            ) AS u
+            LEFT JOIN
+                ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
+
+        `;
+
 
         const users = await selectData(query, [inputUsername]);
 
@@ -176,17 +196,17 @@ const signin = async (req, res) => {
         other.created_at = convertTimeToGMT7(other.created_at);
         other.birthday = convertDateToGMT7(other.birthday);
 
-        other.address =
-            address_id === null
-                ? null
-                : {
-                      id: address_id,
-                      latitude: address_latitude,
-                      longitude: address_longitude,
-                      place_id: place_id,
-                      address_name: address_name,
-                      full_address: full_address,
-                  };
+        // other.address =
+        //     address_id === null
+        //         ? null
+        //         : {
+        //               id: address_id,
+        //               latitude: address_latitude,
+        //               longitude: address_longitude,
+        //               place_id: place_id,
+        //               address_name: address_name,
+        //               full_address: full_address,
+        //           };
 
         const token = generateJWT({
             user_id: users[0].id,

@@ -138,6 +138,24 @@ const updateUserProfile = async (req, res) => {
 
                 updateFields.push(`${field} = ?`);
                 updateValues.push(req.body[field]);
+            } else if (field == 'email') {
+                const emailQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE email = ? AND id != ?`;
+                const emailExisted = await selectData(emailQuery, [
+                    req.body.email,
+                    req.params.user_id,
+                ]);
+
+                if (emailExisted.length > 0) {
+                    sendResponse(
+                        res,
+                        STATUS_CODE.CONFLICT,
+                        'Email already existed!'
+                    );
+                    return;
+                }
+
+                updateFields.push(`${field} = ?`);
+                updateValues.push(req.body[field]);
             } else if (field === 'password') {
                 const hash = await hashPassWord(value);
 
