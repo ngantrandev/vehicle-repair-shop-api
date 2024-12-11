@@ -1,6 +1,12 @@
 const axios = require('axios');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
+if (!process.env.GOONG_MAP_BASE_API_ENPOINT) {
+    throw new Error(
+        'Missing Goong Map API Endpoint. Please check your .env file.'
+    );
+}
+
 const httpRequest = axios.create({
     baseURL: process.env.GOONG_MAP_BASE_API_ENPOINT,
     timeout: 5000,

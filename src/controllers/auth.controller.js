@@ -22,6 +22,7 @@ const {
 const { sendMail } = require('../services/mailsender.service');
 
 const webUrl = process.env.WEB_URL;
+const accessTokenSecret = process.env.JWT_ACCESS_TOKEN;
 
 const register = async (req, res) => {
     try {
@@ -145,7 +146,6 @@ const signin = async (req, res) => {
                 ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
 
         `;
-
 
         const users = await selectData(query, [inputUsername]);
 
@@ -405,15 +405,10 @@ const userResetPassword = async (req, res) => {
             return;
         }
 
-        console.log(req.body);
-
         const accessToken = token.split(' ')[1];
 
         try {
-            const payload = await jwt.verify(
-                accessToken,
-                process.env.JWT_ACCESS_TOKEN
-            );
+            const payload = await jwt.verify(accessToken, accessTokenSecret);
 
             const { email } = payload;
 

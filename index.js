@@ -4,12 +4,23 @@ const morgan = require('morgan');
 const bodyparser = require('body-parser');
 const dotenv = require('dotenv');
 const fs = require('fs');
+var os = require('os');
+
+var ip = '0.0.0.0';
+var ips = os.networkInterfaces();
+Object.keys(ips).forEach(function (_interface) {
+    ips[_interface].forEach(function (_dev) {
+        if (_dev.family === 'IPv4' && !_dev.internal) ip = _dev.address;
+    });
+});
 
 dotenv.config();
 const app = express();
 const { downloadFile } = require('@/src/ultil/ultil.lib');
 
 const filePath = './fcm.serviceaccount.key.json';
+
+const appPort = process.env.APP_PORT || 3000;
 
 const initialApp = () => {
     const apiRoute = require('@/src/routes/api.route');
@@ -51,8 +62,8 @@ const initialApp = () => {
 
     app.use(BASE_URL_PATH, apiRoute);
 
-    app.listen(process.env.APP_PORT, () => {
-        console.log(`Server is running on port ${process.env.APP_PORT}!!`);
+    app.listen(appPort, () => {
+        console.log(`Server is running on http://${ip}:${appPort}`);
     });
 };
 

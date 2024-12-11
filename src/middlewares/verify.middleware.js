@@ -11,28 +11,22 @@ const {
 } = require('@/src/ultil/ultil.lib');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
+const accessTokenSecret = process.env.JWT_ACCESS_TOKEN;
+
 const verifyToken = (req, res, next) => {
     const token = req.headers.token;
 
     if (token) {
         const accessToken = token.split(' ')[1];
 
-        jwt.verify(
-            accessToken,
-            process.env.JWT_ACCESS_TOKEN,
-            (err, tokenPayload) => {
-                if (err) {
-                    sendResponse(
-                        res,
-                        STATUS_CODE.FORBIDDEN,
-                        'Token is not valid'
-                    );
-                    return;
-                }
-                req.tokenPayload = tokenPayload;
-                next();
+        jwt.verify(accessToken, accessTokenSecret, (err, tokenPayload) => {
+            if (err) {
+                sendResponse(res, STATUS_CODE.FORBIDDEN, 'Token is not valid');
+                return;
             }
-        );
+            req.tokenPayload = tokenPayload;
+            next();
+        });
     } else {
         sendResponse(res, STATUS_CODE.UNAUTHORIZED, 'Token is not provided');
         return;

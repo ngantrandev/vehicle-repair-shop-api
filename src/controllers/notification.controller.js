@@ -5,6 +5,7 @@ const {
     selectData,
     convertTimeToGMT7,
 } = require('@/src/ultil/ultil.lib');
+const { sendNotificationToTopic } = require('../ultil/firebaseServices');
 
 const userGetAllNotifications = async (req, res) => {
     try {
@@ -164,6 +165,24 @@ const staffMarkAllNotificationsAsRead = async (req, res) => {
     }
 };
 
+const testSendNoti = async (req, res) => {
+    try {
+        const { user_id, title, content, role } = req.query;
+
+        const topic = `${role}_${user_id}`;
+
+        await sendNotificationToTopic(title, content, topic);
+
+        sendResponse(res, STATUS_CODE.OK, 'success');
+    } catch (error) {
+        sendResponse(
+            res,
+            STATUS_CODE.INTERNAL_SERVER_ERROR,
+            'something went wrong!' + error
+        );
+    }
+};
+
 const notificationController = {
     userGetAllNotifications,
     userMarkNotificationAsRead,
@@ -171,6 +190,7 @@ const notificationController = {
     staffGetAllNotifications,
     staffMarkNotificationAsRead,
     staffMarkAllNotificationsAsRead,
+    testSendNoti,
 };
 
 module.exports = notificationController;

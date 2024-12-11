@@ -1,7 +1,7 @@
 const express = require('express');
 
-const authRoutes = require('./auth.route');
-const adminRoutes = require('./admin.route');
+const authRoutes = require('@/src/routes/auth.route');
+const adminRoutes = require('@/src/routes/admin.route');
 const motorcycleBrandsRoute = require('@/src/routes/motorcycle.brands.route');
 const servicesRoute = require('@/src/routes/services.route');
 const motorcyclesRoute = require('@/src/routes/motorcycles.route');
@@ -20,6 +20,7 @@ const {
     verifyAdminRole,
     verifyStaffRole,
 } = require('@/src/middlewares/verify.middleware');
+const { testSendNoti } = require('@/src/controllers/notification.controller');
 
 const apiRoute = express();
 
@@ -49,5 +50,7 @@ apiRoute.use('/profile', profileRoute);
 apiRoute.use('/invoices', invoicesRoute);
 
 apiRoute.use('/payments', paymentsRoute);
+
+apiRoute.get('/test-noti', testSendNoti);
 
 module.exports = apiRoute;

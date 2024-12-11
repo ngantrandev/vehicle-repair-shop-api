@@ -1,6 +1,8 @@
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const goongHttpRequests = require('@/src/ultil/goongHttpRequests');
 
+const goongRestApiKey = process.env.GOONG_API_KEY;
+
 const getDistanceMatrixFromUserAddrToOtherStations = async (
     origins,
     destinations
@@ -13,7 +15,7 @@ const getDistanceMatrixFromUserAddrToOtherStations = async (
     const params = {
         origins: origins.join('|'),
         destinations: destinations.join('|'),
-        api_key: process.env.GOONG_API_KEY,
+        api_key: goongRestApiKey,
     };
 
     const res = await goongHttpRequests.get(apiPath, params);
@@ -34,7 +36,7 @@ const autocompleteAddress = async (input, latitude, longitude) => {
         location: `${latitude},${longitude}`,
         limit: 10,
         radius: 10,
-        api_key: process.env.GOONG_API_KEY,
+        api_key: goongRestApiKey,
     };
 
     const res = await goongHttpRequests.get(apiPath, params);
@@ -53,7 +55,7 @@ const forwardGeocode = async (address) => {
     const apiPath = '/geocode';
     const params = {
         address,
-        api_key: process.env.GOONG_API_KEY,
+        api_key: goongRestApiKey,
     };
 
     const res = await goongHttpRequests.get(apiPath, params);
@@ -71,7 +73,7 @@ const reverseGeocode = async (latitude, longitude) => {
     const apiPath = '/geocode';
     const params = {
         latlng: `${latitude},${longitude}`,
-        api_key: process.env.GOONG_API_KEY,
+        api_key: goongRestApiKey,
     };
 
     const res = await goongHttpRequests.get(apiPath, params);
@@ -89,7 +91,7 @@ const getAddressDetailByPlaceId = async (place_id) => {
     const apiPath = '/geocode';
     const params = {
         place_id,
-        api_key: process.env.GOONG_API_KEY,
+        api_key: goongRestApiKey,
     };
 
     const res = await goongHttpRequests.get(apiPath, params);
@@ -109,7 +111,7 @@ const getDirection = async (origin, destination, vehicle) => {
         origin,
         destination,
         vehicle,
-        api_key: process.env.GOONG_API_KEY,
+        api_key: goongRestApiKey,
     };
 
     const res = await goongHttpRequests.get(apiPath, params);

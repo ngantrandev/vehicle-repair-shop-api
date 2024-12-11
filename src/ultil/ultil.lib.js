@@ -16,6 +16,12 @@ const goongServices = require('@/src/services/goongServices');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const SecretKey = process.env.VNP_SECRET_KEY || '';
+const accessTokenSecret = process.env.JWT_ACCESS_TOKEN;
+const expireTimeAccessToken = process.env.EXPIRES_TIME_ACCESS_TOKEN || '1h';
+
+if (!accessTokenSecret) {
+    throw new Error('Missing access token secret. check your .env file');
+}
 
 const executeTransaction = async (queries, listParamArray) => {
     if (queries.length !== listParamArray.length) {
@@ -143,15 +149,12 @@ const convertDateToGMT7 = (date) => {
     return localDate.format('YYYY-MM-DD');
 };
 
-const generateJWT = (
-    data,
-    expriresTime = process.env.EXPIRES_TIME_ACCESS_TOKEN
-) => {
+const generateJWT = (data, expriresTime = expireTimeAccessToken) => {
     const tokent = jwt.sign(
         {
             ...data,
         },
-        process.env.JWT_ACCESS_TOKEN,
+        accessTokenSecret,
         { expiresIn: expriresTime }
     );
 
