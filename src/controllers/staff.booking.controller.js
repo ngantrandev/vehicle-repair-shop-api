@@ -13,8 +13,8 @@ const {
 
 const {
     createUserNotification,
-} = require('@/src/services/notificationService');
-const { sendNotificationToTopic } = require('@/src/ultil/firebaseServices');
+} = require('@/src/services/notification.service');
+const { sendNotificationToTopic } = require('@/src/services/firebase.service');
 
 const setBookingStatusToFixing = async (req, res) => {
     if (!req.params.booking_id) {

@@ -12,7 +12,7 @@ const {
     TABLE_NAMES,
     ACCOUNT_STATE,
 } = require('@/src/configs/constants.config');
-const goongServices = require('@/src/services/goongServices');
+const goongServices = require('@/src/services/goong.service');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const SecretKey = process.env.VNP_SECRET_KEY || '';

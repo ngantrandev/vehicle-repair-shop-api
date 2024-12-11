@@ -5,7 +5,7 @@ const bookingController = require('@/src/controllers/booking.controller');
 const bookingsController = require('@/src/controllers/bookings.controller');
 const middlewareControllers = require('@/src/middlewares/verify.middleware');
 const cartController = require('@/src/controllers/cart.controller');
-const uploadImgService = require('@/src/services/uploadImageService');
+const uploadImgService = require('@/src/services/uploadImage.service');
 const notificationController = require('@/src/controllers/notification.controller');
 
 router.get(

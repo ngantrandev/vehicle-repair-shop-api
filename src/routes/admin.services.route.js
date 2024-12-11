@@ -1,5 +1,5 @@
 const adminServiceControllers = require('@/src/controllers/admin.service.controller');
-const uploadImgService = require('@/src/services/uploadImageService');
+const uploadImgService = require('@/src/services/uploadImage.service');
 
 const router = require('express').Router();
 

@@ -2,7 +2,7 @@ const {
     getUserByUsername,
     updateUserProfile,
 } = require('@/src/controllers/profile.controller');
-const { upload } = require('@/src/services/uploadImageService');
+const { upload } = require('@/src/services/uploadImage.service');
 
 const router = require('express').Router();
 

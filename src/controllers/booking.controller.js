@@ -20,8 +20,8 @@ const {
 } = require('@/src/configs/constants.config');
 const {
     createUserNotification,
-} = require('@/src/services/notificationService');
-const { sendNotificationToTopic } = require('@/src/ultil/firebaseServices');
+} = require('@/src/services/notification.service');
+const { sendNotificationToTopic } = require('@/src/services/firebase.service');
 const { createInvoiceFile } = require('@/src/services/invoice.service');
 
 const getBookingById = async (req, res) => {

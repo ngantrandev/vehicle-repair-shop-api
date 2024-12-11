@@ -15,10 +15,10 @@ const {
     PAYMENT_TYPE,
     PAYMENT_STATUS,
 } = require('@/src/configs/constants.config');
-const { sendNotificationToTopic } = require('@/src/ultil/firebaseServices');
+const { sendNotificationToTopic } = require('@/src/services/firebase.service');
 const {
     createUserNotification,
-} = require('@/src/services/notificationService');
+} = require('@/src/services/notification.service');
 
 const VnpTmnCode = process.env.VNP_TMN_CODE || '';
 

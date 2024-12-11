@@ -1,5 +1,5 @@
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const goongServices = require('@/src/services/goongServices');
+const goongServices = require('@/src/services/goong.service');
 const { sendResponse, decodePolyline } = require('@/src/ultil/ultil.lib');
 
 const autocompleteAddress = async (req, res) => {
@@ -74,7 +74,12 @@ const reverseGeocode = async (req, res) => {
             },
             []
         );
-        sendResponse(res, STATUS_CODE.OK, 'Get reverse geocode successfully!', newList);
+        sendResponse(
+            res,
+            STATUS_CODE.OK,
+            'Get reverse geocode successfully!',
+            newList
+        );
     } catch (error) {
         sendResponse(
             res,

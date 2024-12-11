@@ -5,7 +5,7 @@ const {
     selectData,
     convertTimeToGMT7,
 } = require('@/src/ultil/ultil.lib');
-const { sendNotificationToTopic } = require('../ultil/firebaseServices');
+const { sendNotificationToTopic } = require('@/src/services/firebase.service');
 
 const userGetAllNotifications = async (req, res) => {
     try {

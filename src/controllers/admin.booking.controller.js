@@ -7,8 +7,8 @@ const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const {
     createUserNotification,
     createStaffNotification,
-} = require('@/src/services/notificationService');
-const { sendNotificationToTopic } = require('@/src/ultil/firebaseServices');
+} = require('@/src/services/notification.service');
+const { sendNotificationToTopic } = require('@/src/services/firebase.service');
 const {
     isValidInteger,
     selectData,
