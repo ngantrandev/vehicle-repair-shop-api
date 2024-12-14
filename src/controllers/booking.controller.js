@@ -66,7 +66,7 @@ const getBookingById = async (req, res) => {
                 st_addr.longitude AS station_longitude,
                 st_addr.full_address AS station_address,
                 st_addr.address_name AS station_address_name,
-                IF(p.id IS NULL, 0, 1) AS is_paid,
+                IF(p.status = 'success', 1, 0) AS is_paid,
                 inv.invoice_file
             FROM ( SELECT *
                     FROM ${TABLE_NAMES.bookings}
@@ -347,9 +347,7 @@ const createBooking = async (req, res) => {
             `
             SELECT
                 b.id booking_id,
-                s.price service_price,
-                s.name service_name,
-                IFNULL(SUM(bi.price), 0) as items_price
+                s.name service_name
             FROM bookings b
             INNER JOIN services s ON s.id = b.service_id
             LEFT JOIN bookings_items bi ON bi.booking_id = b.id 
@@ -361,15 +359,7 @@ const createBooking = async (req, res) => {
             [bookingId]
         );
 
-        const { service_name, service_price, items_price } = bookingsData[0];
-
-        const totalAmount = service_price + items_price;
-
-        // create invoice
-        await excuteQuery(
-            `INSERT INTO ${TABLE_NAMES.invoices} (booking_id, total_price, final_price, invoice_date) VALUES (?, ?, ?, ?)`,
-            [bookingId, totalAmount, totalAmount, createdTime]
-        );
+        const { service_name } = bookingsData[0];
 
         const title = 'Tạo lịch hẹn thành công';
         const message = `Lịch hẹn "${service_name}" đã được tạo thành công!`;

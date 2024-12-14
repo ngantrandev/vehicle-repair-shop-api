@@ -6,6 +6,7 @@ const {
     buildQueryParams,
     getChecksum,
     convertTimeFormat,
+    executeTransaction,
 } = require('@/src/ultil/ultil.lib');
 
 const { createReturnUrl } = require('@/src/services/vnpay.service');
@@ -31,21 +32,60 @@ const createPaymentUrl = async (req, res) => {
             throw new Error('booking_id is required');
         }
 
+        const bookingsData = await selectData(
+            `
+            SELECT
+                b.id booking_id,
+                b.created_at,
+                s.price service_price,
+                s.name service_name,
+                IFNULL(SUM(bi.price * bi.count), 0) as items_price
+            FROM bookings b
+            INNER JOIN services s ON s.id = b.service_id
+            LEFT JOIN bookings_items bi ON bi.booking_id = b.id 
+            LEFT JOIN items i ON i.id = bi.item_id
+            WHERE b.id = ?
+            GROUP BY s.id, b.id
+            
+            `,
+            [bookingId]
+        );
+
+        const { service_name, service_price, items_price } = bookingsData[0];
+
+        const totalAmount = service_price + items_price;
+
+        await excuteQuery(
+            `
+                INSERT INTO ${TABLE_NAMES.invoices} (booking_id, total_price, final_price, invoice_date) 
+                SELECT ?, ?, ?, ?
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM ${TABLE_NAMES.invoices}
+                    WHERE booking_id = ?
+                );
+            `,
+            [
+                bookingId,
+                totalAmount,
+                totalAmount,
+                bookingsData[0].created_at,
+                bookingId,
+            ]
+        );
+
         const getBookingInfoQuery = `
             SELECT
-                s.name service_name,
-                i.final_price amount,
                 i.id invoice_id
 
             FROM ${TABLE_NAMES.bookings} b
-            INNER JOIN ${TABLE_NAMES.services} s ON s.id = b.service_id
             INNER JOIN ${TABLE_NAMES.invoices} i ON i.booking_id = b.id
             WHERE b.id = ?
         `;
 
         const bookingInfo = await selectData(getBookingInfoQuery, [bookingId]);
 
-        const { service_name, amount, invoice_id: invoiceId } = bookingInfo[0];
+        const { invoice_id: invoiceId } = bookingInfo[0];
 
         const date = new Date();
 
@@ -56,25 +96,40 @@ const createPaymentUrl = async (req, res) => {
 
         const createDate = convertTimeFormat(date, null, timeFormat);
         const expireDate = convertTimeFormat(expireTime, null, timeFormat);
-        const txnRef = `GIAODICH_${invoiceId}_${convertTimeFormat(date, null, timeFormat)}`;
+        let txnRef = `GIAODICH_${invoiceId}_${convertTimeFormat(date, null, timeFormat)}`;
 
-        const createPaymentQuery = `
-            INSERT INTO
-                ${TABLE_NAMES.payments} (invoice_id, created_at, txn_ref, status)
-            VALUES (?, ?, ?, ?)
-        `;
+        const paymentExists = await selectData(
+            'SELECT * FROM payments WHERE invoice_id = ?',
+            invoiceId
+        );
 
-        await excuteQuery(createPaymentQuery, [
-            invoiceId,
-            date,
-            txnRef,
-            PAYMENT_STATUS.pending,
-        ]);
+        if (paymentExists.length == 0) {
+            const createPaymentQuery = `
+                INSERT INTO
+                    ${TABLE_NAMES.payments} (invoice_id, created_at, txn_ref, status)
+                SELECT ?, ?, ?, ?
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM ${TABLE_NAMES.payments}
+                    WHERE invoice_id = ? AND (status = 'pending' OR status = 'success')
+                )
+            `;
+
+            await excuteQuery(createPaymentQuery, [
+                invoiceId,
+                date,
+                txnRef,
+                PAYMENT_STATUS.pending,
+                invoiceId,
+            ]);
+        } else {
+            txnRef = paymentExists[0].txn_ref;
+        }
 
         const orderInfo = `Thanh toán dịch vụ ${service_name} và các sản phẩm đặt cùng`;
 
         const returnUrl = createReturnUrl({
-            amount: amount,
+            amount: totalAmount,
             orderInfo,
             txnRef,
             createDate,
@@ -213,33 +268,56 @@ const getVNPayIPN = async (req, res) => {
             case PAYMENT_STATUS.pending:
                 if (vnp_resCode == '00') {
                     // Ở đây cập nhật trạng thái giao dịch thanh toán thành công vào CSDL của bạn
-                    await excuteQuery(
+
+                    const queries = [];
+                    const args = [];
+
+                    queries.push(
                         `
-                            UPDATE ${TABLE_NAMES.payments}
-                            SET
-                                payment_method = ?,
-                                amount_paid = ?,
-                                order_info = ?,
-                                bank_code = ?,
-                                bank_transaction_id = ?,
-                                transaction_id = ?,
-                                payment_status = ?,
-                                status = ?
-                            WHERE invoice_id = ? AND txn_ref = ?
-                        `,
-                        [
-                            PAYMENT_TYPE.vnpay,
-                            amount,
-                            queryParams['vnp_OrderInfo'],
-                            queryParams['vnp_BankCode'],
-                            queryParams['vnp_BankTranNo'],
-                            queryParams['vnp_TransactionNo'],
-                            queryParams['vnp_TransactionStatus'],
-                            PAYMENT_STATUS.success,
-                            invoiceId,
-                            vnp_TxnRef,
-                        ]
+                        UPDATE ${TABLE_NAMES.payments}
+                        SET
+                            payment_method = ?,
+                            amount_paid = ?,
+                            order_info = ?,
+                            bank_code = ?,
+                            bank_transaction_id = ?,
+                            transaction_id = ?,
+                            payment_status = ?,
+                            status = ?
+                        WHERE invoice_id = ? AND txn_ref = ?
+                        `
                     );
+
+                    args.push([
+                        PAYMENT_TYPE.vnpay,
+                        amount,
+                        queryParams['vnp_OrderInfo'],
+                        queryParams['vnp_BankCode'],
+                        queryParams['vnp_BankTranNo'],
+                        queryParams['vnp_TransactionNo'],
+                        queryParams['vnp_TransactionStatus'],
+                        PAYMENT_STATUS.success,
+                        invoiceId,
+                        vnp_TxnRef,
+                    ]);
+
+                    queries.push(`
+                        INSERT INTO items_output (item_id, count, price, date_output)
+                        SELECT 
+                            bi.item_id,
+                            bi.count,
+                            bi.price,
+                            p.created_at
+                        FROM payments p 
+                        INNER JOIN invoices ivn ON ivn.id = p.invoice_id
+                        INNER JOIN bookings b ON b.id = ivn.booking_id
+                        INNER JOIN bookings_items bi ON bi.booking_id = b.id
+                        WHERE p.status = 'success' AND ivn.id = ?    
+                    `);
+
+                    args.push([invoiceId]);
+
+                    await executeTransaction(queries, args);
 
                     const title = 'Thanh toán thành công';
                     const message =
