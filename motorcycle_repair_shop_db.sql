@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 29, 2024 lúc 10:02 AM
+-- Thời gian đã tạo: Th12 14, 2024 lúc 11:14 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -48,20 +48,23 @@ CREATE TABLE `bookings` (
 --
 
 CREATE TABLE `bookings_items` (
-  `booking_id` int(30) DEFAULT NULL,
-  `item_id` int(30) DEFAULT NULL
+  `id` int(11) NOT NULL,
+  `booking_id` int(30) NOT NULL,
+  `item_id` int(30) NOT NULL,
+  `price` int(11) NOT NULL,
+  `count` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `carts`
+-- Cấu trúc bảng cho bảng `bookings_items_temp`
 --
 
-CREATE TABLE `carts` (
+CREATE TABLE `bookings_items_temp` (
   `id` int(11) NOT NULL,
-  `service_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL
+  `booking_id` int(30) DEFAULT NULL,
+  `item_id` int(30) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -106,6 +109,35 @@ CREATE TABLE `items` (
   `price` int(30) DEFAULT NULL,
   `image_url` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `items_input`
+--
+
+CREATE TABLE `items_input` (
+  `id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `count` int(11) NOT NULL,
+  `input_price` int(11) NOT NULL,
+  `output_price` int(11) NOT NULL,
+  `date_input` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `items_output`
+--
+
+CREATE TABLE `items_output` (
+  `id` int(11) NOT NULL,
+  `item_input_id` int(11) NOT NULL,
+  `count` int(11) NOT NULL,
+  `booking_id` int(11) NOT NULL,
+  `date_output` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -167,7 +199,7 @@ CREATE TABLE `notifications_users` (
 CREATE TABLE `payments` (
   `id` int(11) NOT NULL,
   `invoice_id` int(11) NOT NULL,
-  `payment_date` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `payment_method` varchar(255) NOT NULL COMMENT 'payment type: online, cash',
   `amount_paid` int(11) NOT NULL,
   `order_info` varchar(255) DEFAULT NULL,
@@ -175,7 +207,8 @@ CREATE TABLE `payments` (
   `bank_transaction_id` varchar(255) DEFAULT NULL,
   `transaction_id` varchar(255) DEFAULT NULL COMMENT 'mã giao dịch trên cổng thanh toán',
   `txn_ref` varchar(255) DEFAULT NULL COMMENT 'mã giao dịch tham chiếu trên hệ thống merchant',
-  `payment_status` varchar(255) NOT NULL COMMENT 'mã phản hồi kết quả thanh toán trên cổng thanh toán'
+  `payment_status` varchar(255) NOT NULL COMMENT 'mã phản hồi kết quả thanh toán trên cổng thanh toán',
+  `status` varchar(255) NOT NULL COMMENT 'trạng thái của giao dịch\r\n- pending ( chưa có ipn)\r\n- success ( ipn trả về thành công)\r\n- fail ( ipn trả về thất bại)\r\n- refund'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -300,13 +333,17 @@ ALTER TABLE `bookings`
   ADD KEY `bookings_ibfk_4` (`staff_id`);
 
 --
--- Chỉ mục cho bảng `carts`
+-- Chỉ mục cho bảng `bookings_items`
 --
-ALTER TABLE `carts`
+ALTER TABLE `bookings_items`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `id` (`id`),
-  ADD KEY `service_id` (`service_id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD UNIQUE KEY `booking_id` (`booking_id`,`item_id`);
+
+--
+-- Chỉ mục cho bảng `bookings_items_temp`
+--
+ALTER TABLE `bookings_items_temp`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Chỉ mục cho bảng `goong_map_addresses`
@@ -319,13 +356,24 @@ ALTER TABLE `goong_map_addresses`
 -- Chỉ mục cho bảng `invoices`
 --
 ALTER TABLE `invoices`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `booking_id` (`booking_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Chỉ mục cho bảng `items`
 --
 ALTER TABLE `items`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `items_input`
+--
+ALTER TABLE `items_input`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `items_output`
+--
+ALTER TABLE `items_output`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -418,9 +466,15 @@ ALTER TABLE `bookings`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `carts`
+-- AUTO_INCREMENT cho bảng `bookings_items`
 --
-ALTER TABLE `carts`
+ALTER TABLE `bookings_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `bookings_items_temp`
+--
+ALTER TABLE `bookings_items_temp`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -440,6 +494,18 @@ ALTER TABLE `invoices`
 --
 ALTER TABLE `items`
   MODIFY `id` int(30) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `items_input`
+--
+ALTER TABLE `items_input`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `items_output`
+--
+ALTER TABLE `items_output`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `motorcycles`
@@ -507,19 +573,6 @@ ALTER TABLE `bookings`
   ADD CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `bookings_ibfk_3` FOREIGN KEY (`address_id`) REFERENCES `goong_map_addresses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `bookings_ibfk_4` FOREIGN KEY (`staff_id`) REFERENCES `staffs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Các ràng buộc cho bảng `carts`
---
-ALTER TABLE `carts`
-  ADD CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `carts_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Các ràng buộc cho bảng `invoices`
---
-ALTER TABLE `invoices`
-  ADD CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`);
 
 --
 -- Các ràng buộc cho bảng `motorcycles`

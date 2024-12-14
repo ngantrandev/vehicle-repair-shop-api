@@ -4,12 +4,23 @@ const {
     selectData,
     sendResponse,
     excuteQuery,
+    executeTransaction,
 } = require('@/src/ultil/ultil.lib');
 
 const getAllItem = async (req, res) => {
     try {
         const query = `
-           SELECT * FROM ${TABLE_NAMES.items}
+            SELECT
+                i.*,
+                ii.output_price price
+            FROM ${TABLE_NAMES.items} i
+            JOIN (
+                SELECT item_id, MAX(date_input) as latest_input
+                FROM items_input
+                GROUP BY item_id
+            ) latest ON i.id = latest.item_id
+            JOIN items_input ii ON i.id = ii.item_id AND ii.date_input = latest.latest_input
+            ORDER BY i.id
         `;
 
         const items = await selectData(query, []);
@@ -33,12 +44,32 @@ const addItemToBooking = async (req, res) => {
             return;
         }
 
-        const query = `
-            INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id)
-            VALUES (?, ?)
+        const getPriceQuery = `
+            SELECT
+                output_price
+            FROM ${TABLE_NAMES.items_input}
+            WHERE item_id = ?
+            ORDER BY date_input DESC
         `;
 
-        await excuteQuery(query, [itemId, bookingId]);
+        const itemPrices = await selectData(getPriceQuery, [itemId]);
+
+        if (itemPrices.length === 0) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Item not found');
+            return;
+        }
+
+        const query = `
+            INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id, count, price)
+            VALUES (?, ?, 1, ?)
+            ON DUPLICATE KEY UPDATE count = count + 1;
+        `;
+
+        await excuteQuery(query, [
+            itemId,
+            bookingId,
+            itemPrices[0].output_price,
+        ]);
 
         sendResponse(res, STATUS_CODE.OK, 'Add item to booking successfully');
     } catch (error) {
@@ -59,13 +90,21 @@ const removeItemFromBooking = async (req, res) => {
             return;
         }
 
-        const query = `
-            DELETE FROM ${TABLE_NAMES.bookings_items}
-            WHERE item_id = ? AND booking_id = ?
-            LIMIT 1
-        `;
+        const queries = [
+            `
+                UPDATE ${TABLE_NAMES.bookings_items}
+                SET count = count - 1
+                WHERE item_id = ? AND booking_id = ?;`,
+            `
+                DELETE FROM ${TABLE_NAMES.bookings_items}
+                WHERE item_id = ? AND booking_id = ? AND count <= 0;
+            `,
+        ];
 
-        await excuteQuery(query, [itemId, bookingId]);
+        await executeTransaction(queries, [
+            [itemId, bookingId],
+            [itemId, bookingId],
+        ]);
 
         sendResponse(
             res,
@@ -90,13 +129,13 @@ const getAllItemOfBooking = async (req, res) => {
             SELECT
                 i.id,
                 i.name,
-                i.price,
                 i.image_url,
-                COUNT(i.id) as quantity
+                bi.count AS quantity,
+                bi.price
             FROM ${TABLE_NAMES.bookings_items} bi
             JOIN ${TABLE_NAMES.items} i ON bi.item_id = i.id
             WHERE bi.booking_id = ?
-            GROUP BY i.id, i.name, i.price
+            GROUP BY i.id
         `;
 
         const items = await selectData(query, [bookingId]);
@@ -180,14 +219,18 @@ const getAllItemOfService = async (req, res) => {
 
         const query = `
             SELECT
-                i.id,
-                i.name,
-                i.price,
-                i.image_url
+                i.*,
+                ii.output_price price
             FROM ${TABLE_NAMES.services_items} si
             JOIN ${TABLE_NAMES.items} i ON si.item_id = i.id
+            JOIN (
+                SELECT item_id, MAX(date_input) as latest_input
+                FROM items_input
+                GROUP BY item_id
+            ) latest ON i.id = latest.item_id
+            JOIN items_input ii ON i.id = ii.item_id AND ii.date_input = latest.latest_input
             WHERE si.service_id = ?
-            GROUP BY i.id, i.name, i.price
+            GROUP BY i.id
         `;
 
         const items = await selectData(query, [serviceId]);

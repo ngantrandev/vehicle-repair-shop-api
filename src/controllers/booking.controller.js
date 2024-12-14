@@ -312,13 +312,24 @@ const createBooking = async (req, res) => {
         if (items && items.length > 0) {
             const args = [];
             const query = `
-                INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id) VALUES 
-                ${items
-                    .map((item) => {
-                        args.push(item);
-                        return '(?, @booking_id)';
-                    })
-                    .join(', ')}
+                INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id, count, price)
+                SELECT 
+                    i.id,
+                    @booking_id,
+                    1,
+                    ii.output_price
+                FROM ${TABLE_NAMES.items} i
+                JOIN (
+                    SELECT item_id, MAX(date_input) as latest_input
+                    FROM ${TABLE_NAMES.items_input}
+                    GROUP BY item_id
+                ) latest ON i.id = latest.item_id
+                JOIN ${TABLE_NAMES.items_input} ii ON i.id = ii.item_id AND ii.date_input = latest.latest_input
+                WHERE i.id IN (${items.map((item) => {
+                    return `${item}`;
+                })})
+                ON DUPLICATE KEY UPDATE
+                    count = bookings_items.count + 1
             `;
 
             queries.push('SET @booking_id = LAST_INSERT_ID();');
@@ -338,7 +349,7 @@ const createBooking = async (req, res) => {
                 b.id booking_id,
                 s.price service_price,
                 s.name service_name,
-                IFNULL(SUM(i.price), 0) as items_price
+                IFNULL(SUM(bi.price), 0) as items_price
             FROM bookings b
             INNER JOIN services s ON s.id = b.service_id
             LEFT JOIN bookings_items bi ON bi.booking_id = b.id 
@@ -614,12 +625,12 @@ const setBookingStatusToDone = async (req, res) => {
             SELECT
                 i.id AS id,
                 i.name AS name,
-                i.price AS price,
-                COUNT(id) AS quantity
+                bi.price AS price,
+                bi.count AS quantity
             FROM ${TABLE_NAMES.bookings_items} AS bi
             JOIN ${TABLE_NAMES.items} AS i ON bi.item_id = i.id
             WHERE bi.booking_id = ?
-            GROUP BY i.id, i.name, i.price  
+            GROUP BY i.id, i.name, bi.price  
         `,
             [req.params.booking_id]
         );
