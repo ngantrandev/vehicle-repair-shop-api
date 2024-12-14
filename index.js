@@ -1,10 +1,34 @@
 const express = require('express');
 const cors = require('cors');
-const morgan = require('morgan');
+const winston = require('winston');
 const bodyparser = require('body-parser');
 const dotenv = require('dotenv');
 const fs = require('fs');
 var os = require('os');
+
+// config logger
+const logger = winston.createLogger({
+    level: 'info', // log level (info, warn, error)
+    transports: [
+        // Console Transport:
+        new winston.transports.Console({
+            format: winston.format.combine(
+                winston.format.colorize(),
+                winston.format.printf(({ method, path, duration, statusCode }) => {
+                    return `${method} ${statusCode} ${duration} ${path}`;
+                })
+            ),
+        }),
+        // File Transport:
+        new winston.transports.File({
+            filename: 'combined.log',
+            format: winston.format.combine(
+                winston.format.timestamp(),
+                winston.format.json()
+            ),
+        }),
+    ],
+});
 
 var ip = '0.0.0.0';
 var ips = os.networkInterfaces();
@@ -31,7 +55,6 @@ const initialApp = () => {
     const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
     app.use(cors());
-    app.use(morgan('common'));
     app.use(bodyparser.json({ limit: '50mb' }));
 
     fs.access('./uploads', (error) => {
@@ -46,6 +69,24 @@ const initialApp = () => {
             fs.mkdirSync('./invoices');
             console.log('Invoices folder created successfully!');
         }
+    });
+
+    app.use((req, res, next) => {
+        const start = Date.now();
+
+        res.on('finish', () => {
+            const duration = Date.now() - start;
+            logger.info({
+                message: 'Request received',
+                path: req.url,
+                method: req.method,
+                timestamp: new Date().toISOString(),
+                statusCode: res.statusCode,
+                duration: `${duration}ms`,
+            });
+        });
+
+        next();
     });
 
     app.use(`${BASE_URL_PATH}/uploads`, express.static('uploads'));
