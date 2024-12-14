@@ -3,7 +3,7 @@ const goongHttpRequests = require('@/src/ultil/goongHttpRequests');
 
 const goongRestApiKey = process.env.GOONG_API_KEY;
 
-const getDistanceMatrixFromUserAddrToOtherStations = async (
+const getDistanceMatrix = async (
     origins,
     destinations
 ) => {
@@ -126,7 +126,7 @@ const getDirection = async (origin, destination, vehicle) => {
 };
 
 const goongServices = {
-    getDistanceMatrixFromUserAddrToOtherStations,
+    getDistanceMatrix,
     autocompleteAddress,
     forwardGeocode,
     reverseGeocode,

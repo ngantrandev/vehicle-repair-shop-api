@@ -14,9 +14,22 @@ const {
     selectData,
     excuteQuery,
     sendResponse,
-    getIdOfNearestStation,
-    getIdOfTheMostFreeStaff,
 } = require('@/src/ultil/ultil.lib');
+const { getDistanceMatrix } = require('../services/goong.service');
+
+const calculateScore = (min, max, value) => {
+    return (value - min) / (max - min);
+};
+
+const calculateTotalScore = (
+    scorePendingTasks,
+    scoreDistance,
+    scoreEstimatedTime
+) => {
+    return (
+        0.3 * scorePendingTasks + 0.4 * scoreDistance + 0.3 * scoreEstimatedTime
+    );
+};
 
 const confirmBooking = async (req, res) => {
     if (!req.params.booking_id) {
@@ -64,23 +77,144 @@ const confirmBooking = async (req, res) => {
             return;
         }
 
-        // if (bookingsFound[0].status === BOOKING_STATE.accepted) {
-        //     sendResponse(
-        //         res,
-        //         STATUS_CODE.CONFLICT,
-        //         'booking has been already confirmed!'
-        //     );
+        const { address_latitude, address_longitude, service_name, user_id } =
+            bookingsFound[0];
 
-        //     return;
-        // }
+        const getStaffStatusQuery = `
+            SELECT 
+                s.id AS staff_id,
+                COUNT(b.id) AS pending_tasks,
+                CASE 
+                    WHEN COUNT(b.id) > 0 THEN g.latitude 
+                    ELSE station_addr.latitude 
+                END AS latest_latitude,
+                CASE 
+                    WHEN COUNT(b.id) > 0 THEN g.longitude
+                    ELSE station_addr.longitude
+                END AS latest_longitude,
+                IFNULL(SUM(TIME_TO_SEC(srv.estimated_time)), 0) AS total_estimated_time
+            FROM staffs s
+            LEFT JOIN bookings b 
+                ON s.id = b.staff_id AND b.status NOT IN ('done', 'cancelled')
+            LEFT JOIN services srv 
+                ON b.service_id = srv.id
+            LEFT JOIN (
+                SELECT 
+                    b.staff_id, 
+                    b.address_id,
+                    ROW_NUMBER() OVER (PARTITION BY b.staff_id ORDER BY b.created_at DESC) AS row_num
+                FROM bookings b
+                WHERE b.status NOT IN ('done', 'cancelled')
+            ) latest_booking 
+                ON s.id = latest_booking.staff_id AND latest_booking.row_num = 1
+            LEFT JOIN goong_map_addresses g 
+                ON latest_booking.address_id = g.id
+            LEFT JOIN service_stations ss 
+                ON s.station_id = ss.id
+            LEFT JOIN goong_map_addresses station_addr 
+                ON ss.address_id = station_addr.id
+            GROUP BY s.id, station_addr.latitude, station_addr.longitude, g.latitude, g.longitude;
+        `;
 
-        /** auto choose staffid if user give latitude and longitude */
-        const stationId = await getIdOfNearestStation(
-            bookingsFound[0].address_latitude,
-            bookingsFound[0].address_longitude
+        const staffStatus = await selectData(getStaffStatusQuery, []);
+
+        const listAddress = staffStatus.map((item) => {
+            return [[item.latest_latitude, item.latest_longitude]];
+        });
+
+        const distanceMatrix = await getDistanceMatrix(
+            [[address_latitude, address_longitude]],
+            listAddress
         );
 
-        const staffId = await getIdOfTheMostFreeStaff(stationId);
+        if (!distanceMatrix) {
+            return null;
+        }
+
+        const data = distanceMatrix.rows[0].elements;
+
+        data.forEach(({ distance }, index) => {
+            const { text, value } = distance;
+            staffStatus[index].distance = { text, value };
+        });
+
+        let maxDistance = 0;
+        let maxPendingTasks = 0;
+        let maxEstimatedTime = 0;
+        let minEstimatedTime = 0;
+        let minDistance = 0;
+        let minPendingTasks = 0;
+
+        staffStatus.forEach((item) => {
+            const { pending_tasks, distance, total_estimated_time } = item;
+
+            if (pending_tasks) {
+                if (pending_tasks > maxPendingTasks) {
+                    maxPendingTasks = pending_tasks;
+                } else if (pending_tasks < minPendingTasks) {
+                    minPendingTasks = pending_tasks;
+                }
+            }
+
+            if (distance) {
+                if (distance.value > maxDistance) {
+                    maxDistance = distance.value;
+                } else if (distance.value < minDistance) {
+                    minDistance = distance.value;
+                }
+            }
+
+            if (total_estimated_time) {
+                if (total_estimated_time > maxEstimatedTime) {
+                    maxEstimatedTime = total_estimated_time;
+                } else if (total_estimated_time < minEstimatedTime) {
+                    minEstimatedTime = total_estimated_time;
+                }
+            }
+        });
+
+        const dataScore = [];
+
+        staffStatus.forEach((item) => {
+            const { staff_id, pending_tasks, distance, total_estimated_time } =
+                item;
+
+            const scorePendingTasks = calculateScore(
+                minPendingTasks,
+                maxPendingTasks,
+                pending_tasks
+            );
+            const scoreDistance = calculateScore(
+                minDistance,
+                maxDistance,
+                distance.value
+            );
+            const scoreEstimatedTime = calculateScore(
+                minEstimatedTime,
+                maxEstimatedTime,
+                total_estimated_time
+            );
+
+            const score = calculateTotalScore(
+                scorePendingTasks,
+                scoreDistance,
+                scoreEstimatedTime
+            );
+
+            dataScore.push({
+                staff_id,
+                pending_tasks_score: scorePendingTasks,
+                distance_score: scoreDistance,
+                estimated_time_score: scoreEstimatedTime,
+                score,
+            });
+        });
+
+        const dataMinScore = dataScore.reduce((min, current) => {
+            return current.score < min.score ? current : min;
+        });
+
+        const staffId = dataMinScore.staff_id;
 
         const updateBooking = `UPDATE ${TABLE_NAMES.bookings} SET status = ?,pre_status = ?, staff_id = ?, note = ?, staff_id = ? WHERE id = ?`;
 
@@ -94,14 +228,15 @@ const confirmBooking = async (req, res) => {
         ]);
 
         const title = 'Xác nhận lịch hẹn';
-        const message = `Lịch hẹn ${bookingsFound[0].service_name} đã được xác nhận và sẽ được thực hiện đúng giờ. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`;
-        const userId = bookingsFound[0].user_id;
+        const message = `Lịch hẹn ${service_name} đã được xác nhận. Nhân viên sẽ sớm di chuyển.
+Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`;
+        const userId = user_id;
         await createUserNotification(userId, title, message);
         await sendNotificationToTopic(title, message, `customer_${userId}`);
 
         if (staffId) {
             const staffNotiTitle = 'Bạn có nhiệm vụ mới';
-            const staffMessage = `Bạn có lịch hẹn ${bookingsFound[0].service_name} mới cần thực hiện!`;
+            const staffMessage = `Bạn có lịch hẹn ${service_name} mới cần thực hiện!`;
             await createStaffNotification(
                 staffId,
                 staffNotiTitle,

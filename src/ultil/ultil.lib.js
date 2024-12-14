@@ -232,11 +232,10 @@ const getIdOfNearestStation = async (latitude, longitude) => {
         [station.latitude, station.longitude],
     ]);
 
-    const distanceMatrix =
-        await goongServices.getDistanceMatrixFromUserAddrToOtherStations(
-            [[latitude, longitude]],
-            destinations
-        );
+    const distanceMatrix = await goongServices.getDistanceMatrix(
+        [[latitude, longitude]],
+        destinations
+    );
 
     if (!distanceMatrix) {
         return null;
