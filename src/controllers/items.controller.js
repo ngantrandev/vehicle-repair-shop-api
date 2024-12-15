@@ -9,24 +9,43 @@ const {
 
 const getAllItem = async (req, res) => {
     try {
+        const { start_date, end_date } = req.query;
+        const where = [];
+        const args = [];
+
+        if (start_date && end_date) {
+            where.push(`outp.date_output BETWEEN ? AND ?`);
+            args.push(start_date);
+            args.push(end_date);
+        }
         const query = `
             SELECT 
                 i.*,
-                ii.output_price AS price
+                COALESCE(input_data.total_input, 0) AS total_input,
+                COALESCE(output_data.total_output, 0) AS total_output
             FROM items i
-            INNER JOIN ${TABLE_NAMES.input_info} ii ON i.id = ii.item_id
-            JOIN (
-                SELECT ii.item_id, MAX(inp.date_input) AS latest_date
-                FROM ${TABLE_NAMES.input_info} ii
-                JOIN ${TABLE_NAMES.inputs} inp ON ii.input_id = inp.id
+            LEFT JOIN (
+                SELECT 
+                    ii.item_id,
+                    SUM(ii.count) AS total_input
+                FROM input_info ii
+                JOIN inputs inp ON ii.input_id = inp.id 
                 GROUP BY ii.item_id
-            ) latest ON ii.item_id = latest.item_id
-            JOIN ${TABLE_NAMES.inputs} inp ON ii.input_id = inp.id AND inp.date_input = latest.latest_date
-            ORDER BY ii.item_id;
+            ) input_data ON i.id = input_data.item_id
+            LEFT JOIN (
+                SELECT 
+                    io.item_id,
+                    SUM(io.count) AS total_output
+                FROM output_info io
+                JOIN outputs outp ON io.output_id = outp.id 
+                ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
+                GROUP BY io.item_id
+            ) output_data ON i.id = output_data.item_id
+            ORDER BY i.id;
 
-        `;
+         `;
 
-        const items = await selectData(query, []);
+        const items = await selectData(query, args);
 
         sendResponse(res, STATUS_CODE.OK, 'Get items successfully', items);
     } catch (error) {

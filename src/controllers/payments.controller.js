@@ -229,7 +229,8 @@ const getVNPayIPN = async (req, res) => {
                 p.status,
                 i.final_price amount,
                 p.txn_ref p_txn_ref,
-                b.user_id
+                b.user_id,
+                b.id booking_id
 
             FROM ${TABLE_NAMES.invoices} i
             INNER JOIN ${TABLE_NAMES.payments} p ON i.id = p.invoice_id
@@ -241,7 +242,13 @@ const getVNPayIPN = async (req, res) => {
 
         const invoice = await selectData(findInvoiceQuery, [invoiceId]);
 
-        const { status, amount, p_txn_ref, user_id: userId } = invoice[0];
+        const {
+            status,
+            amount,
+            p_txn_ref,
+            user_id: userId,
+            booking_id: bookingId,
+        } = invoice[0];
 
         // CHECK 2
         if (p_txn_ref !== vnp_TxnRef) {
@@ -302,21 +309,20 @@ const getVNPayIPN = async (req, res) => {
                     ]);
 
                     queries.push(
-                        `INSERT INTO ${TABLE_NAMES.outputs} (date_output) VALUES (?)`
+                        `INSERT INTO ${TABLE_NAMES.outputs} (date_output, booking_id) VALUES (?, ?)`
                     );
-                    args.push([new Date()]);
+                    args.push([new Date(), bookingId]);
 
                     queries.push('SET @output_id = LAST_INSERT_ID()');
                     args.push([]);
 
                     queries.push(`
-                        INSERT INTO ${TABLE_NAMES.output_info} (output_id, item_id, count, price, date_output)
+                        INSERT INTO ${TABLE_NAMES.output_info} (output_id, item_id, count, price)
                         SELECT 
                             @output_id,
                             bi.item_id,
                             bi.count,
-                            bi.price,
-                            p.created_at
+                            bi.price
                         FROM payments p 
                         INNER JOIN invoices ivn ON ivn.id = p.invoice_id
                         INNER JOIN bookings b ON b.id = ivn.booking_id

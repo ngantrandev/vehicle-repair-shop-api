@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th12 14, 2024 lúc 11:14 AM
+-- Thời gian đã tạo: Th12 15, 2024 lúc 11:12 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -85,6 +85,32 @@ CREATE TABLE `goong_map_addresses` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `inputs`
+--
+
+CREATE TABLE `inputs` (
+  `id` int(11) NOT NULL,
+  `date_input` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `input_info`
+--
+
+CREATE TABLE `input_info` (
+  `id` int(11) NOT NULL,
+  `input_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `count` int(11) NOT NULL,
+  `input_price` int(11) NOT NULL,
+  `output_price` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `invoices`
 --
 
@@ -106,38 +132,8 @@ CREATE TABLE `invoices` (
 CREATE TABLE `items` (
   `id` int(30) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `price` int(30) DEFAULT NULL,
   `image_url` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `input_info`
---
-
-CREATE TABLE `input_info` (
-  `id` int(11) NOT NULL,
-  `item_id` int(11) NOT NULL,
-  `count` int(11) NOT NULL,
-  `input_price` int(11) NOT NULL,
-  `output_price` int(11) NOT NULL,
-  `date_input` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `output_info`
---
-
-CREATE TABLE `output_info` (
-  `id` int(11) NOT NULL,
-  `item_input_id` int(11) NOT NULL,
-  `count` int(11) NOT NULL,
-  `booking_id` int(11) NOT NULL,
-  `date_output` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -188,6 +184,33 @@ CREATE TABLE `notifications_users` (
   `notification_id` int(11) NOT NULL,
   `recipient_type` varchar(255) NOT NULL,
   `is_read` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `outputs`
+--
+
+CREATE TABLE `outputs` (
+  `id` int(11) NOT NULL,
+  `booking_id` int(11) NOT NULL,
+  `date_output` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `output_info`
+--
+
+CREATE TABLE `output_info` (
+  `id` int(11) NOT NULL,
+  `output_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `count` int(11) NOT NULL,
+  `price` int(11) NOT NULL,
+  `booking_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -353,15 +376,9 @@ ALTER TABLE `goong_map_addresses`
   ADD UNIQUE KEY `id` (`id`);
 
 --
--- Chỉ mục cho bảng `invoices`
+-- Chỉ mục cho bảng `inputs`
 --
-ALTER TABLE `invoices`
-  ADD PRIMARY KEY (`id`);
-
---
--- Chỉ mục cho bảng `items`
---
-ALTER TABLE `items`
+ALTER TABLE `inputs`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -371,9 +388,15 @@ ALTER TABLE `input_info`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `output_info`
+-- Chỉ mục cho bảng `invoices`
 --
-ALTER TABLE `output_info`
+ALTER TABLE `invoices`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `items`
+--
+ALTER TABLE `items`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -395,6 +418,18 @@ ALTER TABLE `motorcycle_brands`
 -- Chỉ mục cho bảng `notifications`
 --
 ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `outputs`
+--
+ALTER TABLE `outputs`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `output_info`
+--
+ALTER TABLE `output_info`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -484,6 +519,18 @@ ALTER TABLE `goong_map_addresses`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `inputs`
+--
+ALTER TABLE `inputs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `input_info`
+--
+ALTER TABLE `input_info`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `invoices`
 --
 ALTER TABLE `invoices`
@@ -494,18 +541,6 @@ ALTER TABLE `invoices`
 --
 ALTER TABLE `items`
   MODIFY `id` int(30) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `input_info`
---
-ALTER TABLE `input_info`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `output_info`
---
-ALTER TABLE `output_info`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `motorcycles`
@@ -523,6 +558,18 @@ ALTER TABLE `motorcycle_brands`
 -- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `outputs`
+--
+ALTER TABLE `outputs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `output_info`
+--
+ALTER TABLE `output_info`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

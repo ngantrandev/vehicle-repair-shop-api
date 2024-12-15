@@ -317,21 +317,23 @@ const createBooking = async (req, res) => {
                     i.id,
                     @booking_id,
                     1,
-                    ii.output_price
+                    ri.output_price
                 FROM ${TABLE_NAMES.items} i
-                INNER JOIN ${TABLE_NAMES.input_info} ii ON i.id = ii.item_id
-                JOIN (
-                    SELECT ii.item_id, MAX(i.date_input) AS latest_date
+                INNER JOIN (
+                    SELECT 
+                        ii.item_id,
+                        ii.output_price,
+                        ROW_NUMBER() OVER (PARTITION BY ii.item_id ORDER BY i.date_input DESC) AS rn
                     FROM ${TABLE_NAMES.input_info} ii
-                    JOIN ${TABLE_NAMES.inputs} i ON ii.input_id = i.id
-                    GROUP BY ii.item_id
-                ) latest ON i.id = latest.item_id
-                JOIN ${TABLE_NAMES.inputs} ipn ON ii.input_id = ipn.id AND ipn.date_input = latest.latest_date
-                WHERE i.id IN (${items.map((item) => {
+                    INNER JOIN ${TABLE_NAMES.inputs} i ON ii.input_id = i.id
+                ) ri ON i.id = ri.item_id
+                WHERE ri.rn = 1
+                AND i.id IN (${items.map((item) => {
                     return `${item}`;
                 })})
                 ON DUPLICATE KEY UPDATE
-                    count = bookings_items.count + 1
+                    count = bookings_items.count + 1;
+
             `;
 
             queries.push('SET @booking_id = LAST_INSERT_ID();');
