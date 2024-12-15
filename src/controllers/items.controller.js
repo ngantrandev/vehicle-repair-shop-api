@@ -10,17 +10,20 @@ const {
 const getAllItem = async (req, res) => {
     try {
         const query = `
-            SELECT
+            SELECT 
                 i.*,
-                ii.output_price price
-            FROM ${TABLE_NAMES.items} i
+                ii.output_price AS price
+            FROM items i
+            INNER JOIN ${TABLE_NAMES.input_info} ii ON i.id = ii.item_id
             JOIN (
-                SELECT item_id, MAX(date_input) as latest_input
-                FROM items_input
-                GROUP BY item_id
-            ) latest ON i.id = latest.item_id
-            JOIN items_input ii ON i.id = ii.item_id AND ii.date_input = latest.latest_input
-            ORDER BY i.id
+                SELECT ii.item_id, MAX(inp.date_input) AS latest_date
+                FROM ${TABLE_NAMES.input_info} ii
+                JOIN ${TABLE_NAMES.inputs} inp ON ii.input_id = inp.id
+                GROUP BY ii.item_id
+            ) latest ON ii.item_id = latest.item_id
+            JOIN ${TABLE_NAMES.inputs} inp ON ii.input_id = inp.id AND inp.date_input = latest.latest_date
+            ORDER BY ii.item_id;
+
         `;
 
         const items = await selectData(query, []);
@@ -47,9 +50,10 @@ const addItemToBooking = async (req, res) => {
         const getPriceQuery = `
             SELECT
                 output_price
-            FROM ${TABLE_NAMES.items_input}
+            FROM ${TABLE_NAMES.input_info} ii
+            INNER JOIN ${TABLE_NAMES.inputs} ON ${TABLE_NAMES.inputs}.id = ii.input_id
             WHERE item_id = ?
-            ORDER BY date_input DESC
+            ORDER BY ${TABLE_NAMES.inputs}.date_input DESC
         `;
 
         const itemPrices = await selectData(getPriceQuery, [itemId]);
@@ -220,17 +224,22 @@ const getAllItemOfService = async (req, res) => {
         const query = `
             SELECT
                 i.*,
-                ii.output_price price
+                ii.output_price AS price
             FROM ${TABLE_NAMES.services_items} si
             JOIN ${TABLE_NAMES.items} i ON si.item_id = i.id
             JOIN (
-                SELECT item_id, MAX(date_input) as latest_input
-                FROM items_input
-                GROUP BY item_id
+                SELECT 
+                    ii.item_id, 
+                    MAX(inp.date_input) AS latest_input
+                FROM ${TABLE_NAMES.input_info} ii
+                JOIN ${TABLE_NAMES.inputs} inp ON ii.input_id = inp.id
+                GROUP BY ii.item_id
             ) latest ON i.id = latest.item_id
-            JOIN items_input ii ON i.id = ii.item_id AND ii.date_input = latest.latest_input
+            JOIN ${TABLE_NAMES.input_info} ii 
+                ON i.id = ii.item_id
+            JOIN ${TABLE_NAMES.inputs} inp ON ii.input_id = inp.id AND inp.date_input = latest.latest_input
             WHERE si.service_id = ?
-            GROUP BY i.id
+            ORDER BY i.id;
         `;
 
         const items = await selectData(query, [serviceId]);
@@ -242,6 +251,7 @@ const getAllItemOfService = async (req, res) => {
             items
         );
     } catch (error) {
+        console.log(error);
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };

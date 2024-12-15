@@ -301,9 +301,18 @@ const getVNPayIPN = async (req, res) => {
                         vnp_TxnRef,
                     ]);
 
+                    queries.push(
+                        `INSERT INTO ${TABLE_NAMES.outputs} (date_output) VALUES (?)`
+                    );
+                    args.push([new Date()]);
+
+                    queries.push('SET @output_id = LAST_INSERT_ID()');
+                    args.push([]);
+
                     queries.push(`
-                        INSERT INTO items_output (item_id, count, price, date_output)
+                        INSERT INTO ${TABLE_NAMES.output_info} (output_id, item_id, count, price, date_output)
                         SELECT 
+                            @output_id,
                             bi.item_id,
                             bi.count,
                             bi.price,

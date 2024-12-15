@@ -20,8 +20,10 @@ const TABLE_NAMES = {
     services_items: 'services_items',
     invoices: 'invoices',
     payments: 'payments',
-    items_input: 'items_input',
-    items_output: 'items_output',
+    inputs: 'inputs',
+    input_info: 'input_info',
+    outputs: 'outputs',
+    output_info: 'output_info',
 };
 
 const USER_ROLES = {

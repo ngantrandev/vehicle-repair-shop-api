@@ -319,12 +319,14 @@ const createBooking = async (req, res) => {
                     1,
                     ii.output_price
                 FROM ${TABLE_NAMES.items} i
+                INNER JOIN ${TABLE_NAMES.input_info} ii ON i.id = ii.item_id
                 JOIN (
-                    SELECT item_id, MAX(date_input) as latest_input
-                    FROM ${TABLE_NAMES.items_input}
-                    GROUP BY item_id
+                    SELECT ii.item_id, MAX(i.date_input) AS latest_date
+                    FROM ${TABLE_NAMES.input_info} ii
+                    JOIN ${TABLE_NAMES.inputs} i ON ii.input_id = i.id
+                    GROUP BY ii.item_id
                 ) latest ON i.id = latest.item_id
-                JOIN ${TABLE_NAMES.items_input} ii ON i.id = ii.item_id AND ii.date_input = latest.latest_input
+                JOIN ${TABLE_NAMES.inputs} ipn ON ii.input_id = ipn.id AND ipn.date_input = latest.latest_date
                 WHERE i.id IN (${items.map((item) => {
                     return `${item}`;
                 })})

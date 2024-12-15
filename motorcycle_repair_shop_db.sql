@@ -114,10 +114,10 @@ CREATE TABLE `items` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `items_input`
+-- Cấu trúc bảng cho bảng `input_info`
 --
 
-CREATE TABLE `items_input` (
+CREATE TABLE `input_info` (
   `id` int(11) NOT NULL,
   `item_id` int(11) NOT NULL,
   `count` int(11) NOT NULL,
@@ -129,10 +129,10 @@ CREATE TABLE `items_input` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `items_output`
+-- Cấu trúc bảng cho bảng `output_info`
 --
 
-CREATE TABLE `items_output` (
+CREATE TABLE `output_info` (
   `id` int(11) NOT NULL,
   `item_input_id` int(11) NOT NULL,
   `count` int(11) NOT NULL,
@@ -365,15 +365,15 @@ ALTER TABLE `items`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `items_input`
+-- Chỉ mục cho bảng `input_info`
 --
-ALTER TABLE `items_input`
+ALTER TABLE `input_info`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `items_output`
+-- Chỉ mục cho bảng `output_info`
 --
-ALTER TABLE `items_output`
+ALTER TABLE `output_info`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -496,15 +496,15 @@ ALTER TABLE `items`
   MODIFY `id` int(30) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `items_input`
+-- AUTO_INCREMENT cho bảng `input_info`
 --
-ALTER TABLE `items_input`
+ALTER TABLE `input_info`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `items_output`
+-- AUTO_INCREMENT cho bảng `output_info`
 --
-ALTER TABLE `items_output`
+ALTER TABLE `output_info`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

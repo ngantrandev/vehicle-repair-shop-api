@@ -78,7 +78,7 @@ const initialApp = () => {
             const duration = Date.now() - start;
             logger.info({
                 message: 'Request received',
-                path: req.url,
+                path: req.originalUrl,
                 method: req.method,
                 timestamp: new Date().toISOString(),
                 statusCode: res.statusCode,
