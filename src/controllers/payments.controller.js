@@ -96,35 +96,30 @@ const createPaymentUrl = async (req, res) => {
 
         const createDate = convertTimeFormat(date, null, timeFormat);
         const expireDate = convertTimeFormat(expireTime, null, timeFormat);
-        let txnRef = `GIAODICH_${invoiceId}_${convertTimeFormat(date, null, timeFormat)}`;
+        const txnRef = `GIAODICH_${invoiceId}_${convertTimeFormat(date, null, timeFormat)}`;
 
-        const paymentExists = await selectData(
-            'SELECT * FROM payments WHERE invoice_id = ?',
-            invoiceId
-        );
+        // const paymentExists = await selectData(
+        //     'SELECT * FROM payments WHERE invoice_id = ?',
+        //     invoiceId
+        // );
 
-        if (paymentExists.length == 0) {
-            const createPaymentQuery = `
+        // if (paymentExists.length == 0) {
+        const createPaymentQuery = `
                 INSERT INTO
                     ${TABLE_NAMES.payments} (invoice_id, created_at, txn_ref, status)
                 SELECT ?, ?, ?, ?
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM ${TABLE_NAMES.payments}
-                    WHERE invoice_id = ? AND (status = 'pending' OR status = 'success')
-                )
             `;
 
-            await excuteQuery(createPaymentQuery, [
-                invoiceId,
-                date,
-                txnRef,
-                PAYMENT_STATUS.pending,
-                invoiceId,
-            ]);
-        } else {
-            txnRef = paymentExists[0].txn_ref;
-        }
+        await excuteQuery(createPaymentQuery, [
+            invoiceId,
+            date,
+            txnRef,
+            PAYMENT_STATUS.pending,
+            invoiceId,
+        ]);
+        // } else {
+        //     txnRef = paymentExists[0].txn_ref;
+        // }
 
         const orderInfo = `Thanh toán dịch vụ ${service_name} và các sản phẩm đặt cùng`;
 
@@ -238,26 +233,35 @@ const getVNPayIPN = async (req, res) => {
             INNER JOIN ${TABLE_NAMES.services} s ON s.id = b.service_id
 
             WHERE p.invoice_id = ?
+            ORDER BY p.created_at DESC
         `;
 
-        const invoice = await selectData(findInvoiceQuery, [invoiceId]);
+        const invoices = await selectData(findInvoiceQuery, [invoiceId]);
 
-        const {
-            status,
-            amount,
-            p_txn_ref,
-            user_id: userId,
-            booking_id: bookingId,
-        } = invoice[0];
+        let invoice = null;
+        invoices.forEach((item) => {
+            const { p_txn_ref } = item;
+            if (p_txn_ref === vnp_TxnRef) {
+                invoice = item;
+                return;
+            }
+        });
 
         // CHECK 2
-        if (p_txn_ref !== vnp_TxnRef) {
+        if (!invoice) {
             res.status(200).json({
                 RspCode: '01',
                 Message: 'booking payment order not found',
             });
             return;
         }
+
+        const {
+            status,
+            amount,
+            user_id: userId,
+            booking_id: bookingId,
+        } = invoice;
 
         // CHECK 3
         // VNPay return amount * 100

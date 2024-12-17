@@ -87,6 +87,7 @@ const getBookingById = async (req, res) => {
                 ${TABLE_NAMES.invoices} AS inv ON inv.booking_id = b.id
             LEFT JOIN
                 ${TABLE_NAMES.payments} AS p ON p.invoice_id = inv.id
+            ORDER BY is_paid DESC
         `;
 
         const bookings = await selectData(selectQuery, [

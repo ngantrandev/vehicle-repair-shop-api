@@ -269,7 +269,7 @@ const getAllBooking = async (req, res) => {
         LEFT JOIN
             ${TABLE_NAMES.invoices} AS inv ON inv.booking_id = b.id
         LEFT JOIN
-            ${TABLE_NAMES.payments} AS p ON p.invoice_id = inv.id
+            ${TABLE_NAMES.payments} AS p ON p.invoice_id = inv.id AND p.status = 'success'
         ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
 
         ${sort ? `ORDER BY created_at ${sort}` : 'ORDER BY created_at DESC'}

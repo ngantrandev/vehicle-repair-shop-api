@@ -106,6 +106,129 @@ const getRevenue = async (req, res) => {
     }
 };
 
+const topItems = async (req, res) => {
+    try {
+        // mode = previous_month, current_month, previous_year, current_year
+        const { mode } = req.query;
+
+        const wheres = [];
+        const args = [];
+
+        if (mode == 'previous_month') {
+            // get start of month and end of month
+            const today = new Date();
+            const start = new Date(
+                today.getFullYear(),
+                today.getMonth() - 1,
+                1
+            );
+            const end = new Date(today.getFullYear(), today.getMonth(), 0);
+
+            wheres.push(`o.date_output BETWEEN ? AND ?`);
+            args.push(start, end);
+        } else if (mode == 'current_month') {
+            // get start of month and end of month
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth(), 1);
+            const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            wheres.push(`o.date_output BETWEEN ? AND ?`);
+            args.push(start, end);
+        } else if (mode == 'current_year') {
+            const today = new Date();
+            const start = new Date(today.getFullYear(), 0, 1);
+            const end = new Date(today.getFullYear(), 11, 31);
+            wheres.push(`o.date_output BETWEEN ? AND ?`);
+            args.push(start, end);
+        }
+
+        const query = `
+            SELECT
+                oi.item_id,
+                i.name,
+                IFNULL(SUM(oi.count), 0) total_output,
+                IFNULL(SUM(oi.price * oi.count), 0) total_price
+
+            FROM ${TABLE_NAMES.output_info} oi
+            INNER JOIN ${TABLE_NAMES.items} i ON oi.item_id = i.id
+            INNER JOIN ${TABLE_NAMES.outputs} o ON oi.output_id = o.id
+            ${wheres.length > 0 ? `WHERE ${wheres.join(' AND ')}` : ''}
+            GROUP BY oi.item_id
+            ORDER BY total_output DESC
+            LIMIT 5
+        `;
+
+        const data = await selectData(query, args);
+
+        sendResponse(res, STATUS_CODE.OK, 'Top items', data);
+    } catch (error) {
+        console.log(error);
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
+const topStaffs = async (req, res) => {
+    try {
+        const { mode } = req.query;
+        const where = [`b.status = 'done'`];
+        const args = [];
+
+        if (mode === 'previous_month') {
+            const today = new Date();
+            const start = new Date(
+                today.getFullYear(),
+                today.getMonth() - 1,
+                1
+            );
+            const end = new Date(today.getFullYear(), today.getMonth(), 0);
+            where.push(`b.created_at BETWEEN ? AND ?`);
+            args.push(start, end);
+        } else if (mode === 'current_month') {
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth(), 1);
+            const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            where.push(`b.created_at BETWEEN ? AND ?`);
+            args.push(start, end);
+        } else if (mode === 'current_year') {
+            const today = new Date();
+            const start = new Date(today.getFullYear(), 0, 1);
+            const end = new Date(today.getFullYear(), 11, 31);
+            where.push(`b.created_at BETWEEN ? AND ?`);
+            args.push(start, end);
+        }
+
+        const query = `
+            SELECT
+                b.staff_id,
+                s.firstname,
+                s.lastname,
+                COUNT(b.id) AS total_booking,
+                IFNULL(SUM(p.amount_paid), 0) total_revenue
+
+            FROM ${TABLE_NAMES.bookings} b
+            INNER JOIN ${TABLE_NAMES.staffs} s ON b.staff_id = s.id
+            LEFT JOIN invoices i ON b.id = i.booking_id
+            LEFT JOIN payments p ON i.id = p.invoice_id
+            ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
+            GROUP BY b.staff_id, s.firstname, s.lastname
+            ORDER BY total_revenue DESC
+            LIMIT 5
+        `;
+
+        const data = await selectData(query, args);
+
+        const newData = data.map(({ firstname, lastname, ...orther }) => {
+            return {
+                fullname: `${lastname} ${firstname}`,
+                ...orther,
+            };
+        });
+        sendResponse(res, STATUS_CODE.OK, 'Top staffs', newData);
+    } catch (error) {
+        console.log(error);
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
 const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -123,6 +246,8 @@ const formatYear = (date) => date.getFullYear();
 
 const statisticsController = {
     getRevenue,
+    topItems,
+    topStaffs,
 };
 
 module.exports = statisticsController;
