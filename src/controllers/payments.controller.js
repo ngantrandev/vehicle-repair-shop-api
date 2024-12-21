@@ -53,39 +53,55 @@ const createPaymentUrl = async (req, res) => {
 
         const { service_name, service_price, items_price } = bookingsData[0];
 
-        const totalAmount = service_price + items_price;
+        const totalPrice = service_price + items_price;
 
-        await excuteQuery(
-            `
-                INSERT INTO ${TABLE_NAMES.invoices} (booking_id, total_price, final_price, invoice_date) 
-                SELECT ?, ?, ?, ?
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM ${TABLE_NAMES.invoices}
-                    WHERE booking_id = ?
-                );
-            `,
-            [
-                bookingId,
-                totalAmount,
-                totalAmount,
-                bookingsData[0].created_at,
-                bookingId,
-            ]
+        const checkInvoiceExists = await selectData(
+            `SELECT * FROM ${TABLE_NAMES.invoices} WHERE booking_id = ?`,
+            [bookingId]
         );
+
+        if (checkInvoiceExists.length > 0) {
+            // update invoice
+            await excuteQuery(
+                `UPDATE ${TABLE_NAMES.invoices} SET total_price = ?, final_price = ? WHERE booking_id = ?`,
+                [totalPrice, totalPrice, bookingId]
+            );
+        } else {
+            await excuteQuery(
+                `
+                    INSERT INTO ${TABLE_NAMES.invoices} (booking_id, total_price, final_price, invoice_date) 
+                    SELECT ?, ?, ?, ?
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM ${TABLE_NAMES.invoices}
+                        WHERE booking_id = ?
+                    );
+                `,
+                [
+                    bookingId,
+                    totalPrice,
+                    totalPrice,
+                    bookingsData[0].created_at,
+                    bookingId,
+                ]
+            );
+        }
 
         const getBookingInfoQuery = `
             SELECT
-                i.id invoice_id
+                i.id invoice_id,
+                IFNULL(SUM(p.amount_paid), 0) as amount_paid
 
             FROM ${TABLE_NAMES.bookings} b
             INNER JOIN ${TABLE_NAMES.invoices} i ON i.booking_id = b.id
+            LEFT JOIN ${TABLE_NAMES.payments} p ON p.invoice_id = i.id AND p.status = '${PAYMENT_STATUS.success}'
             WHERE b.id = ?
         `;
 
         const bookingInfo = await selectData(getBookingInfoQuery, [bookingId]);
 
-        const { invoice_id: invoiceId } = bookingInfo[0];
+        const { invoice_id: invoiceId, amount_paid: amountPaid } =
+            bookingInfo[0];
 
         const date = new Date();
 
@@ -104,10 +120,11 @@ const createPaymentUrl = async (req, res) => {
         // );
 
         // if (paymentExists.length == 0) {
+        const unPaidAmount = totalPrice - amountPaid;
         const createPaymentQuery = `
                 INSERT INTO
-                    ${TABLE_NAMES.payments} (invoice_id, created_at, txn_ref, status)
-                SELECT ?, ?, ?, ?
+                    ${TABLE_NAMES.payments} (invoice_id, created_at, txn_ref, status, amount_paid)
+                SELECT ?, ?, ?, ?, ?
             `;
 
         await excuteQuery(createPaymentQuery, [
@@ -115,7 +132,7 @@ const createPaymentUrl = async (req, res) => {
             date,
             txnRef,
             PAYMENT_STATUS.pending,
-            invoiceId,
+            unPaidAmount,
         ]);
         // } else {
         //     txnRef = paymentExists[0].txn_ref;
@@ -124,7 +141,7 @@ const createPaymentUrl = async (req, res) => {
         const orderInfo = `Thanh toán dịch vụ ${service_name} và các sản phẩm đặt cùng`;
 
         const returnUrl = createReturnUrl({
-            amount: totalAmount,
+            amount: unPaidAmount,
             orderInfo,
             txnRef,
             createDate,
@@ -225,10 +242,11 @@ const getVNPayIPN = async (req, res) => {
                 i.final_price amount,
                 p.txn_ref p_txn_ref,
                 b.user_id,
-                b.id booking_id
+                b.id booking_id,
+                p.amount_paid
 
             FROM ${TABLE_NAMES.invoices} i
-            INNER JOIN ${TABLE_NAMES.payments} p ON i.id = p.invoice_id
+            LEFT JOIN ${TABLE_NAMES.payments} p ON i.id = p.invoice_id
             INNER JOIN ${TABLE_NAMES.bookings} b ON i.booking_id = b.id
             INNER JOIN ${TABLE_NAMES.services} s ON s.id = b.service_id
 
@@ -257,15 +275,15 @@ const getVNPayIPN = async (req, res) => {
         }
 
         const {
+            amount_paid: amountPaid,
             status,
-            amount,
             user_id: userId,
             booking_id: bookingId,
         } = invoice;
 
         // CHECK 3
         // VNPay return amount * 100
-        if (amount != vnp_Amount / 100) {
+        if (amountPaid != vnp_Amount / 100) {
             res.status(200).json({
                 RspCode: '04',
                 Message: 'Amount invalid',
@@ -288,7 +306,6 @@ const getVNPayIPN = async (req, res) => {
                         UPDATE ${TABLE_NAMES.payments}
                         SET
                             payment_method = ?,
-                            amount_paid = ?,
                             order_info = ?,
                             bank_code = ?,
                             bank_transaction_id = ?,
@@ -301,7 +318,6 @@ const getVNPayIPN = async (req, res) => {
 
                     args.push([
                         PAYMENT_TYPE.vnpay,
-                        amount,
                         queryParams['vnp_OrderInfo'],
                         queryParams['vnp_BankCode'],
                         queryParams['vnp_BankTranNo'],
@@ -342,7 +358,7 @@ const getVNPayIPN = async (req, res) => {
                     const message =
                         queryParams['vnp_OrderInfo'] +
                         ' thành công với số tiền ' +
-                        amount +
+                        amountPaid +
                         ' VNĐ';
 
                     await createUserNotification(userId, title, message);

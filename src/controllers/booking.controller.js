@@ -17,6 +17,7 @@ const {
     TABLE_NAMES,
     BOOKING_STATE,
     USER_ROLES,
+    PAYMENT_STATUS,
 } = require('@/src/configs/constants.config');
 const {
     createUserNotification,
@@ -66,8 +67,8 @@ const getBookingById = async (req, res) => {
                 st_addr.longitude AS station_longitude,
                 st_addr.full_address AS station_address,
                 st_addr.address_name AS station_address_name,
-                IF(p.status = 'success', 1, 0) AS is_paid,
-                inv.invoice_file
+                IFNULL(SUM(p.amount_paid), 0) AS paid_amount,
+                IFNULL(inv.invoice_file, '') AS invoice_file
             FROM ( SELECT *
                     FROM ${TABLE_NAMES.bookings}
                     WHERE id = ?) AS b
@@ -86,8 +87,7 @@ const getBookingById = async (req, res) => {
             LEFT JOIN
                 ${TABLE_NAMES.invoices} AS inv ON inv.booking_id = b.id
             LEFT JOIN
-                ${TABLE_NAMES.payments} AS p ON p.invoice_id = inv.id
-            ORDER BY is_paid DESC
+                ${TABLE_NAMES.payments} AS p ON p.invoice_id = inv.id AND p.status = '${PAYMENT_STATUS.success}'
         `;
 
         const bookings = await selectData(selectQuery, [
