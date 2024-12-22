@@ -8,7 +8,13 @@ const {
     addItemToService,
     removeItemFromService,
     getAllItemOfService,
+    createItem,
+    updateItem,
 } = require('@/src/controllers/items.controller');
+
+router.post('/', createItem);
+
+router.patch('/:item_id', updateItem);
 
 router.get('/', getAllItem);
 

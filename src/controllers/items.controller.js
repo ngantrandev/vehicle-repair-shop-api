@@ -7,6 +7,52 @@ const {
     executeTransaction,
 } = require('@/src/ultil/ultil.lib');
 
+const createItem = async (req, res) => {
+    try {
+        const { name, description, image_url } = req.body;
+
+        if (!name) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing name');
+            return;
+        }
+
+        const query = `
+            INSERT INTO ${TABLE_NAMES.items} (name, description, image_url)
+            VALUES (?, ?, ?);
+        `;
+
+        await excuteQuery(query, [name, description, image_url]);
+
+        sendResponse(res, STATUS_CODE.OK, 'Create item successfully');
+    } catch (error) {
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
+const updateItem = async (req, res) => {
+    try {
+        const { item_id } = req.params;
+        const { name, description, image_url } = req.body;
+
+        if (!item_id) {
+            sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing id');
+            return;
+        }
+
+        const query = `
+            UPDATE ${TABLE_NAMES.items}
+            SET name = ?, description = ?, image_url = ?
+            WHERE id = ?;
+        `;
+
+        await excuteQuery(query, [name, description, image_url, item_id]);
+
+        sendResponse(res, STATUS_CODE.OK, 'Update item successfully');
+    } catch (error) {
+        sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
+    }
+};
+
 const getAllItem = async (req, res) => {
     try {
         const { start_date, end_date } = req.query;
@@ -283,4 +329,6 @@ module.exports = {
     addItemToService,
     removeItemFromService,
     getAllItemOfService,
+    createItem,
+    updateItem,
 };
