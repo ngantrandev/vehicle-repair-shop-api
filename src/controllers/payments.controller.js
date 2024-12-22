@@ -298,6 +298,19 @@ const getVNPayIPN = async (req, res) => {
                 if (vnp_resCode == '00') {
                     // Ở đây cập nhật trạng thái giao dịch thanh toán thành công vào CSDL của bạn
 
+                    const selectOutputQuery = `
+                    SELECT
+                        op.id output_id
+                    FROM ${TABLE_NAMES.outputs} op
+                    INNER JOIN ${TABLE_NAMES.bookings} b ON b.id = op.booking_id
+                    INNER JOIN ${TABLE_NAMES.invoices} ivn ON ivn.booking_id = b.id
+                    WHERE ivn.id = ?
+                    `;
+
+                    const outputs = await selectData(selectOutputQuery, [
+                        invoiceId,
+                    ]);
+
                     const queries = [];
                     const args = [];
 
@@ -328,29 +341,54 @@ const getVNPayIPN = async (req, res) => {
                         vnp_TxnRef,
                     ]);
 
-                    queries.push(
-                        `INSERT INTO ${TABLE_NAMES.outputs} (date_output, booking_id) VALUES (?, ?)`
-                    );
-                    args.push([new Date(), bookingId]);
+                    // Nếu đã có output thì cập nhật thông tin output
+                    if (outputs.length > 0) {
+                        const outputId = outputs[0].output_id;
 
-                    queries.push('SET @output_id = LAST_INSERT_ID()');
-                    args.push([]);
+                        queries.push(
+                            `DELETE FROM ${TABLE_NAMES.output_info} WHERE output_id = ?`
+                        );
+                        args.push([outputId]);
 
-                    queries.push(`
-                        INSERT INTO ${TABLE_NAMES.output_info} (output_id, item_id, count, price)
-                        SELECT 
-                            @output_id,
-                            bi.item_id,
-                            bi.count,
-                            bi.price
-                        FROM payments p 
-                        INNER JOIN invoices ivn ON ivn.id = p.invoice_id
-                        INNER JOIN bookings b ON b.id = ivn.booking_id
-                        INNER JOIN bookings_items bi ON bi.booking_id = b.id
-                        WHERE p.status = 'success' AND ivn.id = ?    
-                    `);
+                        queries.push(
+                            `
+                            INSERT INTO ${TABLE_NAMES.output_info} (output_id, item_id, count, price)
+                            SELECT
+                                ?,
+                                bi.item_id,
+                                bi.count,
+                                bi.price
+                            FROM ${TABLE_NAMES.bookings_items} bi
+                            WHERE bi.booking_id = ? 
+                            `
+                        );
 
-                    args.push([invoiceId]);
+                        args.push([outputId, bookingId]);
+                    } else {
+                        queries.push(
+                            `INSERT INTO ${TABLE_NAMES.outputs} (date_output, booking_id) VALUES (?, ?)`
+                        );
+                        args.push([new Date(), bookingId]);
+
+                        queries.push('SET @output_id = LAST_INSERT_ID()');
+                        args.push([]);
+
+                        queries.push(`
+                            INSERT INTO ${TABLE_NAMES.output_info} (output_id, item_id, count, price)
+                            SELECT 
+                                @output_id,
+                                bi.item_id,
+                                bi.count,
+                                bi.price
+                            FROM payments p 
+                            INNER JOIN invoices ivn ON ivn.id = p.invoice_id
+                            INNER JOIN bookings b ON b.id = ivn.booking_id
+                            INNER JOIN bookings_items bi ON bi.booking_id = b.id
+                            WHERE p.status = 'success' AND ivn.id = ?    
+                        `);
+
+                        args.push([invoiceId]);
+                    }
 
                     await executeTransaction(queries, args);
 
