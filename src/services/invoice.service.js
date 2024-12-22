@@ -29,10 +29,9 @@ function generateRowsData(invoice = {}) {
 }
 
 function generateHeader(doc) {
-    doc.image(logoPath, 50, 45, { width: 50 })
+    doc.image(logoPath, 50, 55, { width: 140 })
         .fillColor('#444444')
         .fontSize(20)
-        .text('Shop Sửa Xe', 110, 57)
         .fontSize(10)
         .text('12A Trường Chinh', 200, 65, { align: 'right' })
         .text('phường Tân Thới Nhất, quận 12, TP. Hồ Chí Minh', 200, 80, {
