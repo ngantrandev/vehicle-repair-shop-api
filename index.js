@@ -14,9 +14,11 @@ const logger = winston.createLogger({
         new winston.transports.Console({
             format: winston.format.combine(
                 winston.format.colorize(),
-                winston.format.printf(({ method, path, duration, statusCode }) => {
-                    return `${method} ${statusCode} ${duration} ${path}`;
-                })
+                winston.format.printf(
+                    ({ method, path, duration, statusCode }) => {
+                        return `${method} ${statusCode} ${duration} ${path}`;
+                    }
+                )
             ),
         }),
         // File Transport:

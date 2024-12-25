@@ -113,6 +113,7 @@ const confirmBooking = async (req, res) => {
                 ON s.station_id = ss.id
             LEFT JOIN goong_map_addresses station_addr 
                 ON ss.address_id = station_addr.id
+            WHERE s.active = 1
             GROUP BY s.id, station_addr.latitude, station_addr.longitude, g.latitude, g.longitude;
         `;
 
