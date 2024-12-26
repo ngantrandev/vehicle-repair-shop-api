@@ -3,10 +3,7 @@ const goongHttpRequests = require('@/src/ultil/goongHttpRequests');
 
 const goongRestApiKey = process.env.GOONG_API_KEY;
 
-const getDistanceMatrix = async (
-    origins,
-    destinations
-) => {
+const getDistanceMatrix = async (origins, destinations) => {
     /**
      * origins and destinations are arrays of arrays: [[lat, lng], [lat, lng], ...]
      */

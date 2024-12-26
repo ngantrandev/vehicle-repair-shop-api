@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 
-const serviceAccount = require('@/fcm.serviceaccount.key.json');
+import serviceAccount from '@/fcm.serviceaccount.key.json';
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -8,6 +8,4 @@ admin.initializeApp({
         'https://repair-shop-app-default-rtdb.asia-southeast1.firebasedatabase.app',
 });
 
-const messaging = admin.messaging;
-
-module.exports = messaging;
+export const messaging = admin.messaging;

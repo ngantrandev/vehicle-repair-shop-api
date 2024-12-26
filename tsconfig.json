@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./",
+        "paths": {
+            "@/*": ["./*"]
+        },
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "module": "commonjs",
+        "target": "es6",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true // allow import json file
+    },
+    "include": ["src/**/*.ts", "src/ultil/ultil.lib.js"],
+    "exclude": ["node_modules"]
+}

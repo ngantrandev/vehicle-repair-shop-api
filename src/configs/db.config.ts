@@ -40,7 +40,7 @@ function createDatabaseConnection() {
         connectTimeout: 10000,
     });
 
-    pool.getConnection((err, connection) => {
+    pool.getConnection((err: NodeJS.ErrnoException, connection: any) => {
         if (err) {
             console.error('Lỗi kết nối tới db:', err.message);
             console.log('Thử kết nối lại sau 2 giây...');
@@ -52,7 +52,7 @@ function createDatabaseConnection() {
     });
 
     // Xử lý sự kiện lỗi cho kết nối sau này
-    pool.on('error', (err) => {
+    pool.on('error', (err: NodeJS.ErrnoException) => {
         console.error('Mất kết nối đến cơ sở dữ liệu:', err.message);
         if (
             err.code === 'PROTOCOL_CONNECTION_LOST' ||
@@ -67,4 +67,4 @@ function createDatabaseConnection() {
 }
 const pool = createDatabaseConnection();
 
-module.exports = pool;
+export default pool;

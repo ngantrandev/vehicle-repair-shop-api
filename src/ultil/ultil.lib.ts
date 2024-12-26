@@ -2,17 +2,13 @@ const bcrypt = require('bcrypt');
 const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
 const polyline = require('@mapbox/polyline');
-const crypto = require('crypto');
+import crypto from 'crypto';
 const fs = require('fs');
 const axios = require('axios');
+import { Response } from 'express';
+import { MomentInput } from 'moment-timezone';
 
-const pool = require('@/src/configs/db.config');
-const {
-    BOOKING_STATE,
-    TABLE_NAMES,
-    ACCOUNT_STATE,
-} = require('@/src/configs/constants.config');
-const goongServices = require('@/src/services/goong.service');
+import pool from '@/src/configs/db.config';
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 
 const SecretKey = process.env.VNP_SECRET_KEY || '';
@@ -23,7 +19,10 @@ if (!accessTokenSecret) {
     throw new Error('Missing access token secret. check your .env file');
 }
 
-const executeTransaction = async (queries, listParamArray) => {
+export const executeTransaction = async (
+    queries: string[],
+    listParamArray: any[]
+) => {
     if (queries.length !== listParamArray.length) {
         throw new Error(
             'PAY ATTENTION Queries length must equal to listParamArray length!!!!'
@@ -31,27 +30,27 @@ const executeTransaction = async (queries, listParamArray) => {
     }
 
     return new Promise((resolve, reject) => {
-        pool.getConnection((err, connection) => {
+        pool.getConnection((err: NodeJS.ErrnoException, connection: any) => {
             if (err) {
                 return reject(err);
             }
 
             // Bắt đầu giao dịch
-            connection.beginTransaction(async (err) => {
+            connection.beginTransaction(async (err: NodeJS.ErrnoException) => {
                 if (err) {
                     connection.release(); // Giải phóng kết nối khi có lỗi
                     return reject(err);
                 }
 
                 try {
-                    const results = [];
+                    const results: any[] = [];
 
                     for (let i = 0; i < queries.length; i++) {
                         const result = await new Promise((resolve, reject) => {
                             connection.query(
                                 queries[i],
                                 listParamArray[i],
-                                (error, result) => {
+                                (error: NodeJS.ErrnoException, result: any) => {
                                     if (error) {
                                         return reject(error);
                                     }
@@ -63,7 +62,7 @@ const executeTransaction = async (queries, listParamArray) => {
                     }
 
                     // Commit giao dịch
-                    connection.commit((err) => {
+                    connection.commit((err: NodeJS.ErrnoException) => {
                         if (err) {
                             connection.rollback(() => {
                                 connection.release();
@@ -86,33 +85,41 @@ const executeTransaction = async (queries, listParamArray) => {
     });
 };
 
-const excuteQuery = async (query, listPagrams) => {
+export const excuteQuery = async (query: string, listPagrams: any[]) => {
     return new Promise((resolve, reject) => {
         if (!pool || pool.state === 'disconnected') {
             throw new Error('Không thể kết nối đến cơ sở dữ liệu');
         }
 
-        pool.query(query, listPagrams, function (error, results) {
-            if (error) reject(error);
-            resolve(results);
-        });
-    });
-};
-
-const selectData = async (query, listParams = []) => {
-    return new Promise((resolve, reject) => {
-        pool.query(query, listParams, (error, results) => {
-            if (error) {
-                reject(error); // throw lỗi nếu query thất bại
-            } else {
-                let payload = parseToJSONFrDB(results);
-                resolve(payload);
+        pool.query(
+            query,
+            listPagrams,
+            function (error: NodeJS.ErrnoException, results: any) {
+                if (error) reject(error);
+                resolve(results);
             }
-        });
+        );
     });
 };
 
-const hashPassWord = async (password) => {
+export const selectData = async (query: string, listParams: any[] = []) => {
+    return new Promise((resolve, reject) => {
+        pool.query(
+            query,
+            listParams,
+            (error: NodeJS.ErrnoException, results: any) => {
+                if (error) {
+                    reject(error); // throw lỗi nếu query thất bại
+                } else {
+                    let payload = parseToJSONFrDB(results);
+                    resolve(payload);
+                }
+            }
+        );
+    });
+};
+
+export const hashPassWord = async (password: string) => {
     const saltRounds = 10;
 
     const salt = await bcrypt.genSalt(saltRounds);
@@ -121,35 +128,38 @@ const hashPassWord = async (password) => {
     return hash;
 };
 
-const comparePassWord = async (password, hash) => {
+export const comparePassWord = async (password: string, hash: string) => {
     const result = await bcrypt.compare(password, hash);
 
     return result;
 };
 
-var parseToJSONFrDB = function (a) {
+export const parseToJSONFrDB = function (a: any) {
     return JSON.parse(JSON.stringify(a));
 };
 
-const getCurrentTimeInGMT7 = (format = 'YYYY-MM-DD HH:mm:ss') => {
+export const getCurrentTimeInGMT7 = (format = 'YYYY-MM-DD HH:mm:ss') => {
     if (!format) {
         format = 'YYYY-MM-DD HH:mm:ss';
     }
     return moment.tz('Asia/Bangkok').format(format);
 };
 
-const convertTimeToGMT7 = (time) => {
+export const convertTimeToGMT7 = (time: MomentInput) => {
     const localDateTime = moment.utc(time).tz('Asia/Bangkok');
 
     return localDateTime.format('YYYY-MM-DD HH:mm:ss');
 };
 
-const convertDateToGMT7 = (date) => {
+export const convertDateToGMT7 = (date: MomentInput) => {
     const localDate = moment.utc(date).tz('Asia/Bangkok');
     return localDate.format('YYYY-MM-DD');
 };
 
-const generateJWT = (data, expriresTime = expireTimeAccessToken) => {
+export const generateJWT = (
+    data: object,
+    expriresTime = expireTimeAccessToken
+) => {
     const tokent = jwt.sign(
         {
             ...data,
@@ -161,36 +171,37 @@ const generateJWT = (data, expriresTime = expireTimeAccessToken) => {
     return tokent;
 };
 
-const isValidInteger = (value) => {
+export const isValidInteger = (value: string) => {
     // const trimmedValue = value.trim();
     const trimmedValue = value.toString().trim();
 
     return (
-        !isNaN(trimmedValue) &&
+        !isNaN(Number(trimmedValue)) &&
         Number.isInteger(Number(trimmedValue)) &&
         trimmedValue.length > 0
     );
 };
 
-const isValidDouble = (value) => {
+export const isValidDouble = (value: string) => {
     // const trimmedValue = value.trim();
     const trimmedValue = value.toString().trim();
 
-    return !isNaN(trimmedValue) && trimmedValue.length > 0;
+    return !isNaN(Number(trimmedValue)) && trimmedValue.length > 0;
 };
 
-const isValidTime = (time) => {
+export const isValidTime = (time: MomentInput) => {
     return (
         moment(time, 'HH:mm', true).isValid() ||
         moment(time, 'HH:mm:ss', true).isValid()
     );
 };
 
-const sendResponse = (res, statusCode, message, data) => {
-    if (!isValidInteger(statusCode)) {
-        throw new Error('statusCode must be integer');
-    }
-
+export const sendResponse = (
+    res: Response,
+    statusCode: number,
+    message: string,
+    data: any
+) => {
     if (statusCode != STATUS_CODE.OK) {
         res.status(statusCode).json({
             success: false,
@@ -205,120 +216,22 @@ const sendResponse = (res, statusCode, message, data) => {
     }
 };
 
-const getIdOfNearestStation = async (latitude, longitude) => {
-    if (!latitude || !longitude) {
-        return null;
-    }
-
-    // find nearest station if latitude and longitude not null
-    const query = `SELECT
-        ss.id AS station_id,
-        addr.latitude,
-        addr.longitude
-                
-        FROM ${TABLE_NAMES.service_stations} AS ss
-        JOIN ${TABLE_NAMES.addresses} AS addr
-        ON ss.address_id = addr.id
-        WHERE addr.latitude IS NOT NULL AND addr.longitude IS NOT NULL
-    `;
-
-    const stations = await selectData(query, []);
-
-    if (stations.length === 0) {
-        return null;
-    }
-
-    const destinations = stations.map((station) => [
-        [station.latitude, station.longitude],
-    ]);
-
-    const distanceMatrix = await goongServices.getDistanceMatrix(
-        [[latitude, longitude]],
-        destinations
-    );
-
-    if (!distanceMatrix) {
-        return null;
-    }
-
-    const data = distanceMatrix.rows[0].elements;
-
-    // find nearest station
-    let minDistance = data[0].distance.value;
-    let stationId = stations[0].station_id;
-
-    data.forEach((item, index) => {
-        if (item.distance.value < minDistance) {
-            minDistance = item.distance.value;
-            stationId = stations[index].station_id;
-        }
-    });
-
-    return stationId;
-};
-
-const getIdOfTheMostFreeStaff = async (stationId) => {
-    // get staffid and booking with state = 'pending', 'accepted', 'fixing'
-
-    if (!stationId || !isValidInteger(stationId)) {
-        return null;
-    }
-
-    const query = `
-        SELECT
-            stf.id AS staff_id,
-            COUNT(b.id) AS total_bookings
-        FROM ${TABLE_NAMES.staffs} as stf
-        JOIN
-            ${TABLE_NAMES.service_stations} as ss
-            ON ss.id = stf.station_id
-        LEFT JOIN
-            ${TABLE_NAMES.bookings} AS b
-            ON b.staff_id = stf.id
-            AND (
-                b.status = '${BOOKING_STATE.pending}'
-                OR b.status = '${BOOKING_STATE.accepted}'
-                OR b.status = '${BOOKING_STATE.fixing}'
-            )
-
-        WHERE ss.id = ${stationId} AND stf.active = ${ACCOUNT_STATE.active}
-        
-        GROUP BY stf.id
-    `;
-
-    const data = await selectData(query, []);
-
-    if (data.length === 0) return null;
-
-    // init value
-    let staffId = data[0].staff_id;
-    let totalBookings = data[0].total_bookings;
-
-    // find userId with smallest bookings
-    data.forEach((item) => {
-        if (item.total_bookings < totalBookings) {
-            totalBookings = item.total_bookings;
-            staffId = item.staff_id;
-        }
-    });
-
-    return staffId;
-};
-
 /**
  *
  * @param {*} str example {x`aA{{wiSo@HsARY{AUD
  * @returns
  */
-const decodePolyline = (str) => {
-    return polyline.decode(str).map(([lat, lng]) => [lng, lat]);
+export const decodePolyline = (str: string) => {
+    return polyline
+        .decode(str)
+        .map(([lat, lng]: [number, number]) => [lng, lat]);
 };
 
-const isValidDate = (date) => {
+export const isValidDate = (date: string) => {
     return moment(date, 'YYYY-MM-DD', true).isValid();
 };
 
-const isValidUrl = (url) => {
+export const isValidUrl = (url: string) => {
     try {
         new URL(url); // Kiểm tra xem URL có hợp lệ không
         return true;
@@ -328,9 +241,9 @@ const isValidUrl = (url) => {
     }
 };
 
-const sortObject = (obj) => {
+export const sortObject = (obj: { [key: string]: any }) => {
     const sortedKeys = Object.keys(obj).sort(); // Sắp xếp key theo thứ tự tăng dần
-    const sortedObj = {};
+    const sortedObj: { [key: string]: any } = {};
     sortedKeys.forEach((key) => {
         sortedObj[key] = obj[key]; // Gán giá trị vào object mới theo thứ tự key đã sắp xếp
     });
@@ -338,7 +251,7 @@ const sortObject = (obj) => {
 };
 
 // Hàm thay thế qs.stringify
-const buildQueryParams = (data) => {
+export const buildQueryParams = (data: any) => {
     const searchParams = new URLSearchParams();
     const sortedEntries = Object.entries(data).sort(([key1], [key2]) =>
         key1.localeCompare(key2)
@@ -352,7 +265,7 @@ const buildQueryParams = (data) => {
     return searchParams;
 };
 
-const getChecksum = (data) => {
+export const getChecksum = (data: any) => {
     // Tính toán Secure Hash
     const hmac = crypto.createHmac('sha512', SecretKey);
     const signed = hmac.update(Buffer.from(data, 'utf-8')).digest('hex');
@@ -360,7 +273,11 @@ const getChecksum = (data) => {
     return signed;
 };
 
-const convertTimeFormat = (time, currFormat, targetFormat) => {
+export const convertTimeFormat = (
+    time: string,
+    currFormat: string,
+    targetFormat: string
+) => {
     if (!targetFormat) {
         throw new Error('Target format is required');
     }
@@ -370,7 +287,7 @@ const convertTimeFormat = (time, currFormat, targetFormat) => {
     return moment(time, currFormat).format(targetFormat);
 };
 
-const isValidEmail = (email) => {
+export const isValidEmail = (email: string) => {
     return email
         .toLowerCase()
         .match(
@@ -378,7 +295,10 @@ const isValidEmail = (email) => {
         );
 };
 
-const downloadFile = async (url, outputPath) => {
+export const downloadFile = async (
+    url: string | undefined,
+    outputPath: string
+) => {
     try {
         const response = await axios.get(url, { responseType: 'arraybuffer' });
 
@@ -388,31 +308,4 @@ const downloadFile = async (url, outputPath) => {
     } catch (error) {
         console.error('Error downloading the file:', error);
     }
-};
-
-module.exports = {
-    executeTransaction,
-    excuteQuery,
-    selectData,
-    hashPassWord,
-    comparePassWord,
-    getCurrentTimeInGMT7,
-    convertTimeToGMT7,
-    convertDateToGMT7,
-    generateJWT,
-    isValidInteger,
-    isValidTime,
-    sendResponse,
-    isValidDouble,
-    getIdOfNearestStation,
-    getIdOfTheMostFreeStaff,
-    decodePolyline,
-    isValidDate,
-    isValidUrl,
-    sortObject,
-    buildQueryParams,
-    getChecksum,
-    convertTimeFormat,
-    isValidEmail,
-    downloadFile,
 };
