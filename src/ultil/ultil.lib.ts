@@ -7,6 +7,7 @@ const fs = require('fs');
 const axios = require('axios');
 import { Response } from 'express';
 import { MomentInput } from 'moment-timezone';
+import os from 'os';
 
 import pool from '@/src/configs/db.config';
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
@@ -308,4 +309,18 @@ export const downloadFile = async (
     } catch (error) {
         console.error('Error downloading the file:', error);
     }
+};
+
+export const getDeviceIp = (): string => {
+    let ip = '0.0.0.0';
+    var ips = os.networkInterfaces();
+    Object.keys(ips).forEach(function (_interface: string) {
+        if (ips[_interface]) {
+            ips[_interface].forEach(function (_dev: any) {
+                if (_dev.family === 'IPv4' && !_dev.internal) ip = _dev.address;
+            });
+        }
+    });
+
+    return ip;
 };

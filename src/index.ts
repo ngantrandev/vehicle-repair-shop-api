@@ -2,56 +2,19 @@ import { NextFunction, Request, Response } from 'express';
 
 const express = require('express');
 const cors = require('cors');
-const winston = require('winston');
 const bodyparser = require('body-parser');
 const dotenv = require('dotenv');
 const fs = require('fs');
 var os = require('os');
-
-interface LogInfo {
-    method: string;
-    path: string;
-    duration: number;
-    statusCode: number;
-}
-
-// config logger
-const logger = winston.createLogger({
-    level: 'info', // log level (info, warn, error)
-    transports: [
-        // Console Transport:
-        new winston.transports.Console({
-            format: winston.format.combine(
-                winston.format.colorize(),
-                winston.format.printf(
-                    ({ method, path, duration, statusCode }: LogInfo) => {
-                        return `${method} ${statusCode} ${duration} ${path}`;
-                    }
-                )
-            ),
-        }),
-        // File Transport:
-        new winston.transports.File({
-            filename: 'combined.log',
-            format: winston.format.combine(
-                winston.format.timestamp(),
-                winston.format.json()
-            ),
-        }),
-    ],
-});
-
-var ip = '0.0.0.0';
-var ips = os.networkInterfaces();
-Object.keys(ips).forEach(function (_interface: string) {
-    ips[_interface].forEach(function (_dev: any) {
-        if (_dev.family === 'IPv4' && !_dev.internal) ip = _dev.address;
-    });
-});
-
 dotenv.config();
+
+import { swaggerDocs, swaggerUi } from '@/src/configs/swagger.config'; // Import Swagger
+
+import { logger } from '@/src/configs/logger.config'; // Import Logger
+
 const app = express();
-import { downloadFile } from '@/src/ultil/ultil.lib';
+import { downloadFile, getDeviceIp } from '@/src/ultil/ultil.lib';
+const deviceIp = getDeviceIp();
 
 const filePath = './fcm.serviceaccount.key.json';
 
@@ -113,9 +76,10 @@ const initialApp = () => {
     });
 
     app.use(BASE_URL_PATH, apiRoute);
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
     app.listen(appPort, () => {
-        console.log(`Server is running on http://${ip}:${appPort}`);
+        console.log(`Server is running on http://${deviceIp}:${appPort}`);
     });
 };
 

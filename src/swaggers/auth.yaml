@@ -1,0 +1,343 @@
+openapi: 3.0.0
+info:
+    title: Auth API
+    version: 1.0.0
+    description: Authentication and authorization routes
+tags:
+    - name: Auth
+      description: Authentication and authorization routes
+
+paths:
+    /auth/signin:
+        post:
+            summary: User sign-in
+            tags: [Auth]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                username:
+                                    type: string
+                                    example: user@example.com
+                                password:
+                                    type: string
+                                    example: password123
+            responses:
+                200:
+                    description: Sign-in successful
+                400:
+                    description: Missing username or password
+
+    /auth/register:
+        post:
+            summary: User registration
+            tags: [Auth]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                username:
+                                    type: string
+                                    example: newuser
+                                password:
+                                    type: string
+                                    example: password123
+                                firstname:
+                                    type: string
+                                    example: John
+                                lastname:
+                                    type: string
+                                    example: Doe
+                                phone:
+                                    type: string
+                                    example: 123456789
+            responses:
+                200:
+                    description: Registration successful
+                400:
+                    description: Missing required fields
+
+    /auth/signin/staff:
+        post:
+            summary: Staff sign-in
+            tags: [Auth]
+            description: Sign in as a staff member with username and password
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                username:
+                                    type: string
+                                    example: staffuser
+                                password:
+                                    type: string
+                                    example: staffpassword123
+            responses:
+                200:
+                    description: Sign-in successful
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: 'Sign in successfully!'
+                                    token:
+                                        type: string
+                                        example: 'Bearer + token'
+                                    data:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: integer
+                                                example: 10
+                                            username:
+                                                type: string
+                                                example: staffuser
+                                            firstname:
+                                                type: string
+                                                example: John
+                                            lastname:
+                                                type: string
+                                                example: Doe
+                                            birthday:
+                                                type: string
+                                                format: date
+                                                example: 1990-05-15
+                                            phone:
+                                                type: string
+                                                example: 123456789
+                                            role:
+                                                type: string
+                                                example: staff
+                                            station:
+                                                type: object
+                                                properties:
+                                                    id:
+                                                        type: integer
+                                                        example: 2
+                                                    name:
+                                                        type: string
+                                                        example: Main Station
+                400:
+                    description: Missing username or password
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Missing username'
+                403:
+                    description: Account is deactivated
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'This account has been deactivated!'
+                404:
+                    description: Wrong username or password
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Wrong username or password'
+                500:
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Internal server error'
+
+    /auth/forgot-password:
+        post:
+            summary: Forgot password
+            tags: [Auth]
+            description: Allows users to request a password reset link via email.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    example: user@example.com
+            responses:
+                200:
+                    description: Password reset email sent successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: 'Email sent successfully!'
+                400:
+                    description: Missing or invalid email
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Invalid email'
+                404:
+                    description: Email not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Email not found'
+                500:
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Internal server error'
+
+    /auth/reset-password:
+        post:
+            summary: Reset password
+            tags: [Auth]
+            description: Allows users to reset their password using a token received via email.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                password:
+                                    type: string
+                                    example: NewPassword123
+                                repassword:
+                                    type: string
+                                    example: NewPassword123
+                                token:
+                                    type: string
+                                    example: 'Bearer <your-token-here>'
+            responses:
+                200:
+                    description: Password reset successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: 'Password reset successfully'
+                400:
+                    description: Missing or mismatched password fields
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Missing or Password repassword are not the same'
+                401:
+                    description: Missing token
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Missing token'
+                403:
+                    description: Invalid or expired token
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Token is not valid'
+                500:
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Internal server error'

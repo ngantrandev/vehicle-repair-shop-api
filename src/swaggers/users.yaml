@@ -1,0 +1,457 @@
+openapi: 3.0.0
+info:
+    title: User API
+    version: 1.0.0
+    description: API documentation for user-related functionalities in the system
+tags:
+    - name: Users
+      description: API for users in the system
+
+paths:
+    /users/{user_id}/carts:
+        get:
+            summary: Get all carts for a specific user
+            tags: [Users]
+            parameters:
+                - name: user_id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the user
+            responses:
+                200:
+                    description: List of carts for the user
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: object
+                401:
+                    description: Unauthorized
+                403:
+                    description: Forbidden
+                404:
+                    description: User not found
+                500:
+                    description: Internal server error
+
+        post:
+            summary: Add a service to the user's cart
+            tags: [Users]
+            parameters:
+                - name: user_id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the user
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                service_id:
+                                    type: integer
+                                    description: ID of the service
+            responses:
+                200:
+                    description: Cart created successfully
+                400:
+                    description: Bad request
+                404:
+                    description: Service not found
+                409:
+                    description: Service already exists in the cart
+                500:
+                    description: Internal server error
+
+    /users/bookings:
+        get:
+            summary: Retrieve all bookings
+            tags: [Users]
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: start_date
+                  schema:
+                      type: string
+                      format: date
+                  description: Filter bookings from this start date
+                - in: query
+                  name: end_date
+                  schema:
+                      type: string
+                      format: date
+                  description: Filter bookings to this end date
+                - in: query
+                  name: status
+                  schema:
+                      type: string
+                  description: Filter bookings by status
+                - in: query
+                  name: station
+                  schema:
+                      type: integer
+                  description: Filter bookings by station ID
+                - in: query
+                  name: search
+                  schema:
+                      type: string
+                  description: Search bookings by user name, phone, or service name
+                - in: query
+                  name: sort
+                  schema:
+                      type: string
+                      enum: [asc, desc]
+                  description: Sort bookings by created date
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                  description: Limit the number of results
+                - in: query
+                  name: cursor
+                  schema:
+                      type: integer
+                  description: Pagination cursor
+            responses:
+                200:
+                    description: Successfully retrieved the bookings
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: integer
+                                        created_at:
+                                            type: string
+                                            format: date-time
+                                        modified_at:
+                                            type: string
+                                            format: date-time
+                                        service:
+                                            type: object
+                                            properties:
+                                                id:
+                                                    type: integer
+                                                name:
+                                                    type: string
+                                                price:
+                                                    type: number
+                                                    format: float
+                                                image_url:
+                                                    type: string
+                                                estimated_time:
+                                                    type: string
+                                        address:
+                                            type: object
+                                            properties:
+                                                id:
+                                                    type: integer
+                                                latitude:
+                                                    type: number
+                                                    format: float
+                                                longitude:
+                                                    type: number
+                                                    format: float
+                                                address_name:
+                                                    type: string
+                                                full_address:
+                                                    type: string
+                                        user:
+                                            type: object
+                                            properties:
+                                                id:
+                                                    type: integer
+                                                firstname:
+                                                    type: string
+                                                lastname:
+                                                    type: string
+                                                phone:
+                                                    type: string
+                                        staff:
+                                            type: object
+                                            properties:
+                                                id:
+                                                    type: integer
+                                                firstname:
+                                                    type: string
+                                                lastname:
+                                                    type: string
+                                                station:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: integer
+                                                        name:
+                                                            type: string
+                                                        address:
+                                                            type: object
+                                                            properties:
+                                                                latitude:
+                                                                    type: number
+                                                                    format: float
+                                                                longitude:
+                                                                    type: number
+                                                                    format: float
+                                                                address_name:
+                                                                    type: string
+                                                                full_address:
+                                                                    type: string
+                                        is_paid:
+                                            type: boolean
+                400:
+                    description: Bad request
+                401:
+                    description: Unauthorized
+                500:
+                    description: Internal server error
+
+        post:
+            summary: Create a new booking
+            tags: [Users]
+            security:
+                - BearerAuth: []
+            consumes:
+                - multipart/form-data
+            parameters:
+                - in: formData
+                  name: data
+                  type: string
+                  description: JSON string containing booking details such as items, service_id, address details, and note.
+                  example: '{"service_id": 1, "latitude": 10.8231, "longitude": 106.6297, "address_name": "123 ABC Street", "full_address": "123 ABC Street, District 1", "place_id": "ChIJXz9qF02SHTsRgk4JH3J6J8o", "note": "Please be on time", "items": [1, 2]}'
+                - in: formData
+                  name: file
+                  type: file
+                  description: Optional image file for the booking
+            responses:
+                200:
+                    description: Successfully created booking
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    id:
+                                        type: integer
+                                        description: The ID of the newly created booking
+                                        example: 123
+                400:
+                    description: Bad request, missing or invalid fields in the request
+                500:
+                    description: Internal server error
+
+    /users/bookings/{booking_id}:
+        get:
+            summary: Retrieve booking by ID
+            tags: [Users]
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: booking_id
+                  required: true
+                  schema:
+                      type: integer
+                  description: The ID of the booking to retrieve
+            responses:
+                200:
+                    description: Successfully retrieved booking by ID
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    service:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: integer
+                                            name:
+                                                type: string
+                                            price:
+                                                type: number
+                                            image_url:
+                                                type: string
+                                            estimated_time:
+                                                type: string
+                                    address:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: integer
+                                            latitude:
+                                                type: number
+                                            longitude:
+                                                type: number
+                                            address_name:
+                                                type: string
+                                            full_address:
+                                                type: string
+                                    user:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: integer
+                                            firstname:
+                                                type: string
+                                            lastname:
+                                                type: string
+                                            email:
+                                                type: string
+                                            phone:
+                                                type: string
+                                    staff:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: integer
+                                            firstname:
+                                                type: string
+                                            lastname:
+                                                type: string
+                                            station:
+                                                type: object
+                                                properties:
+                                                    id:
+                                                        type: integer
+                                                    name:
+                                                        type: string
+                                                    address:
+                                                        type: object
+                                                        properties:
+                                                            latitude:
+                                                                type: number
+                                                            longitude:
+                                                                type: number
+                                                            address_name:
+                                                                type: string
+                                                            full_address:
+                                                                type: string
+                400:
+                    description: Bad request, invalid booking ID
+                404:
+                    description: Booking not found
+                500:
+                    description: Internal server error
+
+    /users/bookings/{booking_id}/cancel:
+        patch:
+            summary: Cancel a booking
+            tags:
+                - Users
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: booking_id
+                  required: true
+                  description: The ID of the booking to be cancelled
+                  schema:
+                      type: integer
+                      example: 123
+                - in: body
+                  name: note
+                  required: false
+                  description: Optional note explaining the reason for the cancellation
+                  schema:
+                      type: string
+                      example: 'Customer requested cancellation'
+            responses:
+                200:
+                    description: Successfully cancelled the booking
+                400:
+                    description: Bad request, missing or invalid booking ID, or other invalid input
+                404:
+                    description: Booking not found
+                409:
+                    description: The booking has already been cancelled
+                500:
+                    description: Internal server error
+
+    /users/notifications:
+        get:
+            summary: Get all notifications for a user
+            tags:
+                - Users
+            security:
+                - BearerAuth: []
+            responses:
+                200:
+                    description: Successfully retrieved the list of notifications
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: integer
+                                            description: The unique ID of the notification
+                                            example: 1
+                                        title:
+                                            type: string
+                                            description: The title of the notification
+                                            example: 'New service available'
+                                        message:
+                                            type: string
+                                            description: The content of the notification
+                                            example: 'We have added a new service for you.'
+                                        date:
+                                            type: string
+                                            format: date-time
+                                            description: The date and time when the notification was created
+                                            example: '2024-12-27T15:00:00Z'
+                                        is_read:
+                                            type: boolean
+                                            description: Whether the notification has been read by the user
+                                            example: false
+                400:
+                    description: Bad request, missing or invalid fields in the request
+                500:
+                    description: Internal server error
+
+    /users/notifications/{notification_id}/mark_read:
+        patch:
+            summary: Mark a notification as read
+            tags:
+                - Users
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: notification_id
+                  required: true
+                  description: The ID of the notification to mark as read
+                  schema:
+                      type: integer
+                      example: 1
+            responses:
+                200:
+                    description: Successfully marked the notification as read
+                400:
+                    description: Bad request, invalid notification ID
+                500:
+                    description: Internal server error
+
+    /users/notifications/mark_all_read:
+        patch:
+            summary: Mark all notifications as read
+            tags:
+                - Users
+            security:
+                - BearerAuth: []
+            responses:
+                200:
+                    description: Successfully marked all notifications as read
+                500:
+                    description: Internal server error
