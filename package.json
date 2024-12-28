@@ -5,8 +5,7 @@
     "main": "dist/index.js",
     "scripts": {
         "build": "webpack --config webpack.config.js",
-        "production": "npm run build && npm start",
-        "start": "node dist/bundle.js",
+        "start": "npm run build && node dist/bundle.js",
         "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
         "test": "echo \"Error: no test specified\" && exit 1",
         "format": "npx prettier . --write"
