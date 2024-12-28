@@ -24,8 +24,11 @@ if (
     !process.env.DB_USER ||
     !process.env.DB_NAME
 ) {
-    throw new Error(
-        "Missing database configuration. Please check your '.env' file."
+    // throw new Error(
+    //     "Missing database configuration. Please check your '.env' file."
+    // );
+    console.error(
+        'Missing database configuration. Please check your ".env" file.'
     );
 }
 

@@ -18,7 +18,7 @@ const deviceIp = getDeviceIp();
 
 const filePath = './fcm.serviceaccount.key.json';
 
-const appPort = process.env.APP_PORT || 3000;
+const appPort = process.env.APP_PORT || 8000;
 
 const initialApp = () => {
     const apiRoute = require('@/src/routes/api.route');
@@ -79,7 +79,9 @@ const initialApp = () => {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
     app.listen(appPort, () => {
-        console.log(`Server is running on http://${deviceIp}:${appPort}`);
+        console.log(`
+            ${'\x1b[31m'}Server is running on http://${deviceIp}:${'\x1b[32m'}${appPort}${'\x1b[0m'}
+        `);
     });
 };
 

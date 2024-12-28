@@ -17,7 +17,8 @@ const accessTokenSecret = process.env.JWT_ACCESS_TOKEN;
 const expireTimeAccessToken = process.env.EXPIRES_TIME_ACCESS_TOKEN || '1h';
 
 if (!accessTokenSecret) {
-    throw new Error('Missing access token secret. check your .env file');
+    // throw new Error('Missing access token secret. check your .env file');
+    console.error('Missing access token secret. check your ".env" file');
 }
 
 export const executeTransaction = async (
