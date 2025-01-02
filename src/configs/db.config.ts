@@ -17,6 +17,8 @@ const { createPool } = require('mysql');
 //         connection.release();
 //     }
 // });
+// set time if connection lost
+const timeToReconnect = 5;
 
 if (
     !process.env.DB_PORT ||
@@ -46,8 +48,8 @@ function createDatabaseConnection() {
     pool.getConnection((err: NodeJS.ErrnoException, connection: any) => {
         if (err) {
             console.error('Lỗi kết nối tới db:', err.message);
-            console.log('Thử kết nối lại sau 2 giây...');
-            setTimeout(createDatabaseConnection, 2000);
+            console.log(`Thử kết nối lại sau ${timeToReconnect} giây...`);
+            setTimeout(createDatabaseConnection, timeToReconnect * 1000);
         } else {
             console.log('Kết nối thành công với cơ sở dữ liệu!');
             connection.release(); // Trả lại kết nối về pool sau khi kiểm tra
@@ -61,8 +63,8 @@ function createDatabaseConnection() {
             err.code === 'PROTOCOL_CONNECTION_LOST' ||
             err.code === 'ECONNRESET'
         ) {
-            console.log('Đang thử kết nối lại sau 2 giây...');
-            setTimeout(createDatabaseConnection, 2000);
+            console.log(`Đang thử kết nối lại sau ${timeToReconnect} giây...`);
+            setTimeout(createDatabaseConnection, timeToReconnect * 1000);
         }
     });
 

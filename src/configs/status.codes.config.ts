@@ -1,4 +1,4 @@
-const STATUS_CODE = {
+export const STATUS_CODE = {
     OK: 200,
     BAD_REQUEST: 400,
     FORBIDDEN: 403,
@@ -8,5 +8,3 @@ const STATUS_CODE = {
     CONFLICT: 409,
     UNPROCESSABLE_ENTITY: 422,
 };
-
-module.exports = { STATUS_CODE };

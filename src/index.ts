@@ -5,7 +5,6 @@ const cors = require('cors');
 const bodyparser = require('body-parser');
 const dotenv = require('dotenv');
 const fs = require('fs');
-var os = require('os');
 dotenv.config();
 
 import { swaggerDocs, swaggerUi } from '@/src/configs/swagger.config'; // Import Swagger
@@ -14,6 +13,7 @@ import { logger } from '@/src/configs/logger.config'; // Import Logger
 
 const app = express();
 import { downloadFile, getDeviceIp } from '@/src/ultil/ultil.lib';
+import { errorHandler, errorLogger } from '@/src/middlewares/error.middleware';
 const deviceIp = getDeviceIp();
 
 const filePath = './fcm.serviceaccount.key.json';
@@ -76,6 +76,11 @@ const initialApp = () => {
     });
 
     app.use(BASE_URL_PATH, apiRoute);
+
+    app.use(errorLogger);
+
+    app.use(errorHandler);
+
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
     app.listen(appPort, () => {

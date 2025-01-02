@@ -202,7 +202,7 @@ export const sendResponse = (
     res: Response,
     statusCode: number,
     message: string,
-    data: any
+    data?: any
 ) => {
     if (statusCode != STATUS_CODE.OK) {
         res.status(statusCode).json({
