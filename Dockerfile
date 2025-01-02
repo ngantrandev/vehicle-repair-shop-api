@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8000
 
 # Chạy ứng dụng với lệnh npm start
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "production"]
