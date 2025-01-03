@@ -1,11 +1,12 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const cartsController = require('@/src/controllers/carts.controller');
 const bookingController = require('@/src/controllers/booking.controller');
 const bookingsController = require('@/src/controllers/bookings.controller');
 const middlewareControllers = require('@/src/middlewares/verify.middleware');
 const cartController = require('@/src/controllers/cart.controller');
-const uploadImgService = require('@/src/services/uploadImage.service');
+import { fileMemoryStorage } from '@/src/services/storage.service';
 const notificationController = require('@/src/controllers/notification.controller');
 
 router.get(
@@ -39,7 +40,7 @@ router.get('/bookings/:booking_id', bookingController.getBookingById);
 
 router.post(
     '/bookings',
-    uploadImgService.upload.single('file'),
+    fileMemoryStorage.single('file'),
     bookingController.createBooking
 );
 
@@ -56,4 +57,4 @@ router.patch(
     notificationController.userMarkAllNotificationsAsRead
 );
 
-module.exports = router;
+export default router;

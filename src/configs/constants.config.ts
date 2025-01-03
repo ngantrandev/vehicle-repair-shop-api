@@ -1,8 +1,8 @@
-const APP_NAME = 'Vehicle Repair Shop API';
+export const APP_NAME: string = 'Vehicle Repair Shop API';
 
-const BASE_URL_PATH = '/v1/api';
+export const BASE_URL_PATH: string = '/v1/api';
 
-const TABLE_NAMES = {
+export const TABLE_NAMES = {
     users: 'users',
     staffs: 'staffs',
     service_stations: 'service_stations',
@@ -26,18 +26,18 @@ const TABLE_NAMES = {
     output_info: 'output_info',
 };
 
-const USER_ROLES = {
+export const USER_ROLES = {
     admin: 'admin',
     customer: 'customer',
     staff: 'staff',
 };
 
-const ACCOUNT_STATE = {
+export const ACCOUNT_STATE = {
     active: '1',
     deactive: '0',
 };
 
-const BOOKING_STATE = {
+export const BOOKING_STATE = {
     pending: 'pending',
     accepted: 'accepted',
     fixing: 'fixing',
@@ -45,25 +45,14 @@ const BOOKING_STATE = {
     cancelled: 'cancelled',
 };
 
-const PAYMENT_TYPE = {
+export const PAYMENT_TYPE = {
     cash: 'cash',
     vnpay: 'vnpay',
 };
 
-const PAYMENT_STATUS = {
+export const PAYMENT_STATUS = {
     pending: 'pending',
     success: 'success',
     fail: 'fail',
     refund: 'refund',
-};
-
-module.exports = {
-    APP_NAME,
-    TABLE_NAMES,
-    USER_ROLES,
-    BASE_URL_PATH,
-    ACCOUNT_STATE,
-    BOOKING_STATE,
-    PAYMENT_TYPE,
-    PAYMENT_STATUS,
 };

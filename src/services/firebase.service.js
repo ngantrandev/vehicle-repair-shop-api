@@ -1,4 +1,4 @@
-const { messaging } = require('@/src/firebase.config');
+const { messaging } = require('@/src/configs/firebase.config');
 const { isValidUrl } = require('@/src/ultil/ultil.lib');
 
 const sendNotificationToTopic = async (

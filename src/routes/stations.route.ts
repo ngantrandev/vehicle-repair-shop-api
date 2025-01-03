@@ -1,4 +1,5 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const stationController = require('@/src/controllers/station.controller');
 
@@ -17,4 +18,4 @@ router.get(
     stationController.getAllStaffOfServiceStation
 );
 
-module.exports = router;
+export default router;

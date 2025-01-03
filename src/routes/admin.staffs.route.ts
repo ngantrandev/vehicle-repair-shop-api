@@ -1,7 +1,8 @@
+import express from 'express';
+const router = express.Router();
+
 const adminStaffsController = require('@/src/controllers/admin.staffs.controller');
 const adminStaffController = require('@/src/controllers/admin.staff.controller');
-
-const router = require('express').Router();
 
 router.get('/', adminStaffsController.getAllStaffs);
 
@@ -15,4 +16,4 @@ router.patch('/:staff_id/deactivate', adminStaffController.deactivateStaff);
 
 // router.delete('/:staff_id', adminStaffController.deleteStaff);
 
-module.exports = router;
+export default router;

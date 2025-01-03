@@ -1,4 +1,5 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const {
     getAllItem,
@@ -30,4 +31,4 @@ router.post('/service/add', addItemToService);
 
 router.patch('/service/remove', removeItemFromService);
 
-module.exports = router;
+export default router;

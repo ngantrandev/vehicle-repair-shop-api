@@ -1,4 +1,5 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const motorcycleBrandsController = require('@/src/controllers/motorcycle.brands.controller');
 const motorcycleBrandController = require('@/src/controllers/motorcycle.brand.controller');
@@ -16,4 +17,4 @@ router.get(
     motorcycleBrandController.getAllServicesByBrandId
 );
 
-module.exports = router;
+export default router;

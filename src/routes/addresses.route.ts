@@ -1,4 +1,5 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const addressesController = require('@/src/controllers/addresses.controller');
 const addressController = require('@/src/controllers/address.controller');
@@ -24,4 +25,4 @@ router.get(
     addressController.getGeoJsonCoordinatesDirection
 );
 
-module.exports = router;
+export default router;

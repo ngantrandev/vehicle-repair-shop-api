@@ -1,4 +1,5 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const {
     getBookingById,
@@ -10,4 +11,4 @@ router.get('/:booking_id', verifyToken, getBookingById);
 
 router.patch('/:booking_id/undo', undoBooking);
 
-module.exports = router;
+export default router;

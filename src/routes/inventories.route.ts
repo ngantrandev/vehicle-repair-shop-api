@@ -1,4 +1,5 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const {
     importGoods,
@@ -18,4 +19,4 @@ router.get('/imports-note', getImportNotes);
 
 router.get('/exports-note', getExportNotes);
 
-module.exports = router;
+export default router;

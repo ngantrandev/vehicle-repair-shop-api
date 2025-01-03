@@ -1,4 +1,6 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
+
 const adminUserControllers = require('@/src/controllers/admin.user.controller');
 const adminUsersController = require('@/src/controllers/admin.users.controller');
 
@@ -12,6 +14,4 @@ router.patch('/:user_id', adminUserControllers.updateUser);
 
 router.patch('/:user_id/deactivate', adminUserControllers.deactivateUser);
 
-// router.delete('/:user_id', adminUserControllers.deleteUser);
-
-module.exports = router;
+export default router;

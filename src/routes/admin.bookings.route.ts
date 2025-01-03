@@ -1,8 +1,9 @@
+import express from 'express';
+const router = express.Router();
+
 const bookingController = require('@/src/controllers/booking.controller');
 const bookingsController = require('@/src/controllers/bookings.controller');
 const adminBookingController = require('@/src/controllers/admin.booking.controller');
-
-const router = require('express').Router();
 
 router.get('/', bookingsController.getAllBooking);
 
@@ -17,4 +18,4 @@ router.patch(
     adminBookingController.assignBookingToEmployee
 );
 
-module.exports = router;
+export default router;

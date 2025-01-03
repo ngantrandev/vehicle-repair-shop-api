@@ -1,4 +1,5 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const {
     createPaymentUrl,
@@ -12,4 +13,4 @@ router.get('/vnpay-result', getVNPayReturn);
 
 router.get('/vnpay-ipn', getVNPayIPN);
 
-module.exports = router;
+export default router;

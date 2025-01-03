@@ -1,4 +1,5 @@
-const router = require('express').Router();
+import express from 'express';
+const router = express.Router();
 
 const bookingController = require('@/src/controllers/booking.controller');
 const staffBookingController = require('@/src/controllers/staff.booking.controller');
@@ -27,4 +28,4 @@ router.patch(
     notificationController.staffMarkAllNotificationsAsRead
 );
 
-module.exports = router;
+export default router;

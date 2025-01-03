@@ -1,19 +1,20 @@
 const express = require('express');
+const apiRoute = express();
 
-const authRoutes = require('@/src/routes/auth.route');
-const adminRoutes = require('@/src/routes/admin.route');
-const motorcycleBrandsRoute = require('@/src/routes/motorcycle.brands.route');
-const servicesRoute = require('@/src/routes/services.route');
-const motorcyclesRoute = require('@/src/routes/motorcycles.route');
-const usersRoutes = require('@/src/routes/users.route');
-const staffsRoutes = require('@/src/routes/staffs.route');
-const stationsRoutes = require('@/src/routes/stations.route');
-const addressesRoute = require('@/src/routes/addresses.route');
-const itemsRoute = require('@/src/routes/items.route');
-const bookingsRoute = require('@/src/routes/bookings.route');
-const profileRoute = require('@/src/routes/profile.route');
-const invoicesRoute = require('@/src/routes/invoices.route');
-const paymentsRoute = require('@/src/routes/payments.route');
+import authRoutes from '@/src/routes/auth.route';
+import adminRoutes from '@/src/routes/admin.route';
+import motorcycleBrandsRoute from '@/src/routes/motorcycle.brands.route';
+import servicesRoute from '@/src/routes/services.route';
+import motorcyclesRoute from '@/src/routes/motorcycles.route';
+import usersRoutes from '@/src/routes/users.route';
+import staffsRoutes from '@/src/routes/staffs.route';
+import stationsRoutes from '@/src/routes/stations.route';
+import addressesRoute from '@/src/routes/addresses.route';
+import itemsRoute from '@/src/routes/items.route';
+import bookingsRoute from '@/src/routes/bookings.route';
+import profileRoute from '@/src/routes/profile.route';
+import invoicesRoute from '@/src/routes/invoices.route';
+import paymentsRoute from '@/src/routes/payments.route';
 
 const {
     verifyToken,
@@ -21,8 +22,6 @@ const {
     verifyStaffRole,
 } = require('@/src/middlewares/verify.middleware');
 const { testSendNoti } = require('@/src/controllers/notification.controller');
-
-const apiRoute = express();
 
 apiRoute.use('/auth', authRoutes);
 apiRoute.use('/admin', verifyToken, verifyAdminRole, adminRoutes);
@@ -53,4 +52,4 @@ apiRoute.use('/payments', paymentsRoute);
 
 apiRoute.get('/test-noti', testSendNoti);
 
-module.exports = apiRoute;
+export default apiRoute;

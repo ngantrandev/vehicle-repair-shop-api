@@ -1,15 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
 
-const express = require('express');
+import express from 'express';
 const cors = require('cors');
-const bodyparser = require('body-parser');
-const dotenv = require('dotenv');
-const fs = require('fs');
+import bodyparser from 'body-parser';
+import dotenv from 'dotenv';
+import fs from 'fs';
+
 dotenv.config();
 
 import { swaggerDocs, swaggerUi } from '@/src/configs/swagger.config'; // Import Swagger
 
 import { logger } from '@/src/configs/logger.config'; // Import Logger
+import apiRoutes from '@/src/routes/api.route';
 
 const app = express();
 import { downloadFile, getDeviceIp } from '@/src/ultil/ultil.lib';
@@ -21,7 +23,6 @@ const filePath = './fcm.serviceaccount.key.json';
 const appPort = process.env.APP_PORT || 8000;
 
 const initialApp = () => {
-    const apiRoute = require('@/src/routes/api.route');
     const {
         BASE_URL_PATH,
         APP_NAME,
@@ -75,7 +76,7 @@ const initialApp = () => {
         res.status(STATUS_CODE.OK).json(`Welcome to the ${APP_NAME}!`);
     });
 
-    app.use(BASE_URL_PATH, apiRoute);
+    app.use(BASE_URL_PATH, apiRoutes);
 
     app.use(errorLogger);
 
@@ -85,7 +86,7 @@ const initialApp = () => {
 
     app.listen(appPort, () => {
         console.log(`
-            ${'\x1b[31m'}Server is running on http://${deviceIp}:${'\x1b[32m'}${appPort}${'\x1b[0m'}
+            ${'\x1b[31m'}Server is running on https://${deviceIp}:${'\x1b[32m'}${appPort}${'\x1b[0m'}
         `);
     });
 };
