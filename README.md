@@ -8,31 +8,69 @@ This project is a RESTful API for Motorcycle Repair Shop Web. It is built using 
 
 ```bash
 git clone https://github.com/ngantrandev/vehicle-repair-shop-api.git
+cd vehicle-repair-shop-api
 ```
 
 2. Create a `.env` file in the root directory of the project and add the following environment variables:
 
-```bash
+```env
 PORT=8000
 DB_PORT=3306
-DB_HOST= ***** (Your database host)
-DB_USER= ***** (Your database user)
-DB_PASS= ***** (Your database password)
-DB_NAME= ***** (Your database name)
+DB_HOST=*****  # Your database host
+DB_USER=*****  # Your database user
+DB_PASS=*****  # Your database password
+DB_NAME=*****  # Your database name
 
-JWT_ACCESS_TOKEN = ***** (Your JWT access token secret for authentication)
-EXPIRES_TIME_ACCESS_TOKEN = ***** (Your JWT access token expires time, e.g. 30s, 1h, 1d, 1w, 1m)
+JWT_ACCESS_TOKEN=*****  # Your JWT access token
+EXPIRES_TIME_ACCESS_TOKEN=*****  # Your JWT token expiration time
 
-GOONG_API_KEY = ***** (GOONG MAP API key for calling API)
-GOONG_MAPTILES_KEY = ***** (GOONG MAP API KEY for calling map tiles)
+GOONG_MAP_BASE_API_ENPOINT=*****  # Your Goong map base API endpoint
+GOONG_API_KEY=*****  # Your Goong API key
+GOONG_MAPTILES_KEY=*****  # Your Goong maptiles key
+
+VNP_SECRET_KEY=*****  # Your VNP secret key
+VNP_TMN_CODE=*****  # Your VNP TMN code
+VNP_BASE_URL=*****  # Your VNP base URL
+VNP_RETURN_URL=*****  # Your VNP return URL
+
+WEB_URL=*****  # Your web URL
+EMAIL_USER=*****  # Your email user
+EMAIL_PASS=*****  # Your email password
+EMAIL_HOST=*****  # Your email host
+SHOP_NAME=*****  # Your shop name
 ```
 
-3. Install dependencies
+3. Deploy with Docker
+
+**Step 1**: Make sure you change the database information in the `.env` file to the correct information for the Docker container. For example:
+
+```env
+DB_HOST=mysqldbhost
+DB_USER=root
+DB_PASS=password
+DB_NAME=motorcycle_repair_shop_db
+```
+
+**Step 2**: Build the Docker image
 
 ```bash
-# Install dependencies
-npm install
+docker-compose build
+```
 
-# Start the development server
-npm run start
+**Step 3**: Run the Docker container
+
+```bash
+docker-compose up
+```
+
+4. Install dependencies
+
+```bash
+npm install
+```
+
+5. Start the development server
+
+```bash
+npm run dev
 ```
