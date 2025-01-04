@@ -5,10 +5,10 @@ const mailUser = process.env.EMAIL_USER || '';
 const mailPass = process.env.EMAIL_PASS || '';
 const mailHost = process.env.EMAIL_HOST || '';
 
-const sendMail = async (
-    email,
-    subject = `đây là mail tự động từ ${shopName}`,
-    body
+export const sendMail = async (
+    email: string,
+    subject: string = `đây là mail tự động từ ${shopName}`,
+    body: string
 ) => {
     try {
         const transporter = nodemailer.createTransport({
@@ -31,13 +31,7 @@ const sendMail = async (
         const info = await transporter.sendMail(mailOptions);
 
         return info;
-    } catch (error) {
+    } catch (error: any) {
         throw new Error(error);
     }
 };
-
-const mailsenderService = {
-    sendMail,
-};
-
-module.exports = mailsenderService;

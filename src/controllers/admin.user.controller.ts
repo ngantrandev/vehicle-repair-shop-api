@@ -1,11 +1,15 @@
-const {
+import { Response } from 'express';
+import { CustomRequest } from '@/src/types/requests';
+import { UserResponse } from '@/src/types/responses';
+
+import {
     TABLE_NAMES,
     USER_ROLES,
     ACCOUNT_STATE,
-} = require('@/src/configs/constants.config');
-const { QUERY_SELECT_USER_BY_ID } = require('@/src/configs/queries.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+} from '@/src/configs/constants.config';
+import { QUERY_SELECT_USER_BY_ID } from '@/src/configs/queries.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     selectData,
     excuteQuery,
     convertDateToGMT7,
@@ -14,9 +18,9 @@ const {
     hashPassWord,
     isValidInteger,
     sendResponse,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
 
-const getUserById = async (req, res) => {
+export const getUserById = async (req: CustomRequest, res: Response) => {
     if (!req.params.user_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id is required');
         return;
@@ -30,7 +34,9 @@ const getUserById = async (req, res) => {
     try {
         const query = QUERY_SELECT_USER_BY_ID;
 
-        const users = await selectData(query, [req.params.user_id]);
+        const users: UserResponse[] = (await selectData(query, [
+            req.params.user_id,
+        ])) as UserResponse[];
 
         if (users.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
@@ -38,44 +44,26 @@ const getUserById = async (req, res) => {
         }
 
         const {
-            // eslint-disable-next-line no-unused-vars
             password,
             address_id,
-            address_street,
             address_latitude,
             address_longitude,
-            ward_id,
-            ward_name,
-            district_id,
-            district_name,
-            province_id,
-            province_name,
+            place_id,
+            address_name,
+            full_address,
             ...other
         } = users[0];
         other.birthday = convertDateToGMT7(other.birthday);
         other.created_at = convertTimeToGMT7(other.created_at);
 
-        other.address =
-            address_id === null
-                ? null
-                : {
-                      id: address_id,
-                      street: address_street,
-                      latitude: address_latitude,
-                      longitude: address_longitude,
-                      ward: {
-                          id: ward_id,
-                          name: ward_name,
-                      },
-                      district: {
-                          id: district_id,
-                          name: district_name,
-                      },
-                      province: {
-                          id: province_id,
-                          name: province_name,
-                      },
-                  };
+        other.address = {
+            id: address_id,
+            latitude: address_latitude,
+            longitude: address_longitude,
+            place_id: place_id,
+            address_name: address_name,
+            full_address: full_address,
+        };
 
         sendResponse(res, STATUS_CODE.OK, 'Find user successfullly!', other);
     } catch (error) {
@@ -87,7 +75,7 @@ const getUserById = async (req, res) => {
     }
 };
 
-const createUser = async (req, res) => {
+export const createUser = async (req: CustomRequest, res: Response) => {
     const requiredFields = [
         'username',
         'password',
@@ -112,15 +100,15 @@ const createUser = async (req, res) => {
         /* FIND USER*/
 
         const findQuery = `
-    SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
-    UNION
-    SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? 
-`;
+            SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
+            UNION
+            SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? 
+        `;
 
-        const usersExist = await selectData(findQuery, [
+        const usersExist: any[] = (await selectData(findQuery, [
             req.body.username,
             req.body.username,
-        ]);
+        ])) as any[];
 
         if (usersExist.length > 0) {
             sendResponse(
@@ -176,7 +164,7 @@ const createUser = async (req, res) => {
     }
 };
 
-const updateUser = async (req, res) => {
+export const updateUser = async (req: CustomRequest, res: Response) => {
     if (!req.params.user_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id is required');
         return;
@@ -190,9 +178,9 @@ const updateUser = async (req, res) => {
     try {
         /**FIND USER */
         const checkExistQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
-        const usersFound = await selectData(checkExistQuery, [
+        const usersFound: any[] = (await selectData(checkExistQuery, [
             req.params.user_id,
-        ]);
+        ])) as any[];
 
         if (usersFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
@@ -205,11 +193,10 @@ const updateUser = async (req, res) => {
                 UNION
                 SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ?
             `;
-            const usersExist = await selectData(checkExistUsernameQuery, [
-                req.body.username,
-                req.params.user_id,
-                req.body.username,
-            ]);
+            const usersExist: any[] = (await selectData(
+                checkExistUsernameQuery,
+                [req.body.username, req.params.user_id, req.body.username]
+            )) as any[];
 
             if (usersExist.length > 0) {
                 sendResponse(
@@ -300,40 +287,7 @@ const updateUser = async (req, res) => {
     }
 };
 
-// const deleteUser = async (req, res) => {
-//     if (!req.params.user_id) {
-//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
-
-//         return;
-//     }
-
-//     if (!isValidInteger(req.params.user_id)) {
-//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
-//         return;
-//     }
-
-//     /**DELETE USER */
-//     const deleteQuery = `DELETE FROM ${TABLE_NAMES.users} WHERE id = ?`;
-//     const result = await excuteQuery(deleteQuery, [req.params.user_id]);
-
-//     if (!result) {
-//         sendResponse(
-//             res,
-//             STATUS_CODE.INTERNAL_SERVER_ERROR,
-//             'Somthing went wrongs!'
-//         );
-
-//         return;
-//     } else if (result.affectedRows === 0) {
-//         sendResponse(res, STATUS_CODE.NOT_FOUND, 'user not found!');
-
-//         return;
-//     }
-
-//     sendResponse(res, STATUS_CODE.OK, 'Deleted account successfully!');
-// };
-
-const deactivateUser = async (req, res) => {
+export const deactivateUser = async (req: CustomRequest, res: Response) => {
     if (!req.params.user_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'user_id is required');
 
@@ -348,9 +302,9 @@ const deactivateUser = async (req, res) => {
     try {
         /**FIND USER */
         const findUserQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE id = ?`;
-        const usersFound = await selectData(findUserQuery, [
+        const usersFound: any[] = (await selectData(findUserQuery, [
             req.params.user_id,
-        ]);
+        ])) as any[];
 
         if (usersFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'User not found!');
@@ -399,12 +353,3 @@ const deactivateUser = async (req, res) => {
         );
     }
 };
-
-const adminUserControllers = {
-    getUserById,
-    createUser,
-    deactivateUser,
-    updateUser,
-};
-
-module.exports = adminUserControllers;

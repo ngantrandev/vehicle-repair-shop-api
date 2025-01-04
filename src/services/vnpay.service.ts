@@ -1,20 +1,38 @@
-const {
+import {
     sortObject,
     buildQueryParams,
     getChecksum,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
+import { VnpReturnUrlParams } from '@/src/types/vnpay';
 
 const VnpTmnCode = process.env.VNP_TMN_CODE || '';
 const BaseUrl = process.env.VNP_BASE_URL || '';
 const VnpReturnUrl = process.env.VNP_RETURN_URL || '';
 
-/**
- * data = {amout, service_name, invoice_id, date}
- */
-const createReturnUrl = (data) => {
+export const createReturnUrl = (data: {
+    amount: number;
+    orderInfo: string;
+    createDate: string;
+    expireDate: string;
+    txnRef: string;
+}): string => {
     const { amount, orderInfo, createDate, expireDate, txnRef } = data;
 
-    var vnp_Params = {};
+    let vnp_Params: VnpReturnUrlParams = {
+        vnp_Version: '',
+        vnp_Command: '',
+        vnp_CurrCode: '',
+        vnp_IpAddr: '',
+        vnp_Locale: '',
+        vnp_OrderType: '',
+        vnp_TmnCode: '',
+        vnp_Amount: 0,
+        vnp_CreateDate: '',
+        vnp_OrderInfo: '',
+        vnp_ReturnUrl: '',
+        vnp_ExpireDate: '',
+        vnp_TxnRef: '',
+    };
     vnp_Params['vnp_Version'] = '2.1.1';
     vnp_Params['vnp_Command'] = 'pay';
     vnp_Params['vnp_CurrCode'] = 'VND';
@@ -29,7 +47,7 @@ const createReturnUrl = (data) => {
     vnp_Params['vnp_ExpireDate'] = expireDate;
     vnp_Params['vnp_TxnRef'] = txnRef;
 
-    vnp_Params = sortObject(vnp_Params);
+    vnp_Params = sortObject(vnp_Params) as VnpReturnUrlParams;
 
     const searchParams = buildQueryParams(vnp_Params);
     const signData = searchParams.toString();
@@ -42,9 +60,3 @@ const createReturnUrl = (data) => {
 
     return vnpUrl;
 };
-
-const vnpService = {
-    createReturnUrl,
-};
-
-module.exports = vnpService;

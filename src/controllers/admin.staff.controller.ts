@@ -1,10 +1,10 @@
-const {
-    TABLE_NAMES,
-    ACCOUNT_STATE,
-} = require('@/src/configs/constants.config');
-const { QUERY_SELECT_STAFF_BY_ID } = require('@/src/configs/queries.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { Response } from 'express';
+import { CustomRequest } from '@/src/types/requests';
+
+import { TABLE_NAMES, ACCOUNT_STATE } from '@/src/configs/constants.config';
+import { QUERY_SELECT_STAFF_BY_ID } from '@/src/configs/queries.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     selectData,
     isValidInteger,
     convertDateToGMT7,
@@ -13,9 +13,11 @@ const {
     getCurrentTimeInGMT7,
     excuteQuery,
     sendResponse,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
+import { StaffResponse } from '@/src/types/responses';
+import { Staff } from '@/src/types/models';
 
-const getStaffById = async (req, res) => {
+export const getStaffById = async (req: CustomRequest, res: Response) => {
     if (!req.params.staff_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
         return;
@@ -29,7 +31,9 @@ const getStaffById = async (req, res) => {
     try {
         const query = QUERY_SELECT_STAFF_BY_ID;
 
-        const staffs = await selectData(query, [req.params.staff_id]);
+        const staffs: StaffResponse[] = (await selectData(query, [
+            req.params.staff_id,
+        ])) as StaffResponse[];
 
         if (staffs.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
@@ -42,10 +46,12 @@ const getStaffById = async (req, res) => {
         other.birthday = convertDateToGMT7(other.birthday);
         other.created_at = convertTimeToGMT7(other.created_at);
 
-        other.service_station = {
-            id: station_id,
-            name: service_station_name,
-        };
+        if (station_id) {
+            other.service_station = {
+                id: station_id,
+                name: service_station_name,
+            };
+        }
 
         sendResponse(res, STATUS_CODE.OK, 'Find staff successfully!', other);
     } catch (error) {
@@ -57,7 +63,7 @@ const getStaffById = async (req, res) => {
     }
 };
 
-const createStaff = async (req, res) => {
+export const createStaff = async (req: CustomRequest, res: Response) => {
     const requiredFields = [
         'username',
         'password',
@@ -97,10 +103,10 @@ const createStaff = async (req, res) => {
     SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? 
 `;
 
-        const usersExist = await selectData(findQuery, [
+        const usersExist: any[] = (await selectData(findQuery, [
             req.body.username,
             req.body.username,
-        ]);
+        ])) as any[];
 
         if (usersExist.length > 0) {
             sendResponse(
@@ -162,7 +168,7 @@ const createStaff = async (req, res) => {
     }
 };
 
-const updateStaff = async (req, res) => {
+export const updateStaff = async (req: CustomRequest, res: Response) => {
     if (!req.params.staff_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
         return;
@@ -178,9 +184,9 @@ const updateStaff = async (req, res) => {
         const findStaffQuery = `
             SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
         `;
-        const staffsFound = await selectData(findStaffQuery, [
+        const staffsFound: Staff[] = (await selectData(findStaffQuery, [
             req.params.staff_id,
-        ]);
+        ])) as Staff[];
 
         if (staffsFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
@@ -211,7 +217,10 @@ const updateStaff = async (req, res) => {
 
             if (field === 'username') {
                 if (
-                    await isUsernameExist(req.body[field], req.params.staff_id)
+                    await isUsernameExist(
+                        req.body[field],
+                        Number(req.params.staff_id)
+                    )
                 ) {
                     sendResponse(
                         res,
@@ -272,9 +281,9 @@ const updateStaff = async (req, res) => {
         }
 
         const querySelect = QUERY_SELECT_STAFF_BY_ID;
-        const updatedStaffs = await selectData(querySelect, [
+        const updatedStaffs: StaffResponse[] = (await selectData(querySelect, [
             req.params.staff_id,
-        ]);
+        ])) as StaffResponse[];
 
         // eslint-disable-next-line no-unused-vars
         const { password, station_id, service_station_name, ...other } =
@@ -282,10 +291,12 @@ const updateStaff = async (req, res) => {
         other.created_at = convertTimeToGMT7(other.created_at);
         other.birthday = convertDateToGMT7(other.birthday);
 
-        other.service_station = {
-            id: station_id,
-            name: service_station_name,
-        };
+        if (station_id) {
+            other.service_station = {
+                id: station_id,
+                name: service_station_name,
+            };
+        }
 
         sendResponse(
             res,
@@ -302,7 +313,7 @@ const updateStaff = async (req, res) => {
     }
 };
 
-const deactivateStaff = async (req, res) => {
+export const deactivateStaff = async (req: CustomRequest, res: Response) => {
     if (!req.params.staff_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
         return;
@@ -319,9 +330,9 @@ const deactivateStaff = async (req, res) => {
      SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?
  `;
 
-        const staffsFound = await selectData(findStaffQuery, [
+        const staffsFound: Staff[] = (await selectData(findStaffQuery, [
             req.params.staff_id,
-        ]);
+        ])) as Staff[];
         if (staffsFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
             return;
@@ -370,39 +381,7 @@ const deactivateStaff = async (req, res) => {
     }
 };
 
-// const deleteStaff = async (req, res) => {
-//     if (!req.params.staff_id) {
-//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
-//         return;
-//     }
-
-//     if (!isValidInteger(req.params.staff_id)) {
-//         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id must be interger');
-//         return;
-//     }
-
-//     /**DELETE USER */
-//     const deleteQuery = `DELETE FROM ${TABLE_NAMES.staffs} WHERE id = ?`;
-//     const result = await excuteQuery(deleteQuery, [req.params.staff_id]);
-
-//     if (!result) {
-//         sendResponse(
-//             res,
-//             STATUS_CODE.INTERNAL_SERVER_ERROR,
-//             'Something went wrongs!'
-//         );
-
-//         return;
-//     } else if (result.affectedRows === 0) {
-//         sendResponse(res, STATUS_CODE.NOT_FOUND, 'Staff not found!');
-
-//         return;
-//     }
-
-//     sendResponse(res, STATUS_CODE.OK, 'Deleted staff account successfully!');
-// };
-
-const isUsernameExist = async (username, id) => {
+export const isUsernameExist = async (username: string, id: number) => {
     /**FIND USERNAME EXIST */
     const query = `
         SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
@@ -410,7 +389,11 @@ const isUsernameExist = async (username, id) => {
         SELECT id FROM ${TABLE_NAMES.staffs} WHERE username = ? AND id != ?
     `;
 
-    const staffsFound = await selectData(query, [username, username, id]);
+    const staffsFound: any[] = (await selectData(query, [
+        username,
+        username,
+        id,
+    ])) as any[];
 
     if (staffsFound.length > 0) {
         return true;
@@ -418,12 +401,3 @@ const isUsernameExist = async (username, id) => {
 
     return false;
 };
-
-const adminStaffController = {
-    getStaffById,
-    createStaff,
-    updateStaff,
-    deactivateStaff,
-};
-
-module.exports = adminStaffController;

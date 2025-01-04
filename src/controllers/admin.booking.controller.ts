@@ -1,37 +1,60 @@
-const {
+import { Response } from 'express';
+import { CustomRequest } from '@/src/types/requests';
+
+import {
     BOOKING_STATE,
     TABLE_NAMES,
     ACCOUNT_STATE,
-} = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+} from '@/src/configs/constants.config';
+import { DistanceMatrix } from '@/src/types/goongmaps';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     createUserNotification,
     createStaffNotification,
-} = require('@/src/services/notification.service');
-const { sendNotificationToTopic } = require('@/src/services/firebase.service');
-const {
+} from '@/src/services/notification.service';
+import { sendNotificationToTopic } from '@/src/services/firebase.service';
+import {
     isValidInteger,
     selectData,
     excuteQuery,
     sendResponse,
-} = require('@/src/ultil/ultil.lib');
-const { getDistanceMatrix } = require('../services/goong.service');
+} from '@/src/ultil/ultil.lib';
+import { BookingResponse } from '@/src/types/responses';
+import { Booking, Staff } from '@/src/types/models';
+import { getDistanceMatrix } from '@/src/services/goong.service';
 
-const calculateScore = (min, max, value) => {
+const calculateScore = (min: number, max: number, value: number) => {
     return (value - min) / (max - min);
 };
 
 const calculateTotalScore = (
-    scorePendingTasks,
-    scoreDistance,
-    scoreEstimatedTime
+    scorePendingTasks: number,
+    scoreDistance: number,
+    scoreEstimatedTime: number
 ) => {
     return (
         0.3 * scorePendingTasks + 0.4 * scoreDistance + 0.3 * scoreEstimatedTime
     );
 };
 
-const confirmBooking = async (req, res) => {
+interface StaffStatus {
+    staff_id: number;
+    pending_tasks: number;
+    distance: { text: string; value: number };
+    total_estimated_time: number;
+    latest_latitude: number;
+    latest_longitude: number;
+}
+
+interface StaffScore {
+    staff_id: number;
+    pending_tasks_score: number;
+    distance_score: number;
+    estimated_time_score: number;
+    score: number;
+}
+
+export const confirmBooking = async (req: CustomRequest, res: Response) => {
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
         return;
@@ -45,11 +68,6 @@ const confirmBooking = async (req, res) => {
         );
         return;
     }
-
-    // if (!req.body.employee_id) {
-    //     sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id is required');
-    //     return;
-    // }
 
     if (req.body.employee_id && !isValidInteger(req.body.employee_id)) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'staff_id must be integer');
@@ -68,9 +86,10 @@ const confirmBooking = async (req, res) => {
         INNER JOIN ${TABLE_NAMES.addresses} AS addr ON b.address_id = addr.id
         WHERE b.id = ?
         `;
-        const bookingsFound = await selectData(checkExistBooking, [
-            req.params.booking_id,
-        ]);
+        const bookingsFound: BookingResponse[] = (await selectData(
+            checkExistBooking,
+            [req.params.booking_id]
+        )) as BookingResponse[];
 
         if (bookingsFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
@@ -117,13 +136,18 @@ const confirmBooking = async (req, res) => {
             GROUP BY s.id, station_addr.latitude, station_addr.longitude, g.latitude, g.longitude;
         `;
 
-        const staffStatus = await selectData(getStaffStatusQuery, []);
+        const staffStatus: StaffStatus[] = (await selectData(
+            getStaffStatusQuery,
+            []
+        )) as StaffStatus[];
 
-        const listAddress = staffStatus.map((item) => {
-            return [[item.latest_latitude, item.latest_longitude]];
-        });
+        const listAddress = staffStatus.map(
+            (item: { latest_latitude: number; latest_longitude: number }) => {
+                return [[item.latest_latitude, item.latest_longitude]];
+            }
+        );
 
-        const distanceMatrix = await getDistanceMatrix(
+        const distanceMatrix: DistanceMatrix = await getDistanceMatrix(
             [[address_latitude, address_longitude]],
             listAddress
         );
@@ -174,7 +198,7 @@ const confirmBooking = async (req, res) => {
             }
         });
 
-        const dataScore = [];
+        const dataScore: StaffScore[] = [];
 
         staffStatus.forEach((item) => {
             const { staff_id, pending_tasks, distance, total_estimated_time } =
@@ -261,7 +285,10 @@ Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!`;
     }
 };
 
-const assignBookingToEmployee = async (req, res) => {
+export const assignBookingToEmployee = async (
+    req: CustomRequest,
+    res: Response
+) => {
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
         return;
@@ -292,9 +319,9 @@ const assignBookingToEmployee = async (req, res) => {
 
     try {
         const checkExistBooking = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
-        const bookingsFound = await selectData(checkExistBooking, [
+        const bookingsFound: Booking[] = (await selectData(checkExistBooking, [
             req.params.booking_id,
-        ]);
+        ])) as Booking[];
 
         if (bookingsFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
@@ -311,9 +338,9 @@ const assignBookingToEmployee = async (req, res) => {
         }
 
         const checkExistEmployee = `SELECT * FROM ${TABLE_NAMES.staffs} WHERE id = ?`;
-        const employeesFound = await selectData(checkExistEmployee, [
+        const employeesFound: Staff[] = (await selectData(checkExistEmployee, [
             req.body.employee_id,
-        ]);
+        ])) as Staff[];
 
         if (employeesFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'employee not found!');
@@ -352,10 +379,3 @@ const assignBookingToEmployee = async (req, res) => {
         return;
     }
 };
-
-const adminBookingController = {
-    confirmBooking,
-    assignBookingToEmployee,
-};
-
-module.exports = adminBookingController;

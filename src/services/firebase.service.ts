@@ -1,11 +1,11 @@
-const { messaging } = require('@/src/configs/firebase.config');
-const { isValidUrl } = require('@/src/ultil/ultil.lib');
+import { messaging } from '@/src/configs/firebase.config';
+import { isValidUrl } from '@/src/ultil/ultil.lib';
 
-const sendNotificationToTopic = async (
-    title,
-    subtitle,
-    topic,
-    imageUrl = ''
+export const sendNotificationToTopic = async (
+    title: string,
+    subtitle: string,
+    topic: string,
+    imageUrl?: string
 ) => {
     if (!title || !subtitle || !topic) {
         throw new Error('Invalid parameters');
@@ -39,11 +39,11 @@ const sendNotificationToTopic = async (
     }
 };
 
-const sendNotificationToDevice = async (
-    title,
-    subtitle,
-    token,
-    imageUrl = ''
+export const sendNotificationToDevice = async (
+    title: string,
+    subtitle: string,
+    token: string,
+    imageUrl?: string
 ) => {
     if (!title || !subtitle || !token) {
         throw new Error('Invalid parameters');
@@ -75,9 +75,4 @@ const sendNotificationToDevice = async (
     } catch (error) {
         console.log('Error sending message to device:', error);
     }
-};
-
-module.exports = {
-    sendNotificationToTopic,
-    sendNotificationToDevice,
 };

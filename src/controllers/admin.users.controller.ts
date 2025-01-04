@@ -1,8 +1,12 @@
+import { Response } from 'express';
+import { CustomRequest } from '@/src/types/requests';
+import { UserResponse } from '@/src/types/responses';
+
 const { TABLE_NAMES } = require('@/src/configs/constants.config');
 const { STATUS_CODE } = require('@/src/configs/status.codes.config');
 const { selectData, sendResponse } = require('@/src/ultil/ultil.lib');
 
-const getAllUser = async (req, res) => {
+export const getAllUser = async (req: CustomRequest, res: Response) => {
     try {
         const query = `
         SELECT
@@ -20,7 +24,10 @@ const getAllUser = async (req, res) => {
             ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
     `;
 
-        const users = await selectData(query, []);
+        const users: UserResponse[] = (await selectData(
+            query,
+            []
+        )) as UserResponse[];
 
         const newUsers = users
             .filter(({ username }) => req.tokenPayload.username !== username)
@@ -36,7 +43,7 @@ const getAllUser = async (req, res) => {
                     ...other
                 }) => {
                     if (!address_id) {
-                        other.address = null;
+                        other.address = undefined;
                         return other;
                     }
 
@@ -67,9 +74,3 @@ const getAllUser = async (req, res) => {
         );
     }
 };
-
-const userController = {
-    getAllUser,
-};
-
-module.exports = userController;

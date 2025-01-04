@@ -1,19 +1,22 @@
 const path = require('path');
 const sharp = require('sharp');
 
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { QUERY_SELECT_SERVICE_BY_ID } = require('@/src/configs/queries.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { Response } from 'express';
+import { CustomRequest } from '@/src/types/requests';
+import { Service } from '@/src/types/models';
+
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     isValidInteger,
     isValidTime,
     excuteQuery,
     selectData,
     sendResponse,
     executeTransaction,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
 
-const createService = async (req, res) => {
+export const createService = async (req: CustomRequest, res: Response) => {
     const requiredFields = [
         'category_id',
         'name',
@@ -113,15 +116,17 @@ const createService = async (req, res) => {
     }
 };
 
-const updateService = async (req, res) => {
-    const { items } = req.body;
+export const updateService = async (req: CustomRequest, res: Response) => {
+    const { items }: { items: number[] } = req.body;
 
-    if (!req.params.service_id) {
+    const serviceId = req.params.service_id;
+
+    if (!serviceId) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'service_id is required');
         return;
     }
 
-    if (!isValidInteger(req.params.service_id)) {
+    if (!isValidInteger(serviceId)) {
         sendResponse(
             res,
             STATUS_CODE.BAD_REQUEST,
@@ -147,9 +152,9 @@ const updateService = async (req, res) => {
     try {
         /**FIND SERVICE */
         const findQuery = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
-        const servicesFound = await selectData(findQuery, [
-            req.params.service_id,
-        ]);
+        const servicesFound: Service[] = (await selectData(findQuery, [
+            serviceId,
+        ])) as Service[];
 
         if (servicesFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
@@ -196,16 +201,8 @@ const updateService = async (req, res) => {
                 continue;
             }
 
-            if (field === 'image_file') {
-                /**
-                 * Save file
-                 * get file path
-                 * save file path to image_url field
-                 */
-            } else {
-                updateFields.push(`${field} = ?`);
-                updateValues.push(req.body[field]);
-            }
+            updateFields.push(`${field} = ?`);
+            updateValues.push(req.body[field]);
         }
 
         if (updateFields.length === 0) {
@@ -221,17 +218,17 @@ const updateService = async (req, res) => {
 
         const result = await excuteQuery(updateQuery, [
             ...updateValues,
-            req.params.service_id,
+            serviceId,
         ]);
 
         if (items && items.length > 0) {
-            const args = [];
+            const args: Number[] = [];
             const updateServiceItemsQuery = `
                 INSERT INTO ${TABLE_NAMES.services_items} (item_id, service_id) VALUES 
                 ${items
                     .map((item) => {
                         args.push(item);
-                        args.push(req.params.service_id);
+                        args.push(Number(serviceId));
                         return '(?, ?)';
                     })
                     .join(', ')}
@@ -239,7 +236,7 @@ const updateService = async (req, res) => {
 
             await executeTransaction(
                 [
-                    ` DELETE FROM ${TABLE_NAMES.services_items} WHERE service_id = ${req.params.service_id}`,
+                    ` DELETE FROM ${TABLE_NAMES.services_items} WHERE service_id = ${serviceId}`,
                     updateServiceItemsQuery,
                 ],
                 [[], args]
@@ -255,27 +252,7 @@ const updateService = async (req, res) => {
             return;
         }
 
-        // response updated service
-        const querySelect = QUERY_SELECT_SERVICE_BY_ID;
-        const updatedServices = await selectData(querySelect, [
-            req.params.service_id,
-        ]);
-
-        const { category_id, category_name, category_desc, ...other } =
-            updatedServices[0];
-
-        other.category = {
-            id: category_id,
-            name: category_name,
-            description: category_desc,
-        };
-
-        sendResponse(
-            res,
-            STATUS_CODE.OK,
-            'Updated service info successfully!',
-            other
-        );
+        sendResponse(res, STATUS_CODE.OK, 'Updated service info successfully!');
     } catch (error) {
         sendResponse(
             res,
@@ -285,7 +262,7 @@ const updateService = async (req, res) => {
     }
 };
 
-const deleteService = async (req, res) => {
+export const deleteService = async (req: CustomRequest, res: Response) => {
     if (!req.params.service_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'service_id is required');
 
@@ -304,9 +281,9 @@ const deleteService = async (req, res) => {
     try {
         /**FIND SERVICE */
         const findQuery = `SELECT * FROM ${TABLE_NAMES.services} WHERE id = ?`;
-        const servicesFound = await selectData(findQuery, [
+        const servicesFound: Service[] = (await selectData(findQuery, [
             req.params.service_id,
-        ]);
+        ])) as Service[];
 
         if (servicesFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'service not found!');
@@ -336,11 +313,3 @@ const deleteService = async (req, res) => {
         );
     }
 };
-
-const adminServiceController = {
-    createService,
-    updateService,
-    deleteService,
-};
-
-module.exports = adminServiceController;

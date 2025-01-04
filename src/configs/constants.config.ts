@@ -33,8 +33,8 @@ export const USER_ROLES = {
 };
 
 export const ACCOUNT_STATE = {
-    active: '1',
-    deactive: '0',
+    active: 1,
+    deactive: 0,
 };
 
 export const BOOKING_STATE = {

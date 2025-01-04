@@ -1,10 +1,11 @@
-const { TABLE_NAMES, USER_ROLES } = require('@/src/configs/constants.config');
-const {
-    convertTimeToGMT7,
-    executeTransaction,
-} = require('@/src/ultil/ultil.lib');
+import { TABLE_NAMES, USER_ROLES } from '@/src/configs/constants.config';
+import { convertTimeToGMT7, executeTransaction } from '@/src/ultil/ultil.lib';
 
-const createUserNotification = async (userId, title, message) => {
+export const createUserNotification = async (
+    userId: number,
+    title: string,
+    message: string
+) => {
     try {
         if (!userId || !title || !message) {
             throw new Error('Invalid parameters');
@@ -31,7 +32,11 @@ const createUserNotification = async (userId, title, message) => {
     }
 };
 
-const createStaffNotification = async (staffId, title, message) => {
+export const createStaffNotification = async (
+    staffId: number,
+    title: string,
+    message: string
+) => {
     try {
         if (!staffId || !title || !message) {
             throw new Error('Invalid parameters');
@@ -56,9 +61,4 @@ const createStaffNotification = async (staffId, title, message) => {
         console.log('send message error', error);
         return false;
     }
-};
-
-module.exports = {
-    createUserNotification,
-    createStaffNotification,
 };

@@ -1,9 +1,11 @@
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
 const goongHttpRequests = require('@/src/ultil/goongHttpRequests');
 
 const goongRestApiKey = process.env.GOONG_API_KEY;
 
-const getDistanceMatrix = async (origins, destinations) => {
+type PointList = [[number, number]][];
+
+export const getDistanceMatrix = async (origins: any, destinations: any) => {
     /**
      * origins and destinations are arrays of arrays: [[lat, lng], [lat, lng], ...]
      */
@@ -26,7 +28,11 @@ const getDistanceMatrix = async (origins, destinations) => {
     return resData;
 };
 
-const autocompleteAddress = async (input, latitude, longitude) => {
+export const autocompleteAddress = async (
+    input: string,
+    latitude: number,
+    longitude: number
+) => {
     const apiPath = '/place/autocomplete';
     const params = {
         input: input,
@@ -48,7 +54,7 @@ const autocompleteAddress = async (input, latitude, longitude) => {
 };
 
 //convert address to geocode
-const forwardGeocode = async (address) => {
+export const forwardGeocode = async (address: string) => {
     const apiPath = '/geocode';
     const params = {
         address,
@@ -66,7 +72,7 @@ const forwardGeocode = async (address) => {
     return resData;
 };
 
-const reverseGeocode = async (latitude, longitude) => {
+export const reverseGeocode = async (latitude: number, longitude: number) => {
     const apiPath = '/geocode';
     const params = {
         latlng: `${latitude},${longitude}`,
@@ -84,7 +90,7 @@ const reverseGeocode = async (latitude, longitude) => {
     return resData;
 };
 
-const getAddressDetailByPlaceId = async (place_id) => {
+export const getAddressDetailByPlaceId = async (place_id: string) => {
     const apiPath = '/geocode';
     const params = {
         place_id,
@@ -102,7 +108,11 @@ const getAddressDetailByPlaceId = async (place_id) => {
     return resData;
 };
 
-const getDirection = async (origin, destination, vehicle) => {
+export const getDirection = async (
+    origin: PointList,
+    destination: PointList,
+    vehicle: string
+) => {
     const apiPath = '/Direction';
     const params = {
         origin,
@@ -121,14 +131,3 @@ const getDirection = async (origin, destination, vehicle) => {
 
     return resData;
 };
-
-const goongServices = {
-    getDistanceMatrix,
-    autocompleteAddress,
-    forwardGeocode,
-    reverseGeocode,
-    getAddressDetailByPlaceId,
-    getDirection,
-};
-
-module.exports = goongServices;

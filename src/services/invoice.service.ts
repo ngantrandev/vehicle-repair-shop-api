@@ -1,16 +1,31 @@
-const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const { convertDateToGMT7 } = require('@/src/ultil/ultil.lib');
+import PDFKit from 'pdfkit';
+import fs from 'fs';
+import { convertDateToGMT7 } from '@/src/ultil/ultil.lib';
+import { Service } from '@/src/types/models';
 
 const fontPath = './src/assets/fonts/Roboto-Regular.ttf';
 const logoPath = './src/assets/logo.png';
 
 const rowHeight = 30;
 
-function generateRowsData(invoice = {}) {
+interface RowData {
+    name: string;
+    price: number;
+    quantity: number;
+}
+
+interface Invoice {
+    items: any[];
+    service: Service;
+    booking_id: string;
+    full_address: string;
+    user: any;
+}
+
+const generateRowsData = (invoice: { items: any[]; service: Service }) => {
     const { items, service } = invoice;
 
-    const rows = [
+    const rows: RowData[] = [
         ...items.map((item) => {
             return {
                 name: item?.name,
@@ -26,9 +41,9 @@ function generateRowsData(invoice = {}) {
     ];
 
     return rows;
-}
+};
 
-function generateHeader(doc) {
+const generateHeader = (doc: PDFKit.PDFDocument) => {
     doc.image(logoPath, 50, 55, { width: 140 })
         .fillColor('#444444')
         .fontSize(20)
@@ -38,9 +53,9 @@ function generateHeader(doc) {
             align: 'right',
         })
         .moveDown();
-}
+};
 
-function generateFooter(doc) {
+const generateFooter = (doc: PDFKit.PDFDocument) => {
     const pageHeight = doc.page.height;
 
     const footerY = pageHeight - 100;
@@ -51,9 +66,12 @@ function generateFooter(doc) {
         footerY,
         { align: 'center', width: 500 }
     );
-}
+};
 
-function generateCustomerInformation(doc, invoice) {
+const generateCustomerInformation = (
+    doc: PDFKit.PDFDocument,
+    invoice: Invoice
+) => {
     const { booking_id, full_address, items, service, user } = invoice;
 
     const totalPrice =
@@ -82,18 +100,30 @@ function generateCustomerInformation(doc, invoice) {
 
         .moveDown();
     generateHr(doc, 260);
-}
+};
 
-function generateTableRow(doc, y, c1, c2, c3, c4, c5) {
+const generateTableRow = (
+    doc: PDFKit.PDFDocument,
+    y: number,
+    c1: string,
+    c2: string,
+    c3: string,
+    c4: string,
+    c5: string
+) => {
     doc.fontSize(10)
         .text(c1, 50, y)
         .text(c2, 100, y, { width: 300 })
         .text(c3, 280, y, { width: 90, align: 'right' })
         .text(c4, 370, y, { width: 90, align: 'right' })
         .text(c5, 0, y, { align: 'right' });
-}
+};
 
-function generateInvoiceTable(doc, invoice, rows) {
+const generateInvoiceTable = (
+    doc: PDFKit.PDFDocument,
+    invoice: Invoice,
+    rows: RowData[]
+) => {
     let invoiceTableTop = 330;
 
     const { items, service } = invoice;
@@ -116,11 +146,11 @@ function generateInvoiceTable(doc, invoice, rows) {
         generateTableRow(
             doc,
             position,
-            index + 1,
+            '' + index + 1,
             name,
-            formatCurrency(price),
-            quantity,
-            formatCurrency(price * quantity)
+            '' + formatCurrency(price),
+            '' + quantity,
+            '' + formatCurrency(price * quantity)
         );
         generateHr(doc, position + 20);
     });
@@ -142,20 +172,20 @@ function generateInvoiceTable(doc, invoice, rows) {
         '',
         'Tổng cộng',
         '',
-        formatCurrency(totalPrice)
+        '' + formatCurrency(totalPrice)
     );
-}
+};
 
-function generateHr(doc, y, color = '#bcc2be') {
+const generateHr = (doc: PDFKit.PDFDocument, y: number, color = '#bcc2be') => {
     doc.strokeColor(color).lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
-}
+};
 
-function formatCurrency(value) {
+const formatCurrency = (value: number) => {
     return Math.round(value);
-}
+};
 
-const createInvoiceFile = async (invoice, fileName) => {
-    let doc = new PDFDocument({ margin: 50 });
+export const createInvoiceFile = async (invoice: Invoice, fileName: string) => {
+    let doc = new PDFKit({ margin: 50 });
 
     const rows = generateRowsData(invoice);
 
@@ -171,8 +201,4 @@ const createInvoiceFile = async (invoice, fileName) => {
     generateFooter(doc);
 
     doc.end();
-};
-
-module.exports = {
-    createInvoiceFile,
 };

@@ -16,11 +16,11 @@ import profileRoute from '@/src/routes/profile.route';
 import invoicesRoute from '@/src/routes/invoices.route';
 import paymentsRoute from '@/src/routes/payments.route';
 
-const {
+import {
     verifyToken,
     verifyAdminRole,
     verifyStaffRole,
-} = require('@/src/middlewares/verify.middleware');
+} from '@/src/middlewares/verify.middleware';
 const { testSendNoti } = require('@/src/controllers/notification.controller');
 
 apiRoute.use('/auth', authRoutes);

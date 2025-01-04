@@ -1,13 +1,17 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { Response } from 'express';
+import { CustomRequest } from '@/src/types/requests';
+import { StaffResponse } from '@/src/types/responses';
+
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     selectData,
     convertDateToGMT7,
     convertTimeToGMT7,
     sendResponse,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
 
-const getAllStaffs = async (req, res) => {
+export const getAllStaffs = async (req: CustomRequest, res: Response) => {
     try {
         const query = `
         SELECT
@@ -21,18 +25,23 @@ const getAllStaffs = async (req, res) => {
         ORDER BY current_tasks DESC
     `;
 
-        const staffs = await selectData(query, []);
+        const staffs: StaffResponse[] = (await selectData(
+            query,
+            []
+        )) as StaffResponse[];
 
         const newStaffs = staffs.map(
-            // eslint-disable-next-line no-unused-vars
             ({ password, station_id, service_station_name, ...other }) => {
                 other.birthday = convertDateToGMT7(other.birthday);
                 other.created_at = convertTimeToGMT7(other.created_at);
 
-                other.service_station = {
-                    id: station_id,
-                    name: service_station_name,
-                };
+                if (station_id) {
+                    other.service_station = {
+                        id: station_id,
+                        name: service_station_name,
+                    };
+                }
+
                 return other;
             }
         );
@@ -43,7 +52,7 @@ const getAllStaffs = async (req, res) => {
             'Get all staffs successfully!',
             newStaffs
         );
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
@@ -51,9 +60,3 @@ const getAllStaffs = async (req, res) => {
         );
     }
 };
-
-const adminStaffsController = {
-    getAllStaffs,
-};
-
-module.exports = adminStaffsController;

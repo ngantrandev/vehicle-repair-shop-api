@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { STATUS_CODE } from '../configs/status.codes.config';
-import { sendResponse } from '../ultil/ultil.lib';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import { sendResponse } from '@/src/ultil/ultil.lib';
 
 export const errorLogger = (
     err: Error,

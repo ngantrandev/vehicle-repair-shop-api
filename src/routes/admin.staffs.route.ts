@@ -1,19 +1,22 @@
 import express from 'express';
 const router = express.Router();
 
-const adminStaffsController = require('@/src/controllers/admin.staffs.controller');
-const adminStaffController = require('@/src/controllers/admin.staff.controller');
+import { getAllStaffs } from '@/src/controllers/admin.staffs.controller';
+import {
+    createStaff,
+    deactivateStaff,
+    getStaffById,
+    updateStaff,
+} from '@/src/controllers/admin.staff.controller';
 
-router.get('/', adminStaffsController.getAllStaffs);
+router.get('/', getAllStaffs);
 
-router.get('/:staff_id', adminStaffController.getStaffById);
+router.get('/:staff_id', getStaffById);
 
-router.post('/', adminStaffController.createStaff);
+router.post('/', createStaff);
 
-router.patch('/:staff_id', adminStaffController.updateStaff);
+router.patch('/:staff_id', updateStaff);
 
-router.patch('/:staff_id/deactivate', adminStaffController.deactivateStaff);
-
-// router.delete('/:staff_id', adminStaffController.deleteStaff);
+router.patch('/:staff_id/deactivate', deactivateStaff);
 
 export default router;

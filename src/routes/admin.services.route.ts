@@ -1,21 +1,17 @@
 import express from 'express';
 const router = express.Router();
 
-const adminServiceControllers = require('@/src/controllers/admin.service.controller');
+import {
+    createService,
+    deleteService,
+    updateService,
+} from '@/src/controllers/admin.service.controller';
 import { fileMemoryStorage } from '@/src/services/storage.service';
 
-router.post(
-    '/',
-    fileMemoryStorage.single('file'),
-    adminServiceControllers.createService
-);
+router.post('/', fileMemoryStorage.single('file'), createService);
 
-router.patch(
-    '/:service_id',
-    fileMemoryStorage.single('file'),
-    adminServiceControllers.updateService
-);
+router.patch('/:service_id', fileMemoryStorage.single('file'), updateService);
 
-router.delete('/:service_id', adminServiceControllers.deleteService);
+router.delete('/:service_id', deleteService);
 
 export default router;

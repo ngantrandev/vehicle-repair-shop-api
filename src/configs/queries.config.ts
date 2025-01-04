@@ -1,6 +1,6 @@
-const { TABLE_NAMES } = require('./constants.config');
+import { TABLE_NAMES } from '@/src/configs/constants.config';
 
-const QUERY_SELECT_SERVICE_BY_ID = `
+export const QUERY_SELECT_SERVICE_BY_ID = `
             SELECT
                 ${TABLE_NAMES.services}.*,
                 ${TABLE_NAMES.service_categories}.name AS category_name,
@@ -11,7 +11,7 @@ const QUERY_SELECT_SERVICE_BY_ID = `
             WHERE ${TABLE_NAMES.services}.id = ?
         `;
 
-const QUERY_SELECT_STAFF_BY_ID = `
+export const QUERY_SELECT_STAFF_BY_ID = `
     SELECT
         s.*,
         ss.name AS service_station_name
@@ -21,7 +21,7 @@ const QUERY_SELECT_STAFF_BY_ID = `
     WHERE s.id = ?
 `;
 
-const QUERY_SELECT_USER_BY_ID = `
+export const QUERY_SELECT_USER_BY_ID = `
     SELECT
     u.*,
     addr.latitude AS address_latitude,
@@ -38,7 +38,7 @@ const QUERY_SELECT_USER_BY_ID = `
     WHERE u.id = ?
 `;
 
-const QUERY_SELECT_USER_BY_USERNAME = `
+export const QUERY_SELECT_USER_BY_USERNAME = `
     SELECT
         u.*,
         addr.latitude AS address_latitude,
@@ -54,10 +54,3 @@ const QUERY_SELECT_USER_BY_USERNAME = `
         ${TABLE_NAMES.addresses} AS addr ON addr.id = u.address_id
 
 `;
-
-module.exports = {
-    QUERY_SELECT_SERVICE_BY_ID,
-    QUERY_SELECT_STAFF_BY_ID,
-    QUERY_SELECT_USER_BY_ID,
-    QUERY_SELECT_USER_BY_USERNAME,
-};
