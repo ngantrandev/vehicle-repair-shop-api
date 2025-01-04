@@ -1,10 +1,10 @@
 import express from 'express';
 const router = express.Router();
 
-const {
+import {
     getUserByUsername,
     updateUserProfile,
-} = require('@/src/controllers/profile.controller');
+} from '@/src/controllers/profile.controller';
 import { fileMemoryStorage } from '@/src/services/storage.service';
 
 router.get('/:username', getUserByUsername);

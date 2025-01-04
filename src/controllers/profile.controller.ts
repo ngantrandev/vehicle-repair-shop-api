@@ -1,9 +1,12 @@
-const path = require('path');
-const sharp = require('sharp');
+import path from 'path';
+import sharp from 'sharp';
 
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     sendResponse,
     selectData,
     excuteQuery,
@@ -11,12 +14,11 @@ const {
     convertTimeToGMT7,
     convertDateToGMT7,
     hashPassWord,
-} = require('@/src/ultil/ultil.lib');
-const {
-    QUERY_SELECT_USER_BY_USERNAME,
-} = require('@/src/configs/queries.config');
+} from '@/src/ultil/ultil.lib';
+import { QUERY_SELECT_USER_BY_USERNAME } from '@/src/configs/queries.config';
+import { UserResponse } from '@/src/types/responses';
 
-const getUserByUsername = async (req, res) => {
+export const getUserByUsername = async (req: CustomRequest, res: Response) => {
     if (!req.params.username) {
         sendResponse(
             res,
@@ -29,7 +31,9 @@ const getUserByUsername = async (req, res) => {
     try {
         const query = QUERY_SELECT_USER_BY_USERNAME;
 
-        const users = await selectData(query, [req.params.username]);
+        const users: UserResponse[] = (await selectData(query, [
+            req.params.username,
+        ])) as UserResponse[];
 
         const {
             password,
@@ -46,17 +50,16 @@ const getUserByUsername = async (req, res) => {
         other.created_at = convertTimeToGMT7(other.created_at);
         other.birthday = convertDateToGMT7(other.birthday);
 
-        other.address =
-            address_id === null
-                ? null
-                : {
-                      id: address_id,
-                      latitude: address_latitude,
-                      longitude: address_longitude,
-                      address_name,
-                      full_address,
-                      place_id,
-                  };
+        if (address_id) {
+            other.address = {
+                id: address_id,
+                latitude: address_latitude,
+                longitude: address_longitude,
+                address_name,
+                full_address,
+                place_id,
+            };
+        }
 
         sendResponse(
             res,
@@ -73,7 +76,7 @@ const getUserByUsername = async (req, res) => {
     }
 };
 
-const updateUserProfile = async (req, res) => {
+export const updateUserProfile = async (req: CustomRequest, res: Response) => {
     try {
         if (!req.params.user_id) {
             sendResponse(
@@ -122,10 +125,10 @@ const updateUserProfile = async (req, res) => {
                 // find username existed
                 const usernameQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE username = ? AND id != ?`;
 
-                const usernameExisted = await selectData(usernameQuery, [
-                    req.body.username,
-                    req.params.user_id,
-                ]);
+                const usernameExisted: UserResponse[] = (await selectData(
+                    usernameQuery,
+                    [req.body.username, req.params.user_id]
+                )) as UserResponse[];
 
                 if (usernameExisted.length > 0) {
                     sendResponse(
@@ -140,10 +143,10 @@ const updateUserProfile = async (req, res) => {
                 updateValues.push(req.body[field]);
             } else if (field == 'email') {
                 const emailQuery = `SELECT * FROM ${TABLE_NAMES.users} WHERE email = ? AND id != ?`;
-                const emailExisted = await selectData(emailQuery, [
-                    req.body.email,
-                    req.params.user_id,
-                ]);
+                const emailExisted: UserResponse[] = (await selectData(
+                    emailQuery,
+                    [req.body.email, req.params.user_id]
+                )) as UserResponse[];
 
                 if (emailExisted.length > 0) {
                     sendResponse(
@@ -224,10 +227,3 @@ const updateUserProfile = async (req, res) => {
         );
     }
 };
-
-const profileController = {
-    updateUserProfile,
-    getUserByUsername,
-};
-
-module.exports = profileController;

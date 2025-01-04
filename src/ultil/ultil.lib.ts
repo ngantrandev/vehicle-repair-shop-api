@@ -1,16 +1,16 @@
 const bcrypt = require('bcrypt');
-const moment = require('moment-timezone');
-const jwt = require('jsonwebtoken');
+import moment from 'moment-timezone';
+import jwt from 'jsonwebtoken';
 const polyline = require('@mapbox/polyline');
 import crypto from 'crypto';
-const fs = require('fs');
-const axios = require('axios');
+import fs from 'fs';
+import axios from 'axios';
+import os from 'os';
 import { Response } from 'express';
 import { MomentInput } from 'moment-timezone';
-import os from 'os';
 
 import pool from '@/src/configs/db.config';
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
 
 const SecretKey = process.env.VNP_SECRET_KEY || '';
 const accessTokenSecret = process.env.JWT_ACCESS_TOKEN;
@@ -166,7 +166,7 @@ export const generateJWT = (
         {
             ...data,
         },
-        accessTokenSecret,
+        accessTokenSecret as string,
         { expiresIn: expriresTime }
     );
 
@@ -276,8 +276,8 @@ export const getChecksum = (data: any) => {
 };
 
 export const convertTimeFormat = (
-    time: string,
-    currFormat: string,
+    time: Date | string,
+    currFormat: string | undefined | null,
     targetFormat: string
 ) => {
     if (!targetFormat) {
@@ -302,7 +302,9 @@ export const downloadFile = async (
     outputPath: string
 ) => {
     try {
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        const response = await axios.get(url as string, {
+            responseType: 'arraybuffer',
+        });
 
         fs.writeFileSync(outputPath, Buffer.from(response.data));
 

@@ -1,11 +1,11 @@
 import express from 'express';
 const router = express.Router();
 
-const {
+import {
     getBookingById,
     undoBooking,
-} = require('@/src/controllers/booking.controller');
-const { verifyToken } = require('@/src/middlewares/verify.middleware');
+} from '@/src/controllers/booking.controller';
+import { verifyToken } from '@/src/middlewares/verify.middleware';
 
 router.get('/:booking_id', verifyToken, getBookingById);
 

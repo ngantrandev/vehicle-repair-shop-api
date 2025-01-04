@@ -1,13 +1,20 @@
-const { TABLE_NAMES, USER_ROLES } = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { NotificationResponse } from '@/src/types/responses';
+import { Response } from 'express';
+
+import { TABLE_NAMES, USER_ROLES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     sendResponse,
     selectData,
     convertTimeToGMT7,
-} = require('@/src/ultil/ultil.lib');
-const { sendNotificationToTopic } = require('@/src/services/firebase.service');
+} from '@/src/ultil/ultil.lib';
+import { sendNotificationToTopic } from '@/src/services/firebase.service';
 
-const userGetAllNotifications = async (req, res) => {
+export const userGetAllNotifications = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const query = `
             SELECT
@@ -23,14 +30,15 @@ const userGetAllNotifications = async (req, res) => {
         
         `;
 
-        const notifications = await selectData(query, [
+        const notifications: NotificationResponse[] = (await selectData(query, [
             req.tokenPayload.user_id,
-        ]);
+        ])) as NotificationResponse[];
 
-        const newList = notifications.map(({ date, ...other }) => {
-            other.date = convertTimeToGMT7(date);
+        const newList = notifications.map((notification) => {
+            const { date } = notification;
+            notification.date = convertTimeToGMT7(date);
 
-            return other;
+            return notification;
         });
 
         sendResponse(res, STATUS_CODE.OK, 'success', newList);
@@ -43,7 +51,10 @@ const userGetAllNotifications = async (req, res) => {
     }
 };
 
-const userMarkNotificationAsRead = async (req, res) => {
+export const userMarkNotificationAsRead = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const query = `
             UPDATE ${TABLE_NAMES.notifications_users}
@@ -66,7 +77,10 @@ const userMarkNotificationAsRead = async (req, res) => {
     }
 };
 
-const userMarkAllNotificationsAsRead = async (req, res) => {
+export const userMarkAllNotificationsAsRead = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const query = `
             UPDATE ${TABLE_NAMES.notifications_users}
@@ -86,7 +100,10 @@ const userMarkAllNotificationsAsRead = async (req, res) => {
     }
 };
 
-const staffGetAllNotifications = async (req, res) => {
+export const staffGetAllNotifications = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const query = `
             SELECT
@@ -102,14 +119,16 @@ const staffGetAllNotifications = async (req, res) => {
         
         `;
 
-        const notifications = await selectData(query, [
+        const notifications: NotificationResponse[] = (await selectData(query, [
             req.tokenPayload.user_id,
-        ]);
+        ])) as NotificationResponse[];
 
-        const newList = notifications.map(({ date, ...other }) => {
-            other.date = convertTimeToGMT7(date);
+        const newList = notifications.map((notification) => {
+            const { date } = notification;
 
-            return other;
+            notification.date = convertTimeToGMT7(date);
+
+            return notification;
         });
 
         sendResponse(res, STATUS_CODE.OK, 'success', newList);
@@ -122,7 +141,10 @@ const staffGetAllNotifications = async (req, res) => {
     }
 };
 
-const staffMarkNotificationAsRead = async (req, res) => {
+export const staffMarkNotificationAsRead = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const query = `
             UPDATE ${TABLE_NAMES.notifications_users}
@@ -145,7 +167,10 @@ const staffMarkNotificationAsRead = async (req, res) => {
     }
 };
 
-const staffMarkAllNotificationsAsRead = async (req, res) => {
+export const staffMarkAllNotificationsAsRead = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const query = `
             UPDATE ${TABLE_NAMES.notifications_users}
@@ -165,13 +190,19 @@ const staffMarkAllNotificationsAsRead = async (req, res) => {
     }
 };
 
-const testSendNoti = async (req, res) => {
+export const testSendNoti = async (req: CustomRequest, res: Response) => {
     try {
         const { user_id, title, content, role } = req.query;
 
         const topic = `${role}_${user_id}`;
 
-        await sendNotificationToTopic(title, content, topic);
+        if (title) {
+            await sendNotificationToTopic(
+                title as string,
+                content as string,
+                topic as string
+            );
+        }
 
         sendResponse(res, STATUS_CODE.OK, 'success');
     } catch (error) {
@@ -182,15 +213,3 @@ const testSendNoti = async (req, res) => {
         );
     }
 };
-
-const notificationController = {
-    userGetAllNotifications,
-    userMarkNotificationAsRead,
-    userMarkAllNotificationsAsRead,
-    staffGetAllNotifications,
-    staffMarkNotificationAsRead,
-    staffMarkAllNotificationsAsRead,
-    testSendNoti,
-};
-
-module.exports = notificationController;

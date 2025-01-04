@@ -1,4 +1,7 @@
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import {
     sendResponse,
     excuteQuery,
     selectData,
@@ -7,24 +10,24 @@ const {
     getChecksum,
     convertTimeFormat,
     executeTransaction,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
 
-const { createReturnUrl } = require('@/src/services/vnpay.service');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { createReturnUrl } from '@/src/services/vnpay.service';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     TABLE_NAMES,
     PAYMENT_TYPE,
     PAYMENT_STATUS,
-} = require('@/src/configs/constants.config');
-const { sendNotificationToTopic } = require('@/src/services/firebase.service');
-const {
-    createUserNotification,
-} = require('@/src/services/notification.service');
+} from '@/src/configs/constants.config';
+import { sendNotificationToTopic } from '@/src/services/firebase.service';
+import { createUserNotification } from '@/src/services/notification.service';
+import { BookingResponse, InvoiceResponse } from '@/src/types/responses';
+import { Invoice } from '@/src/types/models';
 
 const VnpTmnCode = process.env.VNP_TMN_CODE || '';
 
 // create url for payment and init payment record
-const createPaymentUrl = async (req, res) => {
+export const createPaymentUrl = async (req: CustomRequest, res: Response) => {
     try {
         const { booking_id: bookingId } = req.body;
 
@@ -32,7 +35,7 @@ const createPaymentUrl = async (req, res) => {
             throw new Error('booking_id is required');
         }
 
-        const bookingsData = await selectData(
+        const bookingsData: BookingResponse[] = (await selectData(
             `
             SELECT
                 b.id booking_id,
@@ -49,16 +52,16 @@ const createPaymentUrl = async (req, res) => {
             
             `,
             [bookingId]
-        );
+        )) as BookingResponse[];
 
         const { service_name, service_price, items_price } = bookingsData[0];
 
-        const totalPrice = service_price + items_price;
+        const totalPrice = service_price + (items_price || 0);
 
-        const checkInvoiceExists = await selectData(
+        const checkInvoiceExists: InvoiceResponse[] = (await selectData(
             `SELECT * FROM ${TABLE_NAMES.invoices} WHERE booking_id = ?`,
             [bookingId]
-        );
+        )) as InvoiceResponse[];
 
         if (checkInvoiceExists.length > 0) {
             // update invoice
@@ -98,7 +101,9 @@ const createPaymentUrl = async (req, res) => {
             WHERE b.id = ?
         `;
 
-        const bookingInfo = await selectData(getBookingInfoQuery, [bookingId]);
+        const bookingInfo: any[] = (await selectData(getBookingInfoQuery, [
+            bookingId,
+        ])) as any[];
 
         const { invoice_id: invoiceId, amount_paid: amountPaid } =
             bookingInfo[0];
@@ -162,7 +167,7 @@ const createPaymentUrl = async (req, res) => {
     }
 };
 
-const getVNPayReturn = async (req, res) => {
+export const getVNPayReturn = async (req: CustomRequest, res: Response) => {
     try {
         // CHECK SUM
         let queryParams = req.query;
@@ -192,8 +197,7 @@ const getVNPayReturn = async (req, res) => {
         }
 
         sendResponse(res, STATUS_CODE.OK, 'create payment success');
-    } catch (error) {
-        console.log(error.message);
+    } catch (error: any) {
         sendResponse(
             res,
             STATUS_CODE.INTERNAL_SERVER_ERROR,
@@ -202,7 +206,7 @@ const getVNPayReturn = async (req, res) => {
     }
 };
 
-const getVNPayIPN = async (req, res) => {
+export const getVNPayIPN = async (req: CustomRequest, res: Response) => {
     try {
         // CHECK SUM
         let queryParams = req.query;
@@ -212,8 +216,8 @@ const getVNPayIPN = async (req, res) => {
         }
 
         const vnp_SecureHash = queryParams['vnp_SecureHash'];
-        const vnp_TxnRef = queryParams['vnp_TxnRef'];
-        const vnp_Amount = queryParams['vnp_Amount'];
+        const vnp_TxnRef: string = queryParams['vnp_TxnRef'] as string;
+        const vnp_Amount: number = Number(queryParams['vnp_Amount']);
         const invoiceId = vnp_TxnRef.split('_')[1];
         const vnp_resCode = queryParams['vnp_ResponseCode'];
 
@@ -254,7 +258,10 @@ const getVNPayIPN = async (req, res) => {
             ORDER BY p.created_at DESC
         `;
 
-        const invoices = await selectData(findInvoiceQuery, [invoiceId]);
+        const invoices: InvoiceResponse[] = (await selectData(
+            findInvoiceQuery,
+            [invoiceId]
+        )) as InvoiceResponse[];
 
         let invoice = null;
         invoices.forEach((item) => {
@@ -307,9 +314,10 @@ const getVNPayIPN = async (req, res) => {
                     WHERE ivn.id = ?
                     `;
 
-                    const outputs = await selectData(selectOutputQuery, [
-                        invoiceId,
-                    ]);
+                    const outputs: any[] = (await selectData(
+                        selectOutputQuery,
+                        [invoiceId]
+                    )) as any[];
 
                     const queries = [];
                     const args = [];
@@ -434,15 +442,7 @@ const getVNPayIPN = async (req, res) => {
                 });
                 return;
         }
-    } catch (error) {
+    } catch (error: any) {
         throw new Error(error);
     }
 };
-
-const paymentsController = {
-    createPaymentUrl,
-    getVNPayReturn,
-    getVNPayIPN,
-};
-
-module.exports = paymentsController;

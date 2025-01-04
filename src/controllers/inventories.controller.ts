@@ -1,15 +1,24 @@
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     sendResponse,
     selectData,
     executeTransaction,
-} = require('@/src/ultil/ultil.lib');
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const utils = require('@/src/ultil/ultil.lib');
+    convertTimeToGMT7,
+} from '@/src/ultil/ultil.lib';
+import { TABLE_NAMES } from '@/src/configs/constants.config';
 
-const importGoods = async (req, res) => {
+export const importGoods = async (req: CustomRequest, res: Response) => {
     try {
-        const data = req.body;
+        interface Data {
+            item_id: number;
+            count: number;
+            input_price: number;
+            output_price: number;
+        }
+        const data: Data[] = req.body;
 
         const date = new Date();
 
@@ -30,7 +39,7 @@ const importGoods = async (req, res) => {
         `);
 
         args.push(
-            data.reduce((acc, item) => {
+            data.reduce((acc: any[], item) => {
                 acc.push(item.item_id);
                 acc.push(item.count);
                 acc.push(item.input_price);
@@ -42,12 +51,12 @@ const importGoods = async (req, res) => {
         await executeTransaction(queries, args);
 
         sendResponse(res, STATUS_CODE.OK, 'Import goods successfully');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getImportList = async (req, res) => {
+export const getImportList = async (req: CustomRequest, res: Response) => {
     try {
         const { item_id } = req.query;
 
@@ -64,15 +73,15 @@ const getImportList = async (req, res) => {
             ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
         `;
 
-        const result = await selectData(query, args);
+        const result: any[] = (await selectData(query, args)) as any[];
 
-        sendResponse(res, STATUS_CODE.OK, result);
-    } catch (error) {
+        sendResponse(res, STATUS_CODE.OK, 'Import goods list', result);
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getExportList = async (req, res) => {
+export const getExportList = async (req: CustomRequest, res: Response) => {
     try {
         const { item_id } = req.query;
 
@@ -89,15 +98,15 @@ const getExportList = async (req, res) => {
             ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
         `;
 
-        const result = await selectData(query, args);
+        const result: any[] = (await selectData(query, args)) as any[];
 
-        sendResponse(res, STATUS_CODE.OK, result);
-    } catch (error) {
+        sendResponse(res, STATUS_CODE.OK, 'result', result);
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getImportNotes = async (req, res) => {
+export const getImportNotes = async (req: CustomRequest, res: Response) => {
     try {
         const query = `
             SELECT
@@ -110,9 +119,9 @@ const getImportNotes = async (req, res) => {
         
         `;
 
-        const result = await selectData(query);
+        const result: any[] = (await selectData(query)) as any[];
 
-        const grouped = {};
+        const grouped: { [key: string]: any } = {};
 
         result.forEach((element) => {
             const {
@@ -127,7 +136,7 @@ const getImportNotes = async (req, res) => {
             if (!grouped[input_id]) {
                 grouped[input_id] = {
                     id: input_id,
-                    date_input: utils.convertTimeToGMT7(date_input),
+                    date_input: convertTimeToGMT7(date_input),
                     total_price: 0,
                     items: [],
                 };
@@ -147,12 +156,12 @@ const getImportNotes = async (req, res) => {
         const newList = Object.values(grouped);
 
         sendResponse(res, STATUS_CODE.OK, 'Goods receipt note', newList);
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getExportNotes = async (req, res) => {
+export const getExportNotes = async (req: CustomRequest, res: Response) => {
     try {
         const query = `
             SELECT
@@ -166,9 +175,9 @@ const getExportNotes = async (req, res) => {
             INNER JOIN ${TABLE_NAMES.items} i ON oi.item_id = i.id
         `;
 
-        const result = await selectData(query);
+        const result: any[] = (await selectData(query)) as any[];
 
-        const grouped = {};
+        const grouped: { [key: string]: any } = {};
 
         result.forEach((element) => {
             const {
@@ -184,7 +193,7 @@ const getExportNotes = async (req, res) => {
                 grouped[output_id] = {
                     id: output_id,
                     booking_id,
-                    date_output: utils.convertTimeToGMT7(date_output),
+                    date_output: convertTimeToGMT7(date_output),
                     total_price: 0,
                     items: [],
                 };
@@ -203,19 +212,14 @@ const getExportNotes = async (req, res) => {
         const newList = Object.values(grouped);
 
         const newSorted = newList.sort((a, b) => {
-            return new Date(b.date_output) - new Date(a.date_output);
+            return (
+                new Date(b.date_output).getTime() -
+                new Date(a.date_output).getTime()
+            );
         });
 
         sendResponse(res, STATUS_CODE.OK, 'Goods receipt note', newSorted);
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
-};
-
-module.exports = {
-    importGoods,
-    getImportList,
-    getExportList,
-    getImportNotes,
-    getExportNotes,
 };

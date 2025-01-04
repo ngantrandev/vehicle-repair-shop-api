@@ -1,11 +1,11 @@
 import express from 'express';
 const router = express.Router();
 
-const {
+import {
     createPaymentUrl,
     getVNPayReturn,
     getVNPayIPN,
-} = require('@/src/controllers/payments.controller');
+} from '@/src/controllers/payments.controller';
 
 router.post('/create-url', createPaymentUrl);
 

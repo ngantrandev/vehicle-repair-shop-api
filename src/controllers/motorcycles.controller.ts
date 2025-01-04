@@ -1,8 +1,11 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { selectData, sendResponse } = require('@/src/ultil/ultil.lib');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
 
-const getAllMotorcycles = async (req, res) => {
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { selectData, sendResponse } from '@/src/ultil/ultil.lib';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+
+export const getAllMotorcycles = async (req: CustomRequest, res: Response) => {
     try {
         const query = `
         SELECT
@@ -14,7 +17,7 @@ const getAllMotorcycles = async (req, res) => {
             ${TABLE_NAMES.motorcycle_brands} AS mb ON mb.id = m.brand_id
     `;
 
-        const motorcycles = await selectData(query, []);
+        const motorcycles: any[] = (await selectData(query, [])) as any[];
 
         const newList = motorcycles.map(
             ({ brand_id, brand_name, ...other }) => {
@@ -41,9 +44,3 @@ const getAllMotorcycles = async (req, res) => {
         );
     }
 };
-
-const motorcycleBrandsController = {
-    getAllMotorcycles,
-};
-
-module.exports = motorcycleBrandsController;

@@ -1,8 +1,14 @@
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const goongServices = require('@/src/services/goong.service');
-const { sendResponse, decodePolyline } = require('@/src/ultil/ultil.lib');
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
 
-const autocompleteAddress = async (req, res) => {
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import goongServices from '@/src/services/goong.service';
+import { sendResponse, decodePolyline } from '@/src/ultil/ultil.lib';
+
+export const autocompleteAddress = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const { input: searchAddressText, longitude, latitude } = req.query;
 
@@ -12,13 +18,13 @@ const autocompleteAddress = async (req, res) => {
         }
 
         const data = await goongServices.autocompleteAddress(
-            searchAddressText,
-            latitude,
-            longitude
+            searchAddressText as string,
+            Number(latitude),
+            Number(longitude)
         );
 
-        const newList = data.reduce(
-            (acc, { structured_formatting, place_id, compound }) => {
+        const newList = data?.reduce(
+            (acc: any[], { structured_formatting, place_id, compound }) => {
                 const { district, commune, province } = compound;
 
                 if (district && commune && province) {
@@ -43,7 +49,7 @@ const autocompleteAddress = async (req, res) => {
     }
 };
 
-const reverseGeocode = async (req, res) => {
+export const reverseGeocode = async (req: CustomRequest, res: Response) => {
     try {
         const { lat, lng } = req.query;
 
@@ -56,10 +62,13 @@ const reverseGeocode = async (req, res) => {
             return;
         }
 
-        const data = await goongServices.reverseGeocode(lat, lng);
+        const data = await goongServices.reverseGeocode(
+            Number(lat),
+            Number(lng)
+        );
 
-        const newList = data.reduce(
-            (acc, { place_id, name, address, compound }) => {
+        const newList = data?.reduce(
+            (acc: any[], { place_id, name, address, compound }) => {
                 const { district, commune, province } = compound;
 
                 if (district && commune && province) {
@@ -89,7 +98,10 @@ const reverseGeocode = async (req, res) => {
     }
 };
 
-const getAddressDetailByPlaceId = async (req, res) => {
+export const getAddressDetailByPlaceId = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const { place_id } = req.query;
 
@@ -98,7 +110,9 @@ const getAddressDetailByPlaceId = async (req, res) => {
             return;
         }
 
-        const data = await goongServices.getAddressDetailByPlaceId(place_id);
+        const data = await goongServices.getAddressDetailByPlaceId(
+            place_id as string
+        );
 
         const results = data.results;
 
@@ -130,8 +144,15 @@ const getAddressDetailByPlaceId = async (req, res) => {
     }
 };
 
-const getGeoJsonCoordinatesDirection = async (req, res) => {
-    let { origin, destination, vehicle } = req.query;
+export const getGeoJsonCoordinatesDirection = async (
+    req: CustomRequest,
+    res: Response
+) => {
+    let { origin, destination, vehicle } = req.query as {
+        origin: string;
+        destination: string;
+        vehicle?: string;
+    };
 
     if (!vehicle) {
         vehicle = 'bike';
@@ -178,12 +199,3 @@ const getGeoJsonCoordinatesDirection = async (req, res) => {
         coordinates
     );
 };
-
-const addressController = {
-    autocompleteAddress,
-    reverseGeocode,
-    getAddressDetailByPlaceId,
-    getGeoJsonCoordinatesDirection,
-};
-
-module.exports = addressController;

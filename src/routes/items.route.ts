@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-const {
+import {
     getAllItem,
     addItemToBooking,
     removeItemFromBooking,
@@ -11,7 +11,7 @@ const {
     getAllItemOfService,
     createItem,
     updateItem,
-} = require('@/src/controllers/items.controller');
+} from '@/src/controllers/items.controller';
 
 router.post('/', createItem);
 

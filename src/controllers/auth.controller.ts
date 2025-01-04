@@ -1,13 +1,17 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+import { User } from '@/src/types/models';
+
+import {
     TABLE_NAMES,
     USER_ROLES,
     ACCOUNT_STATE,
-} = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+} from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
 
-const {
+import {
     selectData,
     comparePassWord,
     hashPassWord,
@@ -18,13 +22,18 @@ const {
     generateJWT,
     sendResponse,
     isValidEmail,
-} = require('@/src/ultil/ultil.lib');
-const { sendMail } = require('../services/mailsender.service');
+} from '@/src/ultil/ultil.lib';
+import { sendMail } from '@/src/services/mailsender.service';
+import { StaffResponse, UserResponse } from '@/src/types/responses';
 
 const webUrl = process.env.WEB_URL;
 const accessTokenSecret = process.env.JWT_ACCESS_TOKEN;
 
-const register = async (req, res) => {
+interface ResetTokenPayload {
+    email: string;
+}
+
+export const register = async (req: CustomRequest, res: Response) => {
     try {
         const requiredFields = [
             'username',
@@ -51,7 +60,9 @@ const register = async (req, res) => {
             SELECT id FROM ${TABLE_NAMES.users} WHERE username = ?
         `;
 
-        const users = await selectData(selectQuery, [req.body.username]);
+        const users: User[] = (await selectData(selectQuery, [
+            req.body.username,
+        ])) as User[];
 
         if (users.length > 0) {
             sendResponse(
@@ -108,7 +119,7 @@ const register = async (req, res) => {
     }
 };
 
-const signin = async (req, res) => {
+export const signin = async (req: CustomRequest, res: Response) => {
     try {
         if (!req.body.username) {
             sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Missing username');
@@ -147,7 +158,9 @@ const signin = async (req, res) => {
 
         `;
 
-        const users = await selectData(query, [inputUsername]);
+        const users: UserResponse[] = (await selectData(query, [
+            inputUsername,
+        ])) as UserResponse[];
 
         if (users.length === 0) {
             sendResponse(
@@ -159,7 +172,19 @@ const signin = async (req, res) => {
             return;
         }
 
-        const result = await comparePassWord(inputPassword, users[0].password);
+        const userPassword = users[0].password;
+
+        if (!userPassword) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'Wrong username or password'
+            );
+
+            return;
+        }
+
+        const result = await comparePassWord(inputPassword, userPassword);
 
         if (!result) {
             sendResponse(
@@ -226,12 +251,12 @@ const signin = async (req, res) => {
             token: token,
             data: other,
         });
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
     }
 };
 
-const staffSignin = async (req, res) => {
+export const staffSignin = async (req: CustomRequest, res: Response) => {
     try {
         const inputUsername = req.body.username;
         const inputPassword = req.body.password;
@@ -250,14 +275,16 @@ const staffSignin = async (req, res) => {
             SELECT
                 stf.*,
                 ss.id AS station_id,
-                ss.name AS station_name
+                ss.name AS service_station_name
             FROM ${TABLE_NAMES.staffs} AS stf
             JOIN ${TABLE_NAMES.service_stations} AS ss
                 ON stf.station_id = ss.id
             WHERE username = ?
         `;
 
-        const staffs = await selectData(queryFindStaff, [inputUsername]);
+        const staffs: StaffResponse[] = (await selectData(queryFindStaff, [
+            inputUsername,
+        ])) as StaffResponse[];
 
         if (staffs.length == 0) {
             sendResponse(
@@ -268,7 +295,19 @@ const staffSignin = async (req, res) => {
 
             return;
         }
-        const result = await comparePassWord(inputPassword, staffs[0].password);
+        const staffPassword = staffs[0].password;
+
+        if (!staffPassword) {
+            sendResponse(
+                res,
+                STATUS_CODE.NOT_FOUND,
+                'Wrong username or password'
+            );
+
+            return;
+        }
+
+        const result = await comparePassWord(inputPassword, staffPassword);
 
         if (!result) {
             sendResponse(
@@ -289,15 +328,16 @@ const staffSignin = async (req, res) => {
         }
 
         // eslint-disable-next-line no-unused-vars
-        const { station_id, station_name, password, ...other } = staffs[0];
+        const { station_id, service_station_name, password, ...other } =
+            staffs[0];
 
         other.created_at = convertTimeToGMT7(other.created_at);
         other.birthday = convertDateToGMT7(other.birthday);
 
         other.role = USER_ROLES.staff;
         other.station = {
-            id: station_id,
-            name: station_name,
+            id: station_id ?? 0,
+            name: service_station_name,
         };
 
         const token = generateJWT({
@@ -313,12 +353,12 @@ const staffSignin = async (req, res) => {
             data: other,
         });
         return;
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
     }
 };
 
-const userForgotPassword = async (req, res) => {
+export const userForgotPassword = async (req: CustomRequest, res: Response) => {
     try {
         const { email } = req.body;
 
@@ -332,10 +372,10 @@ const userForgotPassword = async (req, res) => {
             return;
         }
 
-        const users = await selectData(
+        const users: UserResponse[] = (await selectData(
             `SELECT * FROM ${TABLE_NAMES.users} WHERE email = ?`,
             [email]
-        );
+        )) as UserResponse[];
 
         if (users.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'Email not found');
@@ -377,12 +417,12 @@ const userForgotPassword = async (req, res) => {
         await sendMail(email, 'Đặt lại mật khẩu', emailHTML);
 
         sendResponse(res, STATUS_CODE.OK, 'Email sent successfully!');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
     }
 };
 
-const userResetPassword = async (req, res) => {
+export const userResetPassword = async (req: CustomRequest, res: Response) => {
     try {
         const { password, repassword, token } = req.body;
 
@@ -408,7 +448,14 @@ const userResetPassword = async (req, res) => {
         const accessToken = token.split(' ')[1];
 
         try {
-            const payload = await jwt.verify(accessToken, accessTokenSecret);
+            if (!accessTokenSecret) {
+                throw new Error('JWT access token secret is not defined');
+            }
+
+            const payload: ResetTokenPayload = (await jwt.verify(
+                accessToken,
+                accessTokenSecret
+            )) as ResetTokenPayload;
 
             const { email } = payload;
 
@@ -430,17 +477,7 @@ const userResetPassword = async (req, res) => {
         }
 
         // sendResponse(res, STATUS_CODE.OK, 'OTP is valid');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
-
-const authController = {
-    signin,
-    register,
-    staffSignin,
-    userForgotPassword,
-    userResetPassword,
-};
-
-module.exports = authController;

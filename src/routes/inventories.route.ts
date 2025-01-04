@@ -1,13 +1,13 @@
 import express from 'express';
 const router = express.Router();
 
-const {
+import {
     importGoods,
     getImportList,
     getExportList,
     getImportNotes,
     getExportNotes,
-} = require('@/src/controllers/inventories.controller');
+} from '@/src/controllers/inventories.controller';
 
 router.get('/import-list', getImportList);
 

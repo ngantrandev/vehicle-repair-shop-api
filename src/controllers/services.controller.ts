@@ -1,8 +1,12 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { selectData, sendResponse } = require('@/src/ultil/ultil.lib');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+import { ServiceResponse } from '@/src/types/responses';
 
-const getAllServices = async (req, res) => {
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { selectData, sendResponse } from '@/src/ultil/ultil.lib';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+
+export const getAllServices = async (req: CustomRequest, res: Response) => {
     const {
         category_id: categoryId,
         motorcycle_brand: motocycleBrand,
@@ -60,12 +64,15 @@ const getAllServices = async (req, res) => {
         
         `;
 
-        const services = await selectData(query, []);
+        const services: ServiceResponse[] = (await selectData(
+            query,
+            []
+        )) as ServiceResponse[];
 
         const newList = services.map(
             ({ category_id, category_name, category_desc, ...other }) => {
                 other.category = {
-                    id: category_id,
+                    id: category_id as number,
                     name: category_name,
                     description: category_desc,
                 };
@@ -89,7 +96,7 @@ const getAllServices = async (req, res) => {
     }
 };
 
-const getTopServices = async (req, res) => {
+export const getTopServices = async (req: CustomRequest, res: Response) => {
     try {
         const query = `
         SELECT
@@ -114,12 +121,15 @@ const getTopServices = async (req, res) => {
     
     `;
 
-        const services = await selectData(query, []);
+        const services: ServiceResponse[] = (await selectData(
+            query,
+            []
+        )) as ServiceResponse[];
 
         const newList = services.map(
             ({ category_id, category_name, category_desc, ...other }) => {
                 other.category = {
-                    id: category_id,
+                    id: category_id as number,
                     name: category_name,
                     description: category_desc,
                 };
@@ -142,10 +152,3 @@ const getTopServices = async (req, res) => {
         );
     }
 };
-
-const adminServicesControllers = {
-    getAllServices,
-    getTopServices,
-};
-
-module.exports = adminServicesControllers;

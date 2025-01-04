@@ -1,20 +1,18 @@
 import express from 'express';
 const router = express.Router();
 
-const motorcycleBrandsController = require('@/src/controllers/motorcycle.brands.controller');
-const motorcycleBrandController = require('@/src/controllers/motorcycle.brand.controller');
+import { getAllMotorcycleBrands } from '@/src/controllers/motorcycle.brands.controller';
+import {
+    getAllMotorcyclesByBrandId,
+    getAllServicesByBrandId,
+    getBrandById,
+} from '@/src/controllers/motorcycle.brand.controller';
 
-router.get('/', motorcycleBrandsController.getAllMotorcycleBrands);
+router.get('/', getAllMotorcycleBrands);
 
-router.get('/:brand_id', motorcycleBrandController.getBrandById);
+router.get('/:brand_id', getBrandById);
 
-router.get(
-    '/:brand_id/motorcycles',
-    motorcycleBrandController.getAllMotorcyclesByBrandId
-);
-router.get(
-    '/:brand_id/services',
-    motorcycleBrandController.getAllServicesByBrandId
-);
+router.get('/:brand_id/motorcycles', getAllMotorcyclesByBrandId);
+router.get('/:brand_id/services', getAllServicesByBrandId);
 
 export default router;

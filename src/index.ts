@@ -5,6 +5,8 @@ const cors = require('cors');
 import bodyparser from 'body-parser';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import { BASE_URL_PATH, APP_NAME } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
 
 dotenv.config();
 
@@ -23,12 +25,6 @@ const filePath = './fcm.serviceaccount.key.json';
 const appPort = process.env.APP_PORT || 8000;
 
 const initialApp = () => {
-    const {
-        BASE_URL_PATH,
-        APP_NAME,
-    } = require('@/src/configs/constants.config');
-    const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-
     app.use(cors());
     app.use(bodyparser.json({ limit: '50mb' }));
 

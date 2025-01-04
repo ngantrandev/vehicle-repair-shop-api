@@ -2,9 +2,9 @@ import { Response } from 'express';
 import { CustomRequest } from '@/src/types/requests';
 import { UserResponse } from '@/src/types/responses';
 
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const { selectData, sendResponse } = require('@/src/ultil/ultil.lib');
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import { selectData, sendResponse } from '@/src/ultil/ultil.lib';
 
 export const getAllUser = async (req: CustomRequest, res: Response) => {
     try {

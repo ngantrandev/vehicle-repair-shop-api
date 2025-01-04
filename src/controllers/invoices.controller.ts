@@ -1,26 +1,27 @@
-var fs = require('fs');
+import fs from 'fs';
 
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import {
     sendResponse,
     selectData,
     convertDateToGMT7,
     excuteQuery,
-} = require('../ultil/ultil.lib');
-const { STATUS_CODE } = require('../configs/status.codes.config');
-const { TABLE_NAMES } = require('../configs/constants.config');
-const { createInvoiceFile } = require('../services/invoice.service');
+} from '@/src/ultil/ultil.lib';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { createInvoiceFile } from '@/src/services/invoice.service';
+import { BookingResponse } from '@/src/types/responses';
+import { Invoice } from '@/src/types/models';
 
-const getAllInvoices = async (req, res) => {
-    var files = fs.readdirSync('./invoices');
+export const getAllInvoices = async (req: CustomRequest, res: Response) => {
+    var files: string[] = fs.readdirSync('./invoices');
 
-    // for (var i = 0; i < files.length; i++) {
-    //     console.log(files[i]);
-    // }
-
-    sendResponse(res, STATUS_CODE.OK, files);
+    sendResponse(res, STATUS_CODE.OK, 'Get all invoices', files);
 };
 
-const createInvoice = async (req, res) => {
+export const createInvoice = async (req: CustomRequest, res: Response) => {
     try {
         const requiredFields = ['booking_id'];
 
@@ -60,13 +61,12 @@ GROUP BY (items.id)
         const query = `INSERT INTO invoices (booking_id, invoice_date, total_price, final_price, status) VALUES (?, ?, ?, ?, ?)`;
 
         sendResponse(res, STATUS_CODE.OK, 'Create invoice');
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
     }
 };
 
-const exportInvoice = async (req, res) => {
+export const exportInvoice = async (req: CustomRequest, res: Response) => {
     try {
         const { booking_id } = req.body;
 
@@ -96,7 +96,10 @@ const exportInvoice = async (req, res) => {
         WHERE b.id = ?
         
         `;
-        const bookings = await selectData(selectBookingQuery, [booking_id]);
+        const bookings: BookingResponse[] = (await selectData(
+            selectBookingQuery,
+            [booking_id]
+        )) as BookingResponse[];
 
         if (bookings.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'Booking not found');
@@ -128,10 +131,10 @@ const exportInvoice = async (req, res) => {
             [booking_id]
         );
 
-        const invoice = {
+        const invoice: Invoice = {
             booking_id: booking_id,
             full_address: address_name + ', ' + full_address,
-            items: items || [],
+            items: items as any[],
             service: {
                 name: service_name,
                 price: service_price,
@@ -152,13 +155,7 @@ const exportInvoice = async (req, res) => {
         );
 
         sendResponse(res, STATUS_CODE.OK, 'Export invoice successfully');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
     }
-};
-
-module.exports = {
-    getAllInvoices,
-    createInvoice,
-    exportInvoice,
 };

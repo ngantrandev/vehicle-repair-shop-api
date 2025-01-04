@@ -1,8 +1,11 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const { excuteQuery, sendResponse } = require('@/src/ultil/ultil.lib');
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
 
-const getServiceCategory = async (req, res) => {
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import { excuteQuery, sendResponse } from '@/src/ultil/ultil.lib';
+
+export const getServiceCategory = async (req: CustomRequest, res: Response) => {
     try {
         const query = `SELECT * FROM ${TABLE_NAMES.service_categories}`;
 
@@ -22,9 +25,3 @@ const getServiceCategory = async (req, res) => {
         );
     }
 };
-
-const categoriesController = {
-    getServiceCategory,
-};
-
-module.exports = categoriesController;

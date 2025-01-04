@@ -1,5 +1,5 @@
-const axios = require('axios');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+import axios from 'axios';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
 
 if (!process.env.GOONG_MAP_BASE_API_ENPOINT) {
     // throw new Error(
@@ -16,7 +16,7 @@ const httpRequest = axios.create({
     },
 });
 
-const get = async (apiPath, params = {}) => {
+const get = async (apiPath: string, params = {}) => {
     try {
         const res = await httpRequest.get(apiPath, {
             params: {
@@ -29,7 +29,7 @@ const get = async (apiPath, params = {}) => {
         }
 
         return res;
-    } catch (error) {
+    } catch (error: any) {
         throw new Error(error);
     }
 };
@@ -40,4 +40,4 @@ const goongHttpRequests = {
     get,
 };
 
-module.exports = goongHttpRequests;
+export default goongHttpRequests;

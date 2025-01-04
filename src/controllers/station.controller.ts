@@ -1,17 +1,21 @@
-const {
-    TABLE_NAMES,
-    ACCOUNT_STATE,
-} = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import { TABLE_NAMES, ACCOUNT_STATE } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     sendResponse,
     selectData,
     isValidInteger,
     executeTransaction,
     excuteQuery,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
+import { ServiceStationResponse, StaffResponse } from '@/src/types/responses';
 
-const getAllServiceStations = async (req, res) => {
+export const getAllServiceStations = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const query = `
             SELECT
@@ -33,7 +37,10 @@ const getAllServiceStations = async (req, res) => {
             GROUP BY ss.id
         `;
 
-        const serviceStations = await selectData(query, []);
+        const serviceStations: ServiceStationResponse[] = (await selectData(
+            query,
+            []
+        )) as ServiceStationResponse[];
 
         const newServiceStations = serviceStations.map(
             ({
@@ -63,12 +70,12 @@ const getAllServiceStations = async (req, res) => {
             'Get all service stations successfully!',
             newServiceStations
         );
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getStationById = async (req, res) => {
+export const getStationById = async (req: CustomRequest, res: Response) => {
     const { station_id: stationId } = req.params;
     try {
         const query = `
@@ -89,7 +96,10 @@ const getStationById = async (req, res) => {
                 ${TABLE_NAMES.addresses} AS address ON ss.address_id = address.id
         `;
 
-        const serviceStations = await selectData(query, [stationId]);
+        const serviceStations: ServiceStationResponse[] = (await selectData(
+            query,
+            [stationId]
+        )) as ServiceStationResponse[];
 
         const {
             address_id,
@@ -119,12 +129,15 @@ const getStationById = async (req, res) => {
             'Get all service stations successfully!',
             station
         );
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getAllStaffOfServiceStation = async (req, res) => {
+export const getAllStaffOfServiceStation = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const { station_id } = req.params;
 
@@ -149,7 +162,9 @@ const getAllStaffOfServiceStation = async (req, res) => {
             WHERE s.station_id = ? AND s.active = ${ACCOUNT_STATE.active}
         `;
 
-        const staffs = await selectData(query, [station_id]);
+        const staffs: StaffResponse[] = (await selectData(query, [
+            station_id,
+        ])) as StaffResponse[];
 
         const newStaffs = staffs.map(
             ({ password, station_id, ...other }) => other
@@ -161,12 +176,12 @@ const getAllStaffOfServiceStation = async (req, res) => {
             'Get all staffs successfully!',
             newStaffs
         );
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const updateStation = async (req, res) => {
+export const updateStation = async (req: CustomRequest, res: Response) => {
     const { station_id: stationId } = req.params;
     const {
         name: stationName,
@@ -199,12 +214,12 @@ const updateStation = async (req, res) => {
         await executeTransaction(queries, params);
 
         sendResponse(res, STATUS_CODE.OK, 'Update station successfully!');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const createStation = async (req, res) => {
+export const createStation = async (req: CustomRequest, res: Response) => {
     const {
         name: stationName,
         place_id: placeId,
@@ -230,13 +245,13 @@ const createStation = async (req, res) => {
         await executeTransaction(queries, params);
 
         sendResponse(res, STATUS_CODE.OK, 'Create station successfully!');
-    } catch (error) {
+    } catch (error: any) {
         console.log(error.message);
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error);
     }
 };
 
-const deleteStation = async (req, res) => {
+export const deleteStation = async (req: CustomRequest, res: Response) => {
     const { station_id: stationId } = req.params;
 
     try {
@@ -245,7 +260,7 @@ const deleteStation = async (req, res) => {
         await excuteQuery(query, [stationId]);
 
         sendResponse(res, STATUS_CODE.OK, 'Delete station successfully!');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };

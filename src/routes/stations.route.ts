@@ -1,21 +1,25 @@
 import express from 'express';
 const router = express.Router();
 
-const stationController = require('@/src/controllers/station.controller');
+import {
+    createStation,
+    deleteStation,
+    getAllServiceStations,
+    getAllStaffOfServiceStation,
+    getStationById,
+    updateStation,
+} from '@/src/controllers/station.controller';
 
-router.get('/', stationController.getAllServiceStations);
+router.get('/', getAllServiceStations);
 
-router.post('/', stationController.createStation);
+router.post('/', createStation);
 
-router.get('/:station_id', stationController.getStationById);
+router.get('/:station_id', getStationById);
 
-router.patch('/:station_id', stationController.updateStation);
+router.patch('/:station_id', updateStation);
 
-router.delete('/:station_id', stationController.deleteStation);
+router.delete('/:station_id', deleteStation);
 
-router.get(
-    '/:station_id/staffs',
-    stationController.getAllStaffOfServiceStation
-);
+router.get('/:station_id/staffs', getAllStaffOfServiceStation);
 
 export default router;

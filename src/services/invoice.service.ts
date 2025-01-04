@@ -1,7 +1,7 @@
 import PDFKit from 'pdfkit';
 import fs from 'fs';
 import { convertDateToGMT7 } from '@/src/ultil/ultil.lib';
-import { Service } from '@/src/types/models';
+import { Invoice, Service } from '@/src/types/models';
 
 const fontPath = './src/assets/fonts/Roboto-Regular.ttf';
 const logoPath = './src/assets/logo.png';
@@ -12,14 +12,6 @@ interface RowData {
     name: string;
     price: number;
     quantity: number;
-}
-
-interface Invoice {
-    items: any[];
-    service: Service;
-    booking_id: string;
-    full_address: string;
-    user: any;
 }
 
 const generateRowsData = (invoice: { items: any[]; service: Service }) => {

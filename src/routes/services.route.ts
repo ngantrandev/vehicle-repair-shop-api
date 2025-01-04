@@ -1,16 +1,19 @@
 import express from 'express';
 const router = express.Router();
 
-const servicesControllers = require('@/src/controllers/services.controller');
-const serviceControllers = require('@/src/controllers/service.controller');
-const categoriesController = require('@/src/controllers/category.controller');
+import { getServiceCategory } from '@/src/controllers/category.controller';
+import {
+    getAllServices,
+    getTopServices,
+} from '@/src/controllers/services.controller';
+import { getServiceById } from '@/src/controllers/service.controller';
 
-router.get('/', servicesControllers.getAllServices);
+router.get('/', getAllServices);
 
-router.get('/top', servicesControllers.getTopServices);
+router.get('/top', getTopServices);
 
-router.get('/categories', categoriesController.getServiceCategory);
+router.get('/categories', getServiceCategory);
 
-router.get('/:service_id', serviceControllers.getServiceById);
+router.get('/:service_id', getServiceById);
 
 export default router;

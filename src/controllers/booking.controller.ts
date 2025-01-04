@@ -1,7 +1,12 @@
-const path = require('path');
-const sharp = require('sharp');
+import path from 'path';
+import sharp from 'sharp';
 
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+import { BookingResponse } from '@/src/types/responses';
+import { Invoice, Item } from '@/src/types/models';
+
+import {
     selectData,
     isValidInteger,
     sendResponse,
@@ -11,21 +16,19 @@ const {
     isValidDouble,
     executeTransaction,
     convertDateToGMT7,
-} = require('@/src/ultil/ultil.lib');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+} from '@/src/ultil/ultil.lib';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     TABLE_NAMES,
     BOOKING_STATE,
     USER_ROLES,
     PAYMENT_STATUS,
-} = require('@/src/configs/constants.config');
-const {
-    createUserNotification,
-} = require('@/src/services/notification.service');
-const { sendNotificationToTopic } = require('@/src/services/firebase.service');
-const { createInvoiceFile } = require('@/src/services/invoice.service');
+} from '@/src/configs/constants.config';
+import { createUserNotification } from '@/src/services/notification.service';
+import { sendNotificationToTopic } from '@/src/services/firebase.service';
+import { createInvoiceFile } from '@/src/services/invoice.service';
 
-const getBookingById = async (req, res) => {
+export const getBookingById = async (req: CustomRequest, res: Response) => {
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
         return;
@@ -90,10 +93,10 @@ const getBookingById = async (req, res) => {
                 ${TABLE_NAMES.payments} AS p ON p.invoice_id = inv.id AND p.status = '${PAYMENT_STATUS.success}'
         `;
 
-        const bookings = await selectData(selectQuery, [
+        const bookings: BookingResponse[] = (await selectData(selectQuery, [
             req.params.booking_id,
             req.tokenPayload.user_id,
-        ]);
+        ])) as BookingResponse[];
 
         if (bookings.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'booking not found!');
@@ -185,7 +188,8 @@ const getBookingById = async (req, res) => {
         );
     }
 };
-const createBooking = async (req, res) => {
+
+export const createBooking = async (req: CustomRequest, res: Response) => {
     try {
         if (!req?.body?.data) {
             sendResponse(res, STATUS_CODE.BAD_REQUEST, `data is required`);
@@ -203,6 +207,15 @@ const createBooking = async (req, res) => {
             full_address,
             place_id,
             note,
+        }: {
+            items: number[];
+            service_id: string;
+            latitude: string;
+            longitude: string;
+            address_name: string;
+            full_address: string;
+            place_id: string;
+            note: string;
         } = bodyData;
 
         /**VALIDATE VALUE */
@@ -304,7 +317,7 @@ const createBooking = async (req, res) => {
         ];
 
         if (items && items.length > 0) {
-            const args = [];
+            const args: Number[] = [];
             const query = `
                 INSERT INTO ${TABLE_NAMES.bookings_items} (item_id, booking_id, count, price)
                 SELECT 
@@ -337,11 +350,14 @@ const createBooking = async (req, res) => {
             params.push(args);
         }
 
-        const transactionRes = await executeTransaction(queries, params);
+        const transactionRes: any[] = (await executeTransaction(
+            queries,
+            params
+        )) as any[];
 
         const bookingId = transactionRes[2].insertId;
 
-        const bookingsData = await selectData(
+        const bookingsData: BookingResponse[] = (await selectData(
             `
             SELECT
                 b.id booking_id,
@@ -355,7 +371,7 @@ const createBooking = async (req, res) => {
             
             `,
             [bookingId]
-        );
+        )) as BookingResponse[];
 
         const { service_name } = bookingsData[0];
 
@@ -376,7 +392,7 @@ const createBooking = async (req, res) => {
     }
 };
 
-const cancelBooking = async (req, res) => {
+export const cancelBooking = async (req: CustomRequest, res: Response) => {
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
         return;
@@ -399,7 +415,9 @@ const cancelBooking = async (req, res) => {
 
     try {
         const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} WHERE id = ?`;
-        const bookings = await selectData(selectQuery, [req.params.booking_id]);
+        const bookings: BookingResponse[] = (await selectData(selectQuery, [
+            req.params.booking_id,
+        ])) as BookingResponse[];
         if (bookings.length === 0) {
             sendResponse(
                 res,
@@ -451,7 +469,7 @@ const cancelBooking = async (req, res) => {
     }
 };
 
-const undoBooking = async (req, res) => {
+export const undoBooking = async (req: CustomRequest, res: Response) => {
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'id is required');
         return;
@@ -477,7 +495,10 @@ const undoBooking = async (req, res) => {
 
         const selectQuery = `SELECT * FROM ${TABLE_NAMES.bookings} ${where}`;
 
-        const bookings = await selectData(selectQuery, args);
+        const bookings: BookingResponse[] = (await selectData(
+            selectQuery,
+            args
+        )) as BookingResponse[];
 
         if (bookings.length === 0) {
             sendResponse(
@@ -518,7 +539,10 @@ const undoBooking = async (req, res) => {
     }
 };
 
-const setBookingStatusToDone = async (req, res) => {
+export const setBookingStatusToDone = async (
+    req: CustomRequest,
+    res: Response
+) => {
     if (!req.params.booking_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'booking_id is required');
         return;
@@ -550,9 +574,10 @@ const setBookingStatusToDone = async (req, res) => {
         JOIN ${TABLE_NAMES.addresses} AS addr ON b.address_id = addr.id
         WHERE b.id = ?
         `;
-        const bookingsFound = await selectData(checkExistBooking, [
-            req.params.booking_id,
-        ]);
+        const bookingsFound: BookingResponse[] = (await selectData(
+            checkExistBooking,
+            [req.params.booking_id]
+        )) as BookingResponse[];
 
         if (bookingsFound.length === 0) {
             sendResponse(
@@ -608,7 +633,7 @@ const setBookingStatusToDone = async (req, res) => {
             service_price,
         } = bookingsFound[0];
 
-        const items = await selectData(
+        const items: Item[] = (await selectData(
             `
             SELECT
                 i.id AS id,
@@ -621,9 +646,9 @@ const setBookingStatusToDone = async (req, res) => {
             GROUP BY i.id, i.name, bi.price  
         `,
             [req.params.booking_id]
-        );
+        )) as Item[];
 
-        const invoice = {
+        const invoice: Invoice = {
             booking_id: req.params.booking_id,
             full_address: address_name + ', ' + full_address,
             items: items || [],
@@ -665,13 +690,3 @@ const setBookingStatusToDone = async (req, res) => {
         );
     }
 };
-
-const bookingController = {
-    getBookingById,
-    createBooking,
-    cancelBooking,
-    setBookingStatusToDone,
-    undoBooking,
-};
-
-module.exports = bookingController;

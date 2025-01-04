@@ -1,12 +1,16 @@
-const { QUERY_SELECT_SERVICE_BY_ID } = require('@/src/configs/queries.config');
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+import { ServiceResponse } from '@/src/types/responses';
+
+import { QUERY_SELECT_SERVICE_BY_ID } from '@/src/configs/queries.config';
+import {
     selectData,
     isValidInteger,
     sendResponse,
-} = require('@/src/ultil/ultil.lib');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+} from '@/src/ultil/ultil.lib';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
 
-const getServiceById = async (req, res) => {
+export const getServiceById = async (req: CustomRequest, res: Response) => {
     if (!req.params.service_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'service_id is required');
         return;
@@ -24,9 +28,10 @@ const getServiceById = async (req, res) => {
     try {
         /**FIND SERVICE */
         const selectQuery = QUERY_SELECT_SERVICE_BY_ID;
-        const servicesFound = await selectData(selectQuery, [
-            req.params.service_id,
-        ]);
+        const servicesFound: ServiceResponse[] = (await selectData(
+            selectQuery,
+            [req.params.service_id]
+        )) as ServiceResponse[];
 
         if (servicesFound.length === 0) {
             sendResponse(res, STATUS_CODE.NOT_FOUND, 'Service not found!');
@@ -36,7 +41,7 @@ const getServiceById = async (req, res) => {
         const { category_id, category_name, category_desc, ...other } =
             servicesFound[0];
         other.category = {
-            id: category_id,
+            id: category_id as number,
             name: category_name,
             description: category_desc,
         };
@@ -55,9 +60,3 @@ const getServiceById = async (req, res) => {
         );
     }
 };
-
-const serviceControllers = {
-    getServiceById,
-};
-
-module.exports = serviceControllers;

@@ -1,12 +1,16 @@
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import {
     selectData,
     sendResponse,
     convertTimeToGMT7,
-} = require('@/src/ultil/ultil.lib');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const { TABLE_NAMES, USER_ROLES } = require('@/src/configs/constants.config');
+} from '@/src/ultil/ultil.lib';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import { TABLE_NAMES, USER_ROLES } from '@/src/configs/constants.config';
+import { BookingResponse } from '@/src/types/responses';
 
-const getLatestBooking = async (req, res) => {
+export const getLatestBooking = async (req: CustomRequest, res: Response) => {
     try {
         const where = [];
         const params = [];
@@ -62,7 +66,10 @@ const getLatestBooking = async (req, res) => {
         ${whereCondition}
  `;
 
-        const bookings = await selectData(selectQuery, params);
+        const bookings: BookingResponse[] = (await selectData(
+            selectQuery,
+            params
+        )) as BookingResponse[];
 
         const newList = bookings.map(
             ({
@@ -155,7 +162,7 @@ const getLatestBooking = async (req, res) => {
     }
 };
 
-const getAllBooking = async (req, res) => {
+export const getAllBooking = async (req: CustomRequest, res: Response) => {
     try {
         // Lấy `startDay` và `endDay` từ query params
         const {
@@ -171,7 +178,7 @@ const getAllBooking = async (req, res) => {
         let cursor = req.query.cursor;
 
         if (!cursor) {
-            cursor = 0;
+            cursor = '0';
         }
 
         let where = [];
@@ -183,8 +190,8 @@ const getAllBooking = async (req, res) => {
 
         // Nếu có cả `startDay` và `endDay`
         if (startDay && endDay) {
-            const startDate = new Date(startDay);
-            const endDate = new Date(endDay);
+            const startDate = new Date(startDay as string);
+            const endDate = new Date(endDay as string);
 
             // Trường hợp `startDay` và `endDay` là cùng một ngày
             if (startDate.toDateString() === endDate.toDateString()) {
@@ -277,7 +284,10 @@ const getAllBooking = async (req, res) => {
         ${limit ? `LIMIT ${cursor}, ${limit}` : ''}
  `;
 
-        const bookings = await selectData(selectQuery, params);
+        const bookings: BookingResponse[] = (await selectData(
+            selectQuery,
+            params
+        )) as BookingResponse[];
 
         const newList = bookings.map(
             ({
@@ -352,7 +362,7 @@ const getAllBooking = async (req, res) => {
                     },
                 };
 
-                if (is_paid == 0) {
+                if (typeof is_paid === 'number' && is_paid === 0) {
                     other.is_paid = false;
                 } else {
                     other.is_paid = true;
@@ -376,10 +386,3 @@ const getAllBooking = async (req, res) => {
         );
     }
 };
-
-const bookingsController = {
-    getAllBooking,
-    getLatestBooking,
-};
-
-module.exports = bookingsController;

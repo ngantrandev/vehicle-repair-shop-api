@@ -1,12 +1,18 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import {
     selectData,
     isValidInteger,
     sendResponse,
-} = require('@/src/ultil/ultil.lib');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+} from '@/src/ultil/ultil.lib';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
 
-const getAllServicesByMotorcycleId = async (req, res) => {
+export const getAllServicesByMotorcycleId = async (
+    req: CustomRequest,
+    res: Response
+) => {
     if (!req.params.motorcycle_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'motorcycle_id is required');
         return;
@@ -41,7 +47,9 @@ const getAllServicesByMotorcycleId = async (req, res) => {
             m.id = ?
     `;
 
-        const motorcycles = await selectData(query, [req.params.motorcycle_id]);
+        const motorcycles: any[] = (await selectData(query, [
+            req.params.motorcycle_id,
+        ])) as any[];
 
         const newList = motorcycles.map(
             ({ category_id, category_name, category_desc, ...other }) => {
@@ -69,9 +77,3 @@ const getAllServicesByMotorcycleId = async (req, res) => {
         );
     }
 };
-
-const motorcycleBrandController = {
-    getAllServicesByMotorcycleId,
-};
-
-module.exports = motorcycleBrandController;

@@ -1,12 +1,18 @@
 import express from 'express';
 const router = express.Router();
 
-const authController = require('@/src/controllers/auth.controller');
+import {
+    register,
+    signin,
+    staffSignin,
+    userForgotPassword,
+    userResetPassword,
+} from '@/src/controllers/auth.controller';
 
-router.post('/signin', authController.signin);
-router.post('/signin/staff', authController.staffSignin);
-router.post('/register', authController.register);
-router.post('/forgot-password', authController.userForgotPassword);
-router.post('/reset-password', authController.userResetPassword);
+router.post('/signin', signin);
+router.post('/signin/staff', staffSignin);
+router.post('/register', register);
+router.post('/forgot-password', userForgotPassword);
+router.post('/reset-password', userResetPassword);
 
 export default router;

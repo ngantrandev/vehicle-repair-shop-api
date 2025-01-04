@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 const apiRoute = express();
 
 import authRoutes from '@/src/routes/auth.route';
@@ -21,7 +21,7 @@ import {
     verifyAdminRole,
     verifyStaffRole,
 } from '@/src/middlewares/verify.middleware';
-const { testSendNoti } = require('@/src/controllers/notification.controller');
+import { testSendNoti } from '@/src/controllers/notification.controller';
 
 apiRoute.use('/auth', authRoutes);
 apiRoute.use('/admin', verifyToken, verifyAdminRole, adminRoutes);

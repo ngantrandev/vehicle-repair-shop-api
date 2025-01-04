@@ -1,5 +1,5 @@
-const path = require('path');
-const sharp = require('sharp');
+import path from 'path';
+import sharp from 'sharp';
 
 import { Response } from 'express';
 import { CustomRequest } from '@/src/types/requests';

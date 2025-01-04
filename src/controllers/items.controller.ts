@@ -1,13 +1,16 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     selectData,
     sendResponse,
     excuteQuery,
     executeTransaction,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
 
-const createItem = async (req, res) => {
+export const createItem = async (req: CustomRequest, res: Response) => {
     try {
         const { name, description, image_url } = req.body;
 
@@ -24,12 +27,12 @@ const createItem = async (req, res) => {
         await excuteQuery(query, [name, description, image_url]);
 
         sendResponse(res, STATUS_CODE.OK, 'Create item successfully');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const updateItem = async (req, res) => {
+export const updateItem = async (req: CustomRequest, res: Response) => {
     try {
         const { item_id } = req.params;
         const { name, description, image_url } = req.body;
@@ -48,12 +51,12 @@ const updateItem = async (req, res) => {
         await excuteQuery(query, [name, description, image_url, item_id]);
 
         sendResponse(res, STATUS_CODE.OK, 'Update item successfully');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getAllItem = async (req, res) => {
+export const getAllItem = async (req: CustomRequest, res: Response) => {
     try {
         const { start_date, end_date } = req.query;
         const where = [];
@@ -94,12 +97,12 @@ const getAllItem = async (req, res) => {
         const items = await selectData(query, args);
 
         sendResponse(res, STATUS_CODE.OK, 'Get items successfully', items);
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const addItemToBooking = async (req, res) => {
+export const addItemToBooking = async (req: CustomRequest, res: Response) => {
     try {
         const { item_id: itemId, booking_id: bookingId } = req.body;
 
@@ -121,7 +124,9 @@ const addItemToBooking = async (req, res) => {
             ORDER BY ${TABLE_NAMES.inputs}.date_input DESC
         `;
 
-        const itemPrices = await selectData(getPriceQuery, [itemId]);
+        const itemPrices: any[] = (await selectData(getPriceQuery, [
+            itemId,
+        ])) as any[];
 
         if (itemPrices.length === 0) {
             sendResponse(res, STATUS_CODE.BAD_REQUEST, 'Item not found');
@@ -141,12 +146,15 @@ const addItemToBooking = async (req, res) => {
         ]);
 
         sendResponse(res, STATUS_CODE.OK, 'Add item to booking successfully');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const removeItemFromBooking = async (req, res) => {
+export const removeItemFromBooking = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const { item_id: itemId, booking_id: bookingId } = req.body;
 
@@ -180,12 +188,15 @@ const removeItemFromBooking = async (req, res) => {
             STATUS_CODE.OK,
             'Remove item from booking successfully'
         );
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getAllItemOfBooking = async (req, res) => {
+export const getAllItemOfBooking = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const { booking_id: bookingId } = req.query;
 
@@ -215,12 +226,12 @@ const getAllItemOfBooking = async (req, res) => {
             'Get booking items successfully',
             items
         );
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const addItemToService = async (req, res) => {
+export const addItemToService = async (req: CustomRequest, res: Response) => {
     try {
         const { item_id: itemId, service_id: serviceId } = req.body;
 
@@ -241,12 +252,15 @@ const addItemToService = async (req, res) => {
         await excuteQuery(query, [itemId, serviceId]);
 
         sendResponse(res, STATUS_CODE.OK, 'Add item to service successfully');
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const removeItemFromService = async (req, res) => {
+export const removeItemFromService = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const { item_id: itemId, service_id: serviceId } = req.body;
 
@@ -272,12 +286,15 @@ const removeItemFromService = async (req, res) => {
             STATUS_CODE.OK,
             'Remove item from service successfully'
         );
-    } catch (error) {
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const getAllItemOfService = async (req, res) => {
+export const getAllItemOfService = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const { service_id: serviceId } = req.query;
 
@@ -315,20 +332,8 @@ const getAllItemOfService = async (req, res) => {
             'Get service items successfully',
             items
         );
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
-};
-
-module.exports = {
-    getAllItem,
-    addItemToBooking,
-    removeItemFromBooking,
-    getAllItemOfBooking,
-    addItemToService,
-    removeItemFromService,
-    getAllItemOfService,
-    createItem,
-    updateItem,
 };

@@ -1,9 +1,8 @@
 import { STATUS_CODE } from '@/src/configs/status.codes.config';
-const goongHttpRequests = require('@/src/ultil/goongHttpRequests');
+import { AutoComplete, Geocode, PointList } from '@/src/types/goongmaps';
+import goongHttpRequests from '@/src/ultil/goongHttpRequests';
 
 const goongRestApiKey = process.env.GOONG_API_KEY;
-
-type PointList = [[number, number]][];
 
 export const getDistanceMatrix = async (origins: any, destinations: any) => {
     /**
@@ -48,7 +47,9 @@ export const autocompleteAddress = async (
         return null;
     }
 
-    const resData = res.data?.predictions;
+    const data: AutoComplete = res?.data;
+
+    const resData = data.predictions;
 
     return resData;
 };
@@ -85,7 +86,9 @@ export const reverseGeocode = async (latitude: number, longitude: number) => {
         return null;
     }
 
-    const resData = res.data?.results;
+    const data: Geocode = res.data;
+
+    const resData = data.results;
 
     return resData;
 };
@@ -109,8 +112,8 @@ export const getAddressDetailByPlaceId = async (place_id: string) => {
 };
 
 export const getDirection = async (
-    origin: PointList,
-    destination: PointList,
+    origin: PointList | string,
+    destination: PointList | string,
     vehicle: string
 ) => {
     const apiPath = '/Direction';
@@ -130,4 +133,13 @@ export const getDirection = async (
     const resData = res.data;
 
     return resData;
+};
+
+export default {
+    getDistanceMatrix,
+    autocompleteAddress,
+    forwardGeocode,
+    reverseGeocode,
+    getAddressDetailByPlaceId,
+    getDirection,
 };

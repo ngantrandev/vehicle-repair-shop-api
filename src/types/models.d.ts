@@ -1,6 +1,6 @@
 export interface Address {
     id?: number;
-    place_id: string;
+    place_id?: string;
     address_name: string;
     full_address: string;
     latitude: number;
@@ -8,29 +8,30 @@ export interface Address {
 }
 
 export interface Person {
-    id: number;
-    username: string;
-    firstname: string;
-    lastname: string;
-    birthday: string;
-    image_url: string;
-    email: string;
-    phone: string;
+    id?: number;
+    username?: string;
+    firstname?: string;
+    lastname?: string;
+    birthday?: string;
+    image_url?: string;
+    email?: string;
+    phone?: string;
 }
 
 export interface User extends Person {
-    password: string;
+    password?: string | undefined;
     address?: Address;
-    role: string;
-    created_at: string;
-    active: number;
+    role?: string;
+    created_at?: string;
+    active?: number;
 }
 
 export interface Staff extends Person {
-    password: string;
-    created_at: string;
-    active: number;
-    service_station?: Station;
+    password?: string;
+    created_at?: string;
+    active?: number;
+    station?: Station;
+    role?: string;
 }
 
 export interface Station {
@@ -46,14 +47,15 @@ export interface Category {
 }
 
 export interface Service {
-    id: number;
+    id?: number;
     category_id?: number;
     name: string;
-    description: string;
+    description?: string;
     price: number;
-    estimated_time: string;
-    image_url: string;
-    active: number;
+    estimated_time?: string;
+    image_url?: string;
+    active?: number;
+    category?: Category;
 }
 
 interface Booking {
@@ -68,6 +70,11 @@ interface Booking {
     note: string;
     staff_id: number;
     image_url: string;
+    user: User;
+    service: Service;
+    address: Address;
+    staff: Staff;
+    is_paid: boolean;
 }
 
 export interface Service {
@@ -79,4 +86,26 @@ export interface Service {
     estimated_time: string;
     image_url: string;
     active: number;
+}
+
+export interface Notification {
+    id: number;
+    title: string;
+    message: string;
+    date: string;
+}
+
+export interface Item {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+}
+
+export interface Invoice {
+    items: any[];
+    service: Service;
+    booking_id: string;
+    full_address: string;
+    user: any;
 }

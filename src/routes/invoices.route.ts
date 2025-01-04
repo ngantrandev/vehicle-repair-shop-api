@@ -1,11 +1,11 @@
 import express from 'express';
 const router = express.Router();
 
-const {
+import {
     getAllInvoices,
     createInvoice,
     exportInvoice,
-} = require('@/src/controllers/invoices.controller');
+} from '@/src/controllers/invoices.controller';
 
 router.get('/', getAllInvoices);
 

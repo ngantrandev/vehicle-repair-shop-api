@@ -1,11 +1,11 @@
-const {
-    TABLE_NAMES,
-    PAYMENT_STATUS,
-} = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const { sendResponse, selectData } = require('@/src/ultil/ultil.lib');
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
 
-const getRevenue = async (req, res) => {
+import { TABLE_NAMES, PAYMENT_STATUS } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import { sendResponse, selectData } from '@/src/ultil/ultil.lib';
+
+export const getRevenue = async (req: CustomRequest, res: Response) => {
     try {
         const {
             start_date: startDate,
@@ -16,7 +16,7 @@ const getRevenue = async (req, res) => {
         const today = new Date();
         let start, end;
 
-        if (!startDate && !endDate) {
+        if (!startDate || !endDate) {
             if (mode === 'day') {
                 start = new Date(today.getFullYear(), today.getMonth(), 1);
                 end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -28,27 +28,25 @@ const getRevenue = async (req, res) => {
                 end = new Date(today.getFullYear(), 11, 31);
             }
         } else {
-            start = new Date(startDate);
-            end = new Date(endDate);
+            start = new Date(startDate as string);
+            end = new Date(endDate as string);
         }
 
         let dates = [];
 
+        let currentDate = start ? new Date(start) : new Date();
         if (mode === 'day') {
-            let currentDate = new Date(start);
-            while (currentDate <= end) {
+            while (end && currentDate <= end) {
                 dates.push(formatDate(currentDate));
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         } else if (mode === 'month') {
-            let currentDate = new Date(start);
-            while (currentDate <= end) {
+            while (end && currentDate <= end) {
                 dates.push(formatMonth(currentDate));
                 currentDate.setMonth(currentDate.getMonth() + 1);
             }
         } else if (mode === 'year') {
-            let currentDate = new Date(start);
-            while (currentDate <= end) {
+            while (end && currentDate <= end) {
                 dates.push(formatYear(currentDate));
                 currentDate.setFullYear(currentDate.getFullYear() + 1);
             }
@@ -85,7 +83,7 @@ const getRevenue = async (req, res) => {
 
         `;
 
-        const data = await selectData(query, [start, end]);
+        const data: any[] = (await selectData(query, [start, end])) as any[];
 
         const revenueData = data.reduce((acc, item) => {
             const { date, total_price } = item;
@@ -100,13 +98,12 @@ const getRevenue = async (req, res) => {
         }));
 
         sendResponse(res, STATUS_CODE.OK, 'Revenue', result);
-    } catch (error) {
-        console.log(error);
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const topItems = async (req, res) => {
+export const topItems = async (req: CustomRequest, res: Response) => {
     try {
         // mode = previous_month, current_month, previous_year, current_year
         const { mode } = req.query;
@@ -160,13 +157,12 @@ const topItems = async (req, res) => {
         const data = await selectData(query, args);
 
         sendResponse(res, STATUS_CODE.OK, 'Top items', data);
-    } catch (error) {
-        console.log(error);
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const topStaffs = async (req, res) => {
+export const topStaffs = async (req: CustomRequest, res: Response) => {
     try {
         const { mode } = req.query;
         const where = [`b.status = 'done'`];
@@ -214,7 +210,7 @@ const topStaffs = async (req, res) => {
             LIMIT 5
         `;
 
-        const data = await selectData(query, args);
+        const data: any[] = (await selectData(query, args)) as any[];
 
         const newData = data.map(({ firstname, lastname, ...orther }) => {
             return {
@@ -223,26 +219,25 @@ const topStaffs = async (req, res) => {
             };
         });
         sendResponse(res, STATUS_CODE.OK, 'Top staffs', newData);
-    } catch (error) {
-        console.log(error);
+    } catch (error: any) {
         sendResponse(res, STATUS_CODE.INTERNAL_SERVER_ERROR, error.message);
     }
 };
 
-const formatDate = (date) => {
+const formatDate = (date: Date) => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
 };
 
-const formatMonth = (date) => {
+const formatMonth = (date: Date) => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${month}-${year}`;
 };
 
-const formatYear = (date) => date.getFullYear();
+const formatYear = (date: Date) => date.getFullYear();
 
 const statisticsController = {
     getRevenue,

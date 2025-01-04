@@ -1,9 +1,15 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
 
-const { selectData, sendResponse } = require('@/src/ultil/ultil.lib');
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
 
-const getAllMotorcycleBrands = async (req, res) => {
+import { selectData, sendResponse } from '@/src/ultil/ultil.lib';
+
+export const getAllMotorcycleBrands = async (
+    req: CustomRequest,
+    res: Response
+) => {
     try {
         const query = `SELECT * FROM ${TABLE_NAMES.motorcycle_brands}`;
 
@@ -23,9 +29,3 @@ const getAllMotorcycleBrands = async (req, res) => {
         );
     }
 };
-
-const motorcycleBrandsController = {
-    getAllMotorcycleBrands,
-};
-
-module.exports = motorcycleBrandsController;

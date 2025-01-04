@@ -1,21 +1,24 @@
 import express from 'express';
 const router = express.Router();
 
-const bookingController = require('@/src/controllers/booking.controller');
-const bookingsController = require('@/src/controllers/bookings.controller');
-const adminBookingController = require('@/src/controllers/admin.booking.controller');
+import { undoBooking } from '@/src/controllers/booking.controller';
+import {
+    getAllBooking,
+    getLatestBooking,
+} from '@/src/controllers/bookings.controller';
+import {
+    assignBookingToEmployee,
+    confirmBooking,
+} from '@/src/controllers/admin.booking.controller';
 
-router.get('/', bookingsController.getAllBooking);
+router.get('/', getAllBooking);
 
-router.get('/latest', bookingsController.getLatestBooking);
+router.get('/latest', getLatestBooking);
 
-router.patch('/:booking_id/undo', bookingController.undoBooking);
+router.patch('/:booking_id/undo', undoBooking);
 
-router.patch('/:booking_id/confirm', adminBookingController.confirmBooking);
+router.patch('/:booking_id/confirm', confirmBooking);
 
-router.patch(
-    '/:booking_id/assign',
-    adminBookingController.assignBookingToEmployee
-);
+router.patch('/:booking_id/assign', assignBookingToEmployee);
 
 export default router;

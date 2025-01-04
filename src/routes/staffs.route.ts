@@ -1,31 +1,29 @@
 import express from 'express';
 const router = express.Router();
 
-const bookingController = require('@/src/controllers/booking.controller');
-const staffBookingController = require('@/src/controllers/staff.booking.controller');
-const notificationController = require('@/src/controllers/notification.controller');
+import { setBookingStatusToDone } from '@/src/controllers/booking.controller';
+import {
+    getAllBookingAssignedToStaff,
+    setBookingStatusToFixing,
+} from '@/src/controllers/staff.booking.controller';
+import {
+    staffGetAllNotifications,
+    staffMarkAllNotificationsAsRead,
+    staffMarkNotificationAsRead,
+} from '@/src/controllers/notification.controller';
 
-router.get('/bookings', staffBookingController.getAllBookingAssignedToStaff);
+router.get('/bookings', getAllBookingAssignedToStaff);
 
-router.patch(
-    '/bookings/:booking_id/set_fixing',
-    staffBookingController.setBookingStatusToFixing
-);
+router.patch('/bookings/:booking_id/set_fixing', setBookingStatusToFixing);
 
-router.patch(
-    '/bookings/:booking_id/set_done',
-    bookingController.setBookingStatusToDone
-);
+router.patch('/bookings/:booking_id/set_done', setBookingStatusToDone);
 
 // Notification routes
-router.get('/notifications', notificationController.staffGetAllNotifications);
+router.get('/notifications', staffGetAllNotifications);
 router.patch(
     '/notifications/:notification_id/mark_read',
-    notificationController.staffMarkNotificationAsRead
+    staffMarkNotificationAsRead
 );
-router.patch(
-    '/notifications/mark_all_read',
-    notificationController.staffMarkAllNotificationsAsRead
-);
+router.patch('/notifications/mark_all_read', staffMarkAllNotificationsAsRead);
 
 export default router;

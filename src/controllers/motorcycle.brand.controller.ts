@@ -1,12 +1,15 @@
-const { TABLE_NAMES } = require('@/src/configs/constants.config');
-const { STATUS_CODE } = require('@/src/configs/status.codes.config');
-const {
+import { CustomRequest } from '@/src/types/requests';
+import { Response } from 'express';
+
+import { TABLE_NAMES } from '@/src/configs/constants.config';
+import { STATUS_CODE } from '@/src/configs/status.codes.config';
+import {
     selectData,
     isValidInteger,
     sendResponse,
-} = require('@/src/ultil/ultil.lib');
+} from '@/src/ultil/ultil.lib';
 
-const getBrandById = async (req, res) => {
+export const getBrandById = async (req: CustomRequest, res: Response) => {
     if (!req.params.brand_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id is required');
         return;
@@ -20,9 +23,9 @@ const getBrandById = async (req, res) => {
     try {
         /**FIND BRAND */
         const selectQuery = `SELECT * FROM ${TABLE_NAMES.motorcycle_brands} WHERE id = ?`;
-        const brandsFound = await selectData(selectQuery, [
+        const brandsFound: any[] = (await selectData(selectQuery, [
             req.params.brand_id,
-        ]);
+        ])) as any[];
 
         if (brandsFound.length === 0) {
             sendResponse(
@@ -48,7 +51,10 @@ const getBrandById = async (req, res) => {
     }
 };
 
-const getAllServicesByBrandId = async (req, res) => {
+export const getAllServicesByBrandId = async (
+    req: CustomRequest,
+    res: Response
+) => {
     if (!req.params.brand_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id is required');
 
@@ -80,7 +86,9 @@ const getAllServicesByBrandId = async (req, res) => {
                 mb.id = ?
         `;
 
-        const motorcycles = await selectData(query, [req.params.brand_id]);
+        const motorcycles: any[] = (await selectData(query, [
+            req.params.brand_id,
+        ])) as any[];
 
         const newList = motorcycles.map(
             ({ category_id, category_name, category_desc, ...other }) => {
@@ -109,7 +117,10 @@ const getAllServicesByBrandId = async (req, res) => {
     }
 };
 
-const getAllMotorcyclesByBrandId = async (req, res) => {
+export const getAllMotorcyclesByBrandId = async (
+    req: CustomRequest,
+    res: Response
+) => {
     if (!req.params.brand_id) {
         sendResponse(res, STATUS_CODE.BAD_REQUEST, 'brand_id is required');
         return;
@@ -130,7 +141,7 @@ const getAllMotorcyclesByBrandId = async (req, res) => {
         ON mb.id = m.brand_id
 `;
 
-        const motorcycles = await selectData(query, []);
+        const motorcycles: any[] = (await selectData(query, [])) as any[];
 
         const newList = motorcycles.map(
             ({ brand_id, brand_name, ...other }) => {
@@ -157,11 +168,3 @@ const getAllMotorcyclesByBrandId = async (req, res) => {
         );
     }
 };
-
-const motorcycleBrandController = {
-    getBrandById,
-    getAllServicesByBrandId,
-    getAllMotorcyclesByBrandId,
-};
-
-module.exports = motorcycleBrandController;
