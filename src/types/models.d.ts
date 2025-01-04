@@ -1,10 +1,10 @@
 export interface Address {
     id?: number;
     place_id?: string;
-    address_name: string;
-    full_address: string;
-    latitude: number;
-    longitude: number;
+    address_name?: string;
+    full_address?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export interface Person {
@@ -49,16 +49,16 @@ export interface Category {
 export interface Service {
     id?: number;
     category_id?: number;
-    name: string;
+    name?: string;
     description?: string;
-    price: number;
+    price?: number;
     estimated_time?: string;
     image_url?: string;
     active?: number;
     category?: Category;
 }
 
-interface Booking {
+export interface Booking {
     id: number;
     service_id: number;
     user_id: number;

@@ -54,7 +54,11 @@ export const createPaymentUrl = async (req: CustomRequest, res: Response) => {
             [bookingId]
         )) as BookingResponse[];
 
-        const { service_name, service_price, items_price } = bookingsData[0];
+        const {
+            service_name,
+            service_price = 0,
+            items_price,
+        } = bookingsData[0];
 
         const totalPrice = service_price + (items_price || 0);
 

@@ -20,6 +20,7 @@ export interface UserResponse extends User {
 export interface StaffResponse extends Staff {
     station_id?: number;
     service_station_name: string;
+    service_station: Station;
 }
 
 export interface ServiceResponse extends Service {
@@ -28,12 +29,12 @@ export interface ServiceResponse extends Service {
 }
 
 export interface BookingResponse extends Booking {
-    address_latitude: number;
-    address_longitude: number;
-    service_name: string;
-    service_price: number;
-    service_image_url: string;
-    service_estimated_time: string;
+    address_latitude?: number;
+    address_longitude?: number;
+    service_name?: string;
+    service_price?: number;
+    service_image_url?: string;
+    service_estimated_time?: string;
     address_name: string;
     full_address: string;
     user_firstname: string;
@@ -49,7 +50,6 @@ export interface BookingResponse extends Booking {
     staff_id: number;
     staff_firstname: string;
     staff_lastname: string;
-    is_paid: boolean;
     items_price?: number;
 }
 

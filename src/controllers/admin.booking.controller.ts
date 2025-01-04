@@ -153,7 +153,7 @@ export const confirmBooking = async (req: CustomRequest, res: Response) => {
         );
 
         if (!distanceMatrix) {
-            return null;
+            return;
         }
 
         const data = distanceMatrix.rows[0].elements;

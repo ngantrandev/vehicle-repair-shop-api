@@ -289,8 +289,8 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
             params
         )) as BookingResponse[];
 
-        const newList = bookings.map(
-            ({
+        const newList = bookings.map((bookingRes) => {
+            const {
                 service_name,
                 service_id,
                 service_price,
@@ -317,60 +317,60 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
                 staff_lastname,
                 is_paid,
                 ...other
-            }) => {
-                other.created_at = convertTimeToGMT7(other.created_at);
-                if (other.modified_at) {
-                    other.modified_at = convertTimeToGMT7(other.modified_at);
-                }
-                other.service = {
-                    id: service_id,
-                    name: service_name,
-                    price: service_price,
-                    image_url: service_image_url,
-                    estimated_time: service_estimated_time,
-                };
+            } = bookingRes;
 
-                other.address = {
-                    id: address_id,
-                    latitude: address_latitude,
-                    longitude: address_longitude,
-                    address_name: address_name,
-                    full_address: full_address,
-                };
-
-                other.user = {
-                    id: user_id,
-                    firstname: user_firstname,
-                    lastname: user_lastname,
-                    email: user_email,
-                    phone: user_phone,
-                };
-
-                other.staff = {
-                    id: staff_id,
-                    firstname: staff_firstname,
-                    lastname: staff_lastname,
-                    station: {
-                        id: station_id,
-                        name: station_name,
-                        address: {
-                            latitude: station_latitude,
-                            longitude: station_longitude,
-                            address_name: station_address_name,
-                            full_address: station_address,
-                        },
-                    },
-                };
-
-                if (typeof is_paid === 'number' && is_paid === 0) {
-                    other.is_paid = false;
-                } else {
-                    other.is_paid = true;
-                }
-
-                return other;
+            bookingRes.created_at = convertTimeToGMT7(other.created_at);
+            if (bookingRes.modified_at) {
+                bookingRes.modified_at = convertTimeToGMT7(other.modified_at);
             }
-        );
+            bookingRes.service = {
+                id: service_id,
+                name: service_name,
+                price: service_price,
+                image_url: service_image_url,
+                estimated_time: service_estimated_time,
+            };
+
+            bookingRes.address = {
+                id: address_id,
+                latitude: address_latitude,
+                longitude: address_longitude,
+                address_name: address_name,
+                full_address: full_address,
+            };
+
+            bookingRes.user = {
+                id: user_id,
+                firstname: user_firstname,
+                lastname: user_lastname,
+                email: user_email,
+                phone: user_phone,
+            };
+
+            bookingRes.staff = {
+                id: staff_id,
+                firstname: staff_firstname,
+                lastname: staff_lastname,
+                station: {
+                    id: station_id,
+                    name: station_name,
+                    address: {
+                        latitude: station_latitude,
+                        longitude: station_longitude,
+                        address_name: station_address_name,
+                        full_address: station_address,
+                    },
+                },
+            };
+
+            if (typeof is_paid === 'number' && is_paid === 0) {
+                bookingRes.is_paid = false;
+            } else {
+                bookingRes.is_paid = true;
+            }
+
+            return other;
+        });
 
         sendResponse(
             res,
