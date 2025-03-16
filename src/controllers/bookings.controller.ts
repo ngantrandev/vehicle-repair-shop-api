@@ -319,11 +319,11 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
                 ...other
             } = bookingRes;
 
-            bookingRes.created_at = convertTimeToGMT7(other.created_at);
-            if (bookingRes.modified_at) {
-                bookingRes.modified_at = convertTimeToGMT7(other.modified_at);
+            other.created_at = convertTimeToGMT7(other.created_at);
+            if (other.modified_at) {
+                other.modified_at = convertTimeToGMT7(other.modified_at);
             }
-            bookingRes.service = {
+            other.service = {
                 id: service_id,
                 name: service_name,
                 price: service_price,
@@ -331,7 +331,7 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
                 estimated_time: service_estimated_time,
             };
 
-            bookingRes.address = {
+            other.address = {
                 id: address_id,
                 latitude: address_latitude,
                 longitude: address_longitude,
@@ -339,7 +339,7 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
                 full_address: full_address,
             };
 
-            bookingRes.user = {
+            other.user = {
                 id: user_id,
                 firstname: user_firstname,
                 lastname: user_lastname,
@@ -347,7 +347,7 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
                 phone: user_phone,
             };
 
-            bookingRes.staff = {
+            other.staff = {
                 id: staff_id,
                 firstname: staff_firstname,
                 lastname: staff_lastname,
@@ -364,9 +364,9 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
             };
 
             if (typeof is_paid === 'number' && is_paid === 0) {
-                bookingRes.is_paid = false;
+                other.is_paid = false;
             } else {
-                bookingRes.is_paid = true;
+                other.is_paid = true;
             }
 
             return other;
