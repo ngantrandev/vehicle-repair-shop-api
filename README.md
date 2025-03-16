@@ -4,14 +4,14 @@ This project is a RESTful API for Motorcycle Repair Shop Web. It is built using 
 
 ## 1. Installation and Usage
 
-1. Clone the repository
+Step 1. Clone the repository
 
 ```bash
 git clone https://github.com/ngantrandev/vehicle-repair-shop-api.git
 cd vehicle-repair-shop-api
 ```
 
-2. Create a `.env` file in the root directory of the project and add the following environment variables:
+Step 2. Create a `.env` file in the root directory of the project and add the following environment variables:
 
 ```env
 PORT=8000
@@ -40,7 +40,19 @@ EMAIL_HOST=*****  # Your email host
 SHOP_NAME=*****  # Your shop name
 ```
 
-3. Deploy with Docker
+Step 3. Install dependencies
+
+```bash
+npm install
+```
+
+Step 4. Start the development server
+
+```bash
+npm run dev
+```
+
+## 2. Deploy with Docker
 
 **Step 1**: Make sure you change the database information in the `.env` file to the correct information for the Docker container. For example:
 
@@ -61,16 +73,4 @@ docker-compose build
 
 ```bash
 docker-compose up
-```
-
-4. Install dependencies
-
-```bash
-npm install
-```
-
-5. Start the development server
-
-```bash
-npm run dev
 ```
