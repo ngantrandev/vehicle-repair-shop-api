@@ -1,0 +1,8 @@
+openapi: 3.0.0
+info:
+    title: Staff API
+    version: 1.0.0
+    description: Staff API
+tags:
+    - name: Staff
+      description: Staff API
