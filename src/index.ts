@@ -86,7 +86,7 @@ const initialApp = () => {
         };
 
         https.createServer(options, app).listen(443, () => {
-            console.log(`✅ HTTPS Server running on https://${deviceIp}:443`);
+            console.log(`✅ HTTPS Server running on https://${deviceIp}:${appPort}`);
         });
     } else {
         app.listen(appPort, () => {
