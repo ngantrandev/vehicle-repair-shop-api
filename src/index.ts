@@ -85,8 +85,8 @@ const initialApp = () => {
             cert: fs.readFileSync(certPath),
         };
 
-        https.createServer(options, app).listen(443, () => {
-            console.log(`✅ HTTPS Server running on https://${deviceIp}:${appPort}`);
+        https.createServer(options, app).listen(8000, '0.0.0.0', () => {
+            console.log('🚀 HTTPS Server running on https://0.0.0.0:8000');
         });
     } else {
         app.listen(appPort, () => {
