@@ -5,6 +5,8 @@ const cors = require('cors');
 import bodyparser from 'body-parser';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import path from 'path';
+import https from 'https';
 import { BASE_URL_PATH, APP_NAME } from '@/src/configs/constants.config';
 import { STATUS_CODE } from '@/src/configs/status.codes.config';
 
@@ -14,8 +16,6 @@ import { swaggerDocs, swaggerUi } from '@/src/configs/swagger.config'; // Import
 
 import { logger } from '@/src/configs/logger.config'; // Import Logger
 import apiRoutes from '@/src/routes/api.route';
-
-const app = express();
 import { downloadFile, getDeviceIp } from '@/src/ultil/ultil.lib';
 import { errorHandler, errorLogger } from '@/src/middlewares/error.middleware';
 const deviceIp = getDeviceIp();
@@ -23,22 +23,23 @@ const deviceIp = getDeviceIp();
 const filePath = './fcm.serviceaccount.key.json';
 
 const appPort = process.env.APP_PORT || 8000;
+const sslPath = process.env.SSL_PATH || path.join(process.cwd(), 'ssl');
+
+// 🔹 Kiểm tra chứng chỉ SSL
+const keyPath = path.join(sslPath, 'server.key');
+const certPath = path.join(sslPath, 'server.cert');
+
+const app = express();
 
 const initialApp = () => {
-    app.use(cors());
+    app.use(cors({ origin: '*', credentials: true }));
     app.use(bodyparser.json({ limit: '50mb' }));
 
-    fs.access('./uploads', (error: NodeJS.ErrnoException | null) => {
-        if (error) {
-            fs.mkdirSync('./uploads');
-            console.log('Uploads folder created successfully!');
-        }
-    });
-
-    fs.access('./invoices', (error: NodeJS.ErrnoException | null) => {
-        if (error) {
-            fs.mkdirSync('./invoices');
-            console.log('Invoices folder created successfully!');
+    ['uploads', 'invoices'].forEach((folder) => {
+        const dirPath = path.join(__dirname, folder);
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath);
+            console.log(`${folder} folder created successfully!`);
         }
     });
 
@@ -73,18 +74,27 @@ const initialApp = () => {
     });
 
     app.use(BASE_URL_PATH, apiRoutes);
-
     app.use(errorLogger);
-
     app.use(errorHandler);
-
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    app.listen(appPort, () => {
-        console.log(`
-            ${'\x1b[31m'}Server is running on https://${deviceIp}:${'\x1b[32m'}${appPort}${'\x1b[0m'}
-        `);
-    });
+    // 🔹 Chạy HTTPS nếu có chứng chỉ, ngược lại chạy HTTP
+    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+        const options = {
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certPath),
+        };
+
+        https.createServer(options, app).listen(443, () => {
+            console.log(`✅ HTTPS Server running on https://${deviceIp}:443`);
+        });
+    } else {
+        app.listen(appPort, () => {
+            console.log(
+                `✅ HTTP Server running on http://${deviceIp}:${appPort}`
+            );
+        });
+    }
 };
 
 if (!fs.existsSync(filePath)) {

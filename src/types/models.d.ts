@@ -74,7 +74,7 @@ export interface Booking {
     service: Service;
     address: Address;
     staff: Staff;
-    is_paid: boolean;
+    is_paid: boolean | number;
 }
 
 export interface Service {

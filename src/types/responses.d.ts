@@ -51,7 +51,7 @@ export interface BookingResponse extends Booking {
     staff_firstname: string;
     staff_lastname: string;
     items_price?: number;
-    is_paid: boolean;
+    is_paid: number | boolean;
 }
 
 export interface NotificationResponse extends Notification {

@@ -9,3 +9,5 @@ fcm.serviceaccount.key.json
 
 /logs
 *.log
+
+/ssl
