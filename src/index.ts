@@ -86,7 +86,7 @@ const initialApp = () => {
         };
 
         https.createServer(options, app).listen(appPort, '0.0.0.0', () => {
-            console.log('🚀 HTTPS Server running on https://0.0.0.0:8000');
+            console.log(`🚀 HTTPS Server running on https://0.0.0.0:${appPort}`);
         });
     } else {
         app.listen(appPort, () => {
