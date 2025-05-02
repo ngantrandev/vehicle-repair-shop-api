@@ -315,7 +315,6 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
                 staff_id,
                 staff_firstname,
                 staff_lastname,
-                is_paid,
                 ...other
             } = bookingRes;
 
@@ -363,7 +362,7 @@ export const getAllBooking = async (req: CustomRequest, res: Response) => {
                 },
             };
 
-            if (typeof is_paid === 'number' && is_paid === 0) {
+            if (typeof other.is_paid === 'number' && other.is_paid === 0) {
                 other.is_paid = false;
             } else {
                 other.is_paid = true;
