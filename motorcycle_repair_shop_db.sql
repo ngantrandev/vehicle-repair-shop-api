@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th12 17, 2024 lúc 08:43 AM
--- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Host: mysqldbhost
+-- Generation Time: May 02, 2025 at 04:20 PM
+-- Server version: 10.4.28-MariaDB-1:10.4.28+maria~ubu2004
+-- PHP Version: 8.2.27
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `motorcycle_repair_shop_db`
+-- Database: `motorcycle_repair_shop_db`
 --
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `bookings`
+-- Table structure for table `bookings`
 --
 
 CREATE TABLE `bookings` (
@@ -42,11 +42,11 @@ CREATE TABLE `bookings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `bookings`
+-- Dumping data for table `bookings`
 --
 
 INSERT INTO `bookings` (`id`, `service_id`, `user_id`, `created_at`, `modified_at`, `address_id`, `status`, `pre_status`, `note`, `staff_id`, `image_url`) VALUES
-(79, 7, 2, '2024-08-04 01:12:35', '2024-11-16 21:23:51', 135, 'done', 'accepted', 'sdfsdf', 12, 'uploads\\1728315132675.webp'),
+(79, 7, 2, '2024-08-04 01:12:35', '2024-11-16 21:23:51', 135, 'done', 'accepted', 'sdfsdf', 12, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201433/repairshopp/uploads/tk8u9kw6t4yb5cejytoj.webp'),
 (80, 1, 2, '2024-08-05 01:12:53', '2024-10-24 22:15:28', 143, 'done', 'accepted', '', 12, ''),
 (81, 1, 2, '2024-08-06 01:13:09', '2024-10-20 15:30:34', 90, 'done', 'accepted', '', 1, ''),
 (82, 1, 2, '2024-08-07 01:13:19', '2024-10-20 15:31:36', 91, 'done', 'accepted', '', 12, ''),
@@ -54,16 +54,16 @@ INSERT INTO `bookings` (`id`, `service_id`, `user_id`, `created_at`, `modified_a
 (84, 1, 2, '2024-08-09 01:16:58', '2024-10-20 15:31:36', 93, 'done', 'accepted', '', 12, ''),
 (85, 1, 2, '2024-08-04 01:17:08', '2024-08-04 11:43:57', 94, 'done', '', '', 1, ''),
 (89, 1, 2, '2024-08-04 10:48:26', '2024-10-20 11:42:05', 98, 'accepted', 'accepted', '', 14, ''),
-(105, 2, 2, '2024-10-07 22:32:12', '2024-10-07 22:32:12', 118, 'done', '', '', 16, 'uploads\\1728315132675.webp'),
-(106, 1, 2, '2024-10-19 15:06:41', '2024-10-19 15:06:41', 120, 'done', '', '', 11, 'uploads\\1729325201091.webp'),
-(107, 1, 2, '2024-10-19 15:07:47', '2024-10-19 15:07:47', 121, 'done', '', '', 13, 'uploads\\1729325267660.webp'),
-(108, 1, 2, '2024-10-19 15:08:39', '2024-10-19 15:08:39', 122, 'done', '', '', 11, 'uploads\\1729325319099.webp'),
-(109, 1, 2, '2024-10-19 22:18:05', '2024-10-19 22:18:05', 123, 'done', '', '', 11, 'uploads\\1729351085008.webp'),
-(110, 1, 1, '2024-10-19 22:18:47', '2024-10-19 22:18:47', 124, 'done', '', '', 13, 'uploads\\1729351127036.webp'),
-(111, 1, 2, '2024-10-19 22:19:16', '2024-10-19 22:19:16', 125, 'done', '', '', 13, 'uploads\\1729351155935.webp'),
-(112, 1, 2, '2024-10-19 22:27:03', '2024-10-19 22:27:03', 126, 'done', '', '', 11, 'uploads\\1729351623476.webp'),
-(113, 1, 2, '2024-10-19 22:27:06', '2024-10-19 22:27:06', 127, 'done', '', '', 13, 'uploads\\1729351626040.webp'),
-(114, 1, 2, '2024-10-19 22:53:45', '2024-10-19 22:53:45', 128, 'done', '', '', 11, 'uploads\\1729353225204.webp'),
+(105, 2, 2, '2024-10-07 22:32:12', '2024-10-07 22:32:12', 118, 'done', '', '', 16, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201433/repairshopp/uploads/tk8u9kw6t4yb5cejytoj.webp'),
+(106, 1, 2, '2024-10-19 15:06:41', '2024-10-19 15:06:41', 120, 'done', '', '', 11, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201436/repairshopp/uploads/ddz1p5ym7zjk9opqzpv0.webp'),
+(107, 1, 2, '2024-10-19 15:07:47', '2024-10-19 15:07:47', 121, 'done', '', '', 13, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201437/repairshopp/uploads/vlw5l38zbxyar9boehjw.webp'),
+(108, 1, 2, '2024-10-19 15:08:39', '2024-10-19 15:08:39', 122, 'done', '', '', 11, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201438/repairshopp/uploads/ppe6l9uqvjpvjecqsk4u.webp'),
+(109, 1, 2, '2024-10-19 22:18:05', '2024-10-19 22:18:05', 123, 'done', '', '', 11, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201439/repairshopp/uploads/sbgymqydyggxna6jqrhh.webp'),
+(110, 1, 1, '2024-10-19 22:18:47', '2024-10-19 22:18:47', 124, 'done', '', '', 13, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201440/repairshopp/uploads/nwpjoodaouzpowwmuqay.webp'),
+(111, 1, 2, '2024-10-19 22:19:16', '2024-10-19 22:19:16', 125, 'done', '', '', 13, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201441/repairshopp/uploads/fu3p59t2yxs0f5qmux6j.webp'),
+(112, 1, 2, '2024-10-19 22:27:03', '2024-10-19 22:27:03', 126, 'done', '', '', 11, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201442/repairshopp/uploads/flnk5swlhhcu42xycmrt.webp'),
+(113, 1, 2, '2024-10-19 22:27:06', '2024-10-19 22:27:06', 127, 'done', '', '', 13, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201443/repairshopp/uploads/lneyoiplc56mqgwpoqxx.webp'),
+(114, 1, 2, '2024-10-19 22:53:45', '2024-10-19 22:53:45', 128, 'done', '', '', 11, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201444/repairshopp/uploads/qfz57wcp13kvewcdkr2j.webp'),
 (115, 1, 2, '2024-10-20 12:12:57', '2024-10-20 12:12:57', 129, 'done', '', '', 11, ''),
 (116, 1, 2, '2024-10-20 12:21:48', '2024-10-20 12:37:04', 130, 'done', 'pending', '', 13, ''),
 (120, 2, 2, '2024-10-20 15:33:33', '2024-10-24 14:48:36', 134, 'done', 'pending', '', 13, ''),
@@ -73,16 +73,16 @@ INSERT INTO `bookings` (`id`, `service_id`, `user_id`, `created_at`, `modified_a
 (124, 1, 2, '2024-10-20 22:36:52', '2024-10-20 22:36:52', 138, 'done', '', '', 13, ''),
 (125, 2, 2, '2024-10-20 22:36:58', '2024-10-20 22:36:58', 139, 'done', '', '', 12, ''),
 (126, 1, 2, '2024-10-21 20:42:18', '2024-10-21 22:39:16', 140, 'done', 'pending', '', 11, ''),
-(127, 1, 2, '2024-10-21 23:52:01', '2024-10-21 23:52:01', 141, 'done', '', '', 13, 'uploads\\1729529521612.webp'),
+(127, 1, 2, '2024-10-21 23:52:01', '2024-10-21 23:52:01', 141, 'done', '', '', 13, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201446/repairshopp/uploads/swzxksvx5vwslqolzzdn.webp'),
 (128, 1, 2, '2024-10-21 23:53:17', '2024-10-21 23:53:17', 142, 'done', '', '', NULL, ''),
 (129, 1, 2, '2024-10-21 23:54:29', '2024-10-21 23:54:29', 143, 'done', '', '', 11, ''),
 (130, 1, 2, '2024-10-22 00:28:00', '2024-10-22 00:28:00', 144, 'done', '', '', 13, ''),
 (131, 1, 2, '2024-10-22 01:54:00', '2024-10-24 14:52:49', 145, 'done', 'pending', '', 11, ''),
-(132, 1, 2, '2024-10-22 01:54:58', '2024-10-24 14:52:50', 146, 'done', 'pending', '', 16, 'uploads\\1729536897875.webp'),
-(133, 1, 2, '2024-10-22 01:55:56', '2024-10-24 14:52:51', 147, 'done', 'pending', '', 13, 'uploads\\1729536956488.webp'),
+(132, 1, 2, '2024-10-22 01:54:58', '2024-10-24 14:52:50', 146, 'done', 'pending', '', 16, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201447/repairshopp/uploads/wsdjig9zn85aa7tpvxxa.webp'),
+(133, 1, 2, '2024-10-22 01:55:56', '2024-10-24 14:52:51', 147, 'done', 'pending', '', 13, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201448/repairshopp/uploads/mjgrwnymvk4a3nv6tgyc.webp'),
 (134, 2, 2, '2024-10-22 10:05:13', '2024-10-22 10:05:13', 148, 'done', '', '', 11, ''),
 (135, 1, 2, '2024-10-23 23:59:34', '2024-10-23 23:59:34', 149, 'done', '', '', 12, ''),
-(136, 1, 2, '2024-10-24 14:10:23', '2024-10-24 14:10:23', 150, 'done', '', '', 11, 'uploads\\1729753823210.webp'),
+(136, 1, 2, '2024-10-24 14:10:23', '2024-10-24 14:10:23', 150, 'done', '', '', 11, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201449/repairshopp/uploads/iemput49ibtmoypflgu7.webp'),
 (137, 1, 2, '2024-10-25 00:39:34', '2024-10-25 00:39:34', 151, 'done', '', '', 1, ''),
 (138, 10, 2, '2024-10-27 20:55:42', '2024-10-27 20:55:42', 153, 'done', '', '', 1, ''),
 (139, 1, 2, '2024-11-01 16:13:54', '2024-11-01 16:13:54', 154, 'done', '', '', 1, ''),
@@ -91,11 +91,11 @@ INSERT INTO `bookings` (`id`, `service_id`, `user_id`, `created_at`, `modified_a
 (142, 1, 2, '2024-11-01 16:32:55', '2024-11-01 16:32:55', 157, 'done', '', '', 12, ''),
 (143, 1, 2, '2024-11-01 23:14:02', '2024-11-01 23:14:02', 158, 'done', '', '', 1, ''),
 (144, 1, 2, '2024-11-01 23:14:37', '2024-11-01 23:14:37', 159, 'done', '', '', 12, ''),
-(145, 23, 2, '2024-11-03 11:12:52', '2024-11-03 11:12:52', 160, 'done', '', '', 1, 'uploads\\1730607172112.webp'),
-(146, 1, 2, '2024-11-03 14:14:30', '2024-11-03 14:14:30', 161, 'done', '', '', 11, 'uploads\\1730618070792.webp'),
-(147, 7, 38, '2024-11-03 19:03:09', '2024-11-03 19:03:09', 162, 'done', 'accepted', '', 1, 'uploads\\1730635388679.webp'),
+(145, 23, 2, '2024-11-03 11:12:52', '2024-11-03 11:12:52', 160, 'done', '', '', 1, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201458/repairshopp/uploads/cdyphv3h2dshqvi3gane.webp'),
+(146, 1, 2, '2024-11-03 14:14:30', '2024-11-03 14:14:30', 161, 'done', '', '', 11, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201459/repairshopp/uploads/xc9u1fr8zwhvody1q63n.webp'),
+(147, 7, 38, '2024-11-03 19:03:09', '2024-11-03 19:03:09', 162, 'done', 'accepted', '', 1, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201490/repairshopp/uploads/khvrbdibkwyxs55dr94k.webp'),
 (148, 1, 2, '2024-11-03 19:06:01', '2024-11-03 19:06:01', 163, 'done', 'accepted', '', 1, ''),
-(149, 1, 2, '2024-11-03 20:41:19', '2024-11-03 20:41:19', 164, 'done', '', NULL, 14, 'uploads\\1730641278561.webp'),
+(149, 1, 2, '2024-11-03 20:41:19', '2024-11-03 20:41:19', 164, 'done', '', NULL, 14, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201492/repairshopp/uploads/n2prg90fqagdyccqtpvb.webp'),
 (150, 1, 2, '2024-11-03 20:43:11', '2024-11-03 20:43:11', 165, 'done', '', NULL, 1, ''),
 (151, 2, 2, '2024-11-10 11:55:36', '2024-11-10 11:55:36', 166, 'done', 'accepted', '', 13, ''),
 (152, 1, 2, '2024-11-10 11:55:44', '2024-11-10 11:55:44', 167, 'done', 'accepted', '', 13, ''),
@@ -139,7 +139,7 @@ INSERT INTO `bookings` (`id`, `service_id`, `user_id`, `created_at`, `modified_a
 (302, 7, 2, '2024-12-09 18:52:39', '2024-12-09 18:52:39', 318, 'accepted', '', NULL, 1, ''),
 (303, 7, 2, '2024-12-09 18:54:06', '2024-12-09 18:54:06', 319, 'accepted', 'accepted', '', 12, ''),
 (304, 7, 2, '2024-12-09 18:58:03', '2024-12-09 18:58:03', 320, 'accepted', 'accepted', '', 1, ''),
-(305, 41, 2, '2024-12-09 21:25:10', '2024-12-09 21:25:10', 321, 'accepted', 'accepted', '', 13, 'uploads\\1733754310667.webp'),
+(305, 41, 2, '2024-12-09 21:25:10', '2024-12-09 21:25:10', 321, 'accepted', 'accepted', '', 13, 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201566/repairshopp/uploads/fdzacqsozk778ql9unuj.webp'),
 (309, 7, 2, '2024-12-14 23:52:56', '2024-12-14 23:52:56', 325, 'pending', '', NULL, 1, ''),
 (310, 1, 2, '2024-12-15 00:05:29', '2024-12-15 00:05:29', 326, 'accepted', 'accepted', '', 16, ''),
 (311, 1, 2, '2024-12-15 00:24:51', '2024-12-15 00:24:51', 327, 'pending', '', NULL, 1, ''),
@@ -161,7 +161,7 @@ INSERT INTO `bookings` (`id`, `service_id`, `user_id`, `created_at`, `modified_a
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `bookings_items`
+-- Table structure for table `bookings_items`
 --
 
 CREATE TABLE `bookings_items` (
@@ -173,7 +173,7 @@ CREATE TABLE `bookings_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `bookings_items`
+-- Dumping data for table `bookings_items`
 --
 
 INSERT INTO `bookings_items` (`id`, `booking_id`, `item_id`, `price`, `count`) VALUES
@@ -234,7 +234,7 @@ INSERT INTO `bookings_items` (`id`, `booking_id`, `item_id`, `price`, `count`) V
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `bookings_items_temp`
+-- Table structure for table `bookings_items_temp`
 --
 
 CREATE TABLE `bookings_items_temp` (
@@ -244,7 +244,7 @@ CREATE TABLE `bookings_items_temp` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `bookings_items_temp`
+-- Dumping data for table `bookings_items_temp`
 --
 
 INSERT INTO `bookings_items_temp` (`id`, `booking_id`, `item_id`) VALUES
@@ -318,7 +318,7 @@ INSERT INTO `bookings_items_temp` (`id`, `booking_id`, `item_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `goong_map_addresses`
+-- Table structure for table `goong_map_addresses`
 --
 
 CREATE TABLE `goong_map_addresses` (
@@ -331,7 +331,7 @@ CREATE TABLE `goong_map_addresses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `goong_map_addresses`
+-- Dumping data for table `goong_map_addresses`
 --
 
 INSERT INTO `goong_map_addresses` (`id`, `latitude`, `longitude`, `place_id`, `address_name`, `full_address`) VALUES
@@ -647,7 +647,7 @@ INSERT INTO `goong_map_addresses` (`id`, `latitude`, `longitude`, `place_id`, `a
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `inputs`
+-- Table structure for table `inputs`
 --
 
 CREATE TABLE `inputs` (
@@ -656,7 +656,7 @@ CREATE TABLE `inputs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `inputs`
+-- Dumping data for table `inputs`
 --
 
 INSERT INTO `inputs` (`id`, `date_input`) VALUES
@@ -667,7 +667,7 @@ INSERT INTO `inputs` (`id`, `date_input`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `input_info`
+-- Table structure for table `input_info`
 --
 
 CREATE TABLE `input_info` (
@@ -680,7 +680,7 @@ CREATE TABLE `input_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `input_info`
+-- Dumping data for table `input_info`
 --
 
 INSERT INTO `input_info` (`id`, `input_id`, `item_id`, `count`, `input_price`, `output_price`) VALUES
@@ -702,7 +702,7 @@ INSERT INTO `input_info` (`id`, `input_id`, `item_id`, `count`, `input_price`, `
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `invoices`
+-- Table structure for table `invoices`
 --
 
 CREATE TABLE `invoices` (
@@ -715,7 +715,7 @@ CREATE TABLE `invoices` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `invoices`
+-- Dumping data for table `invoices`
 --
 
 INSERT INTO `invoices` (`id`, `booking_id`, `invoice_date`, `total_price`, `final_price`, `invoice_file`) VALUES
@@ -833,7 +833,7 @@ INSERT INTO `invoices` (`id`, `booking_id`, `invoice_date`, `total_price`, `fina
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `items`
+-- Table structure for table `items`
 --
 
 CREATE TABLE `items` (
@@ -844,7 +844,7 @@ CREATE TABLE `items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `items`
+-- Dumping data for table `items`
 --
 
 INSERT INTO `items` (`id`, `name`, `image_url`, `description`) VALUES
@@ -863,7 +863,7 @@ INSERT INTO `items` (`id`, `name`, `image_url`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `motorcycles`
+-- Table structure for table `motorcycles`
 --
 
 CREATE TABLE `motorcycles` (
@@ -874,7 +874,7 @@ CREATE TABLE `motorcycles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `motorcycles`
+-- Dumping data for table `motorcycles`
 --
 
 INSERT INTO `motorcycles` (`id`, `brand_id`, `name`, `image_url`) VALUES
@@ -892,7 +892,7 @@ INSERT INTO `motorcycles` (`id`, `brand_id`, `name`, `image_url`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `motorcycle_brands`
+-- Table structure for table `motorcycle_brands`
 --
 
 CREATE TABLE `motorcycle_brands` (
@@ -901,7 +901,7 @@ CREATE TABLE `motorcycle_brands` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `motorcycle_brands`
+-- Dumping data for table `motorcycle_brands`
 --
 
 INSERT INTO `motorcycle_brands` (`id`, `name`) VALUES
@@ -919,7 +919,7 @@ INSERT INTO `motorcycle_brands` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `notifications`
+-- Table structure for table `notifications`
 --
 
 CREATE TABLE `notifications` (
@@ -930,7 +930,7 @@ CREATE TABLE `notifications` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `notifications`
+-- Dumping data for table `notifications`
 --
 
 INSERT INTO `notifications` (`id`, `title`, `message`, `date`) VALUES
@@ -1337,7 +1337,7 @@ INSERT INTO `notifications` (`id`, `title`, `message`, `date`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `notifications_users`
+-- Table structure for table `notifications_users`
 --
 
 CREATE TABLE `notifications_users` (
@@ -1348,7 +1348,7 @@ CREATE TABLE `notifications_users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `notifications_users`
+-- Dumping data for table `notifications_users`
 --
 
 INSERT INTO `notifications_users` (`user_id`, `notification_id`, `recipient_type`, `is_read`) VALUES
@@ -1681,7 +1681,7 @@ INSERT INTO `notifications_users` (`user_id`, `notification_id`, `recipient_type
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `outputs`
+-- Table structure for table `outputs`
 --
 
 CREATE TABLE `outputs` (
@@ -1691,7 +1691,7 @@ CREATE TABLE `outputs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `outputs`
+-- Dumping data for table `outputs`
 --
 
 INSERT INTO `outputs` (`id`, `booking_id`, `date_output`) VALUES
@@ -1725,7 +1725,7 @@ INSERT INTO `outputs` (`id`, `booking_id`, `date_output`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `output_info`
+-- Table structure for table `output_info`
 --
 
 CREATE TABLE `output_info` (
@@ -1738,7 +1738,7 @@ CREATE TABLE `output_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `output_info`
+-- Dumping data for table `output_info`
 --
 
 INSERT INTO `output_info` (`id`, `output_id`, `item_id`, `count`, `price`, `booking_id`) VALUES
@@ -1790,7 +1790,7 @@ INSERT INTO `output_info` (`id`, `output_id`, `item_id`, `count`, `price`, `book
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `payments`
+-- Table structure for table `payments`
 --
 
 CREATE TABLE `payments` (
@@ -1809,7 +1809,7 @@ CREATE TABLE `payments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `payments`
+-- Dumping data for table `payments`
 --
 
 INSERT INTO `payments` (`id`, `invoice_id`, `created_at`, `payment_method`, `amount_paid`, `order_info`, `bank_code`, `bank_transaction_id`, `transaction_id`, `txn_ref`, `payment_status`, `status`) VALUES
@@ -1943,7 +1943,7 @@ INSERT INTO `payments` (`id`, `invoice_id`, `created_at`, `payment_method`, `amo
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `services`
+-- Table structure for table `services`
 --
 
 CREATE TABLE `services` (
@@ -1958,45 +1958,45 @@ CREATE TABLE `services` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `services`
+-- Dumping data for table `services`
 --
 
 INSERT INTO `services` (`id`, `category_id`, `name`, `description`, `price`, `estimated_time`, `image_url`, `active`) VALUES
-(1, 1, 'Thay nhớt cho xe honda', 'Đảm bảo động cơ xe Honda của bạn luôn vận hành êm ái với dịch vụ thay nhớt tận nơi.\r\nChúng tôi sử dụng dầu nhớt chất lượng cao, được khuyến nghị bởi nhà sản xuất, giúp:\r\n- Tăng tuổi thọ động cơ,\r\n- Cải thiện hiệu suất vận hành,\r\n- Giảm nhiệt và ma sát trong quá trình hoạt động.\r\nHãy đặt lịch ngay để trải nghiệm dịch vụ tiện lợi và an toàn cho xe của bạn.', 100000, '00:30:00', 'uploads\\1732123141703.webp', 1),
-(2, 2, 'Cấp cứu xe chết máy do ngập nước', 'Xe chết máy do ngập nước? Đừng lo lắng! Dịch vụ cứu hộ của chúng tôi sẽ giúp bạn xử lý sự cố nhanh chóng:\r\n- Hút nước ra khỏi động cơ và hệ thống xăng,\r\n- Kiểm tra và sửa chữa các linh kiện bị ảnh hưởng,\r\n- Khôi phục xe về trạng thái vận hành an toàn.\r\nKỹ thuật viên sẽ đến tận nơi, đảm bảo xử lý triệt để và tiết kiệm thời gian cho bạn.', 500000, '05:00:00', 'uploads\\1730627118480.webp', 1),
-(7, 2, 'Thay lốp xe honda, wave alpha', 'Đừng để sự cố thủng lốp làm gián đoạn hành trình của bạn!\r\nChúng tôi cung cấp dịch vụ vá lốp tận nơi với:\r\n- Thiết bị hiện đại, đảm bảo không gây hư hại lốp,\r\n- Thời gian xử lý nhanh chóng, chỉ trong vài phút,\r\n- Phương pháp vá chuyên nghiệp, đảm bảo bền và an toàn khi di chuyển.\r\nLiên hệ ngay để có giải pháp cứu hộ xe nhanh chóng.', 80000, '00:30:00', 'uploads\\1732371169756.webp', 1),
-(8, 4, 'Thay lốp xe honda, wave alpha', 'Dịch vụ thay lốp chuyên nghiệp giúp bạn nhanh chóng tiếp tục hành trình mà không lo sự cố lốp hỏng.\r\nChúng tôi thay lốp tại chỗ với:\r\n- Lốp chất lượng cao, phù hợp với nhiều dòng xe,\r\n- Quy trình thay lốp nhanh chóng, hiệu quả,\r\n- Sử dụng thiết bị hiện đại để bảo đảm lốp mới được gắn chính xác và an toàn.', 100000, '00:30:00', 'uploads\\1732260277324.webp', 1),
-(10, 4, 'Thay bánh xe honda', 'Khi bánh xe bị hư hỏng hoặc không còn khả năng vận hành tốt, dịch vụ thay bánh xe của chúng tôi sẽ giúp bạn nhanh chóng thay thế tại chỗ.\nChúng tôi cung cấp:\n- Bánh xe phù hợp với các dòng xe phổ biến,\n- Kỹ thuật viên chuyên nghiệp thay bánh xe nhanh chóng,\n- Đảm bảo an toàn và chất lượng cho bánh xe mới.', 200000, '00:30:00', 'uploads\\1732260293394.webp', 1),
-(11, 4, 'Thay gương honda, wave alpha', 'Dịch vụ thay gương xe tận nơi giúp bạn khôi phục sự an toàn khi di chuyển.\r\nChúng tôi thay gương với:\r\n- Gương xe chính hãng, bền bỉ và rõ nét,\r\n- Lắp đặt gương xe nhanh chóng và chính xác,\r\n- Cam kết bảo vệ tầm nhìn của bạn khi lái xe.', 100000, '00:10:00', 'uploads\\1732599520972.webp', 1),
-(12, 4, 'Thay xích xe honda, wave alpha', 'Dịch vụ thay xích xe của chúng tôi sẽ giúp xe của bạn luôn vận hành mượt mà và an toàn.\r\nChúng tôi thay xích với:\r\n- Xích xe chất lượng cao,\r\n- Đảm bảo đúng tiêu chuẩn và phù hợp với dòng xe của bạn,\r\n- Quy trình thay xích nhanh chóng, không làm gián đoạn lịch trình của bạn.', 150000, '00:30:00', 'uploads\\1732260308469.webp', 1),
-(13, 4, 'Thay yên xe xe honda, wave alpha, dream', 'Dịch vụ thay yên xe giúp bạn thay thế yên xe cũ hoặc bị hỏng để tiếp tục hành trình thoải mái.\nChúng tôi thay yên xe với:\n- Yên xe phù hợp với nhiều loại xe,\n- Lắp đặt yên xe chính xác và chắc chắn,\n- Chất liệu yên xe thoải mái, chịu được thời gian sử dụng lâu dài.', 100000, '00:30:00', 'uploads\\1732260319614.webp', 1),
-(14, 4, 'Thay phanh xe honda, wave alpha', 'Thay phanh là dịch vụ cần thiết để đảm bảo an toàn cho bạn khi lái xe.\nChúng tôi thay phanh với:\n- Phanh xe chất lượng cao,\n- Đảm bảo phanh xe hoạt động tốt, an toàn,\n- Quy trình thay phanh nhanh chóng và hiệu quả.', 120000, '00:30:00', 'uploads\\1730627481954.webp', 1),
-(20, 1, 'Bảo dưỡng định kỳ xe honda, dream, wave alpha', 'Bảo dưỡng định kỳ giúp xe của bạn hoạt động ổn định và bền bỉ hơn.\nDịch vụ bảo dưỡng định kỳ bao gồm:\n- Kiểm tra toàn diện các bộ phận của xe,\n- Thay thế các linh kiện cần thiết,\n- Điều chỉnh và làm sạch các bộ phận của xe.\nHãy đặt lịch bảo dưỡng định kỳ để xe luôn hoạt động như mới.', 500000, '05:00:00', 'uploads\\1731853529954.webp', 1),
-(21, 1, 'Bảo dưỡng xe honda', 'Bảo dưỡng xe Honda giúp bạn duy trì hiệu suất và tuổi thọ của xe Honda.\r\nChúng tôi cung cấp dịch vụ bảo dưỡng chuyên sâu cho xe Honda với:\r\n- Kiểm tra và thay thế nhớt động cơ,\r\n- Kiểm tra và thay thế bộ lọc gió, lọc dầu,\r\n- Điều chỉnh hệ thống phanh, lốp, và động cơ.\r\nXe Honda của bạn sẽ luôn sẵn sàng cho mọi chuyến đi.', 500000, '05:00:00', 'uploads\\1730627725721.webp', 1),
-(22, 4, 'Thay lốp xe wave alpha', 'Dịch vụ thay lốp xe Wave Alpha giúp bạn dễ dàng tiếp tục hành trình khi gặp sự cố với lốp xe.\r\nChúng tôi cung cấp:\r\n- Lốp chính hãng cho xe Wave Alpha,\r\n- Quy trình thay lốp nhanh chóng,\r\n- Thiết bị hiện đại để thay lốp chính xác và hiệu quả.', 100000, '01:00:00', 'uploads\\1730627669664.webp', 1),
-(23, 4, 'Thay lốp xe dream', 'Thay lốp xe Dream là dịch vụ quan trọng giúp đảm bảo an toàn khi lái xe.\nChúng tôi thay lốp xe Dream với:\n- Lốp chính hãng, phù hợp với dòng xe Dream,\n- Thời gian thay lốp nhanh chóng,\n- Đảm bảo lốp mới được gắn đúng cách và an toàn.', 110000, '00:30:00', 'uploads\\1730626606457.webp', 1),
-(25, 4, 'Thay bánh xe honda suzuki', 'Dịch vụ thay bánh xe Honda Suzuki giúp xe của bạn hoạt động tốt hơn sau khi gặp sự cố bánh xe.\r\nChúng tôi thay bánh xe với:\r\n- Bánh xe chất lượng cao, phù hợp với dòng xe Honda và Suzuki,\r\n- Kỹ thuật viên chuyên nghiệp thực hiện thay bánh xe tận nơi,\r\n- Đảm bảo sự ổn định và an toàn cho xe.', 100000, '00:30:00', 'uploads\\1730627576872.webp', 1),
-(26, 2, 'Cấp cứu xe chết máy do ngập nước', 'Xe chết máy do ngập nước? Chúng tôi sẽ cứu hộ và xử lý sự cố ngay tại chỗ.\nDịch vụ của chúng tôi bao gồm:\n- Hút nước khỏi động cơ,\n- Kiểm tra và sửa chữa các bộ phận bị ảnh hưởng,\n- Khôi phục xe về trạng thái hoạt động tốt.\nĐội ngũ kỹ thuật viên sẽ đến tận nơi để giúp bạn.', 500000, '05:00:00', 'uploads\\1730627753164.webp', 1),
-(36, 1, 'Thay dầu động cơ Yamaha Grande', 'Đảm bảo động cơ xe Yamaha Grande của bạn luôn vận hành êm ái và bền bỉ với dịch vụ thay dầu tận nơi.\r\n\r\nChúng tôi sử dụng dầu động cơ chính hãng giúp bảo vệ động cơ khỏi tình trạng mài mòn và tăng hiệu suất vận hành.\r\n\r\n- Tăng tuổi thọ động cơ,\r\n\r\n- Cải thiện hiệu suất vận hành,\r\n\r\n- Giảm nhiệt và ma sát trong quá trình hoạt động.\r\n\r\nĐặt lịch ngay để xe của bạn luôn hoạt động ổn định và tiết kiệm nhiên liệu.', 350000, '00:30:00', 'uploads\\1732439482668.webp', 1),
-(37, 4, 'Thay bugi xe Honda SH', 'Bugi xe Honda SH là bộ phận quan trọng giúp xe khởi động dễ dàng và duy trì hiệu suất động cơ ổn định.\r\n\r\nDịch vụ thay bugi chính hãng sẽ giúp xe của bạn hoạt động mượt mà hơn và tiết kiệm nhiên liệu.\r\n\r\n- Cải thiện khả năng khởi động,\r\n\r\n- Giảm thiểu sự cố động cơ,\r\n\r\n- Tiết kiệm nhiên liệu.\r\n\r\nHãy đến và trải nghiệm dịch vụ thay bugi chất lượng cao ngay hôm nay.', 150000, '00:20:00', 'uploads\\1732439534651.webp', 1),
-(38, 2, 'Cứu hộ xe chết máy Yamaha Nouvo', 'Khi xe Yamaha Nouvo gặp sự cố chết máy giữa đường, chúng tôi sẽ đến tận nơi hỗ trợ.\r\n\r\nDịch vụ cứu hộ chuyên nghiệp bao gồm sửa chữa động cơ và kéo xe về trung tâm bảo dưỡng.\r\n\r\n- Sửa chữa động cơ tại chỗ,\r\n\r\n- Kéo xe về trung tâm,\r\n\r\n- Tiết kiệm thời gian và công sức.\r\n\r\nĐảm bảo mọi sự cố sẽ được giải quyết nhanh chóng, giúp bạn tiếp tục hành trình mà không gặp gián đoạn.', 250000, '00:45:00', 'uploads\\1732439561709.webp', 1),
-(39, 6, 'Rửa xe và bảo dưỡng sơn Honda Winner', 'Dịch vụ rửa xe chuyên nghiệp giúp xe Honda Winner của bạn luôn sạch sẽ.\r\n\r\nChúng tôi sử dụng các sản phẩm vệ sinh chất lượng cao và an toàn với bề mặt sơn xe.\r\n\r\n- Bảo vệ bề mặt sơn,\r\n\r\n- Duy trì độ bóng và sáng của xe,\r\n\r\n- Loại bỏ bụi bẩn và tác nhân gây hại từ môi trường.\r\n\r\nĐảm bảo xe của bạn không chỉ sạch mà còn được bảo vệ lâu dài.', 200000, '00:40:00', 'uploads\\1732439570165.webp', 1),
-(40, 5, 'Sửa chữa khẩn cấp xe Vespa LX', 'Khi xe Vespa LX gặp sự cố khẩn cấp, chúng tôi sẽ cử nhân viên đến sửa chữa tại chỗ.\r\n\r\nDịch vụ này bao gồm sửa chữa các vấn đề nhỏ như chết máy, lỗi hệ thống điện.\r\n\r\n- Sửa chữa động cơ và hệ thống điện tại chỗ,\r\n\r\n- Kéo xe về trung tâm nếu cần thiết,\r\n\r\n- Tiết kiệm thời gian và giúp bạn tiếp tục di chuyển nhanh chóng.\r\n\r\nChúng tôi cam kết sẽ giúp bạn giải quyết vấn đề một cách nhanh chóng và an toàn.', 300000, '01:00:00', 'uploads\\1732439578635.webp', 1),
-(41, 3, 'Kiểm tra và sửa hệ thống đèn xe Lead', 'Hệ thống đèn chiếu sáng của xe Honda Lead rất quan trọng để đảm bảo an toàn khi di chuyển vào ban đêm.\r\n\r\nChúng tôi cung cấp dịch vụ kiểm tra và sửa chữa đèn xe, từ đèn pha đến đèn tín hiệu.\r\n\r\n- Kiểm tra và thay thế bóng đèn,\r\n\r\n- Sửa chữa các mạch điện liên quan đến đèn,\r\n\r\n- Đảm bảo hệ thống chiếu sáng hoạt động ổn định.\r\n\r\nHãy đến để đảm bảo ánh sáng rõ ràng và an toàn khi lái xe vào ban đêm.', 120000, '00:30:00', 'uploads\\1732439660665.webp', 1),
-(42, 1, 'Thay dầu động cơ xe Piaggio', 'Dịch vụ thay dầu động cơ chính hãng cho xe Piaggio giúp bảo vệ động cơ khỏi sự mài mòn và tăng hiệu suất vận hành.\r\n\r\nChúng tôi sử dụng dầu chất lượng cao, giúp xe của bạn luôn hoạt động trơn tru và tiết kiệm nhiên liệu.\r\n\r\n- Tăng hiệu suất động cơ,\r\n\r\n- Giảm ma sát và nhiệt độ động cơ,\r\n\r\n- Bảo vệ động cơ lâu dài.\r\n\r\nĐặt lịch ngay để xe của bạn luôn sẵn sàng cho hành trình tiếp theo.', 400000, '00:30:00', 'uploads\\1732439687203.webp', 1),
-(43, 2, 'Cứu hộ xe chết máy xe Suzuki GSX', 'Chúng tôi cung cấp dịch vụ cứu hộ xe Suzuki GSX khi gặp sự cố chết máy, với đội ngũ chuyên nghiệp và thiết bị hỗ trợ sẵn sàng.\r\n\r\nDịch vụ này bao gồm sửa chữa tại chỗ và kéo xe về trung tâm bảo dưỡng.\r\n\r\n- Sửa chữa động cơ tại chỗ,\r\n\r\n- Kéo xe về trung tâm bảo dưỡng nếu cần thiết,\r\n\r\n- Hỗ trợ tận nơi giúp bạn tiếp tục hành trình nhanh chóng.\r\n\r\nĐảm bảo bạn sẽ không phải lo lắng về sự cố xe chết máy.', 500000, '01:00:00', 'uploads\\1732439701697.webp', 1),
-(44, 4, 'Thay má phanh Yamaha Janus', 'Má phanh là bộ phận quan trọng đảm bảo an toàn khi lái xe.\r\n\r\nDịch vụ thay má phanh cho xe Yamaha Janus giúp cải thiện hiệu quả phanh và tăng độ an toàn khi lái xe.\r\n\r\n- Cải thiện khả năng phanh,\r\n\r\n- Giảm tiếng ồn khi phanh,\r\n\r\n- Tăng độ bền của má phanh.\r\n\r\nChúng tôi sử dụng má phanh chính hãng, giúp bạn lái xe an toàn hơn.', 180000, '00:30:00', 'uploads\\1732439712839.webp', 1),
-(45, 5, 'Vá lốp xe Yamaha Mio tại chỗ', 'Dịch vụ vá lốp xe Yamaha Mio tại chỗ giúp bạn giải quyết vấn đề khi gặp sự cố về lốp.\r\n\r\nChúng tôi cung cấp dịch vụ vá lốp nhanh chóng và chất lượng, giúp bạn tiếp tục hành trình mà không phải lo lắng về sự cố lốp xe.\r\n\r\n- Vá lốp nhanh chóng,\r\n\r\n- Đảm bảo lốp bền bỉ và an toàn khi di chuyển,\r\n\r\n- Tiết kiệm thời gian cho bạn.\r\n\r\nHãy liên hệ với chúng tôi ngay để xử lý sự cố lốp xe của bạn.', 100000, '00:20:00', 'uploads\\1732439725457.webp', 1),
-(46, 6, 'Rửa xe và bảo dưỡng sơn cho xe Honda SH', 'Đảm bảo xe Honda SH của bạn luôn sạch sẽ và sáng bóng với dịch vụ rửa xe chuyên nghiệp.\r\n\r\nChúng tôi sử dụng các sản phẩm vệ sinh chất lượng cao và an toàn với bề mặt sơn, giúp xe của bạn duy trì độ bóng lâu dài.\r\n\r\n- Loại bỏ bụi bẩn và chất bẩn bám trên xe,\r\n\r\n- Bảo vệ bề mặt sơn khỏi các tác nhân gây hại,\r\n\r\n- Giúp xe luôn sáng bóng và mới mẻ.\r\n\r\nHãy để chúng tôi chăm sóc xe của bạn, giúp bạn tự tin hơn khi lái xe trên phố.', 150000, '00:40:00', 'uploads\\1732439786685.webp', 1),
-(47, 6, 'Làm bóng xe Honda CBR 150', 'Dịch vụ làm bóng xe Honda CBR 150 giúp xe của bạn luôn sáng bóng và bảo vệ bề mặt sơn khỏi các tác nhân từ môi trường.\r\n\r\nChúng tôi sử dụng các chất liệu đánh bóng cao cấp để bảo vệ và phục hồi vẻ đẹp của xe.\r\n\r\n- Làm bóng bề mặt sơn,\r\n\r\n- Bảo vệ sơn khỏi tia UV và nước mưa,\r\n\r\n- Tăng độ bóng và sáng cho xe.\r\n\r\nHãy để xe của bạn trở nên hoàn hảo hơn với dịch vụ làm bóng xe chất lượng cao của chúng tôi.', 250000, '00:30:00', 'uploads\\1732439798109.webp', 1),
-(48, 6, 'Làm đẹp và bảo dưỡng bề mặt xe Piaggio Liberty', 'Dịch vụ làm đẹp và bảo dưỡng bề mặt xe Piaggio Liberty giúp xe luôn sáng bóng và bảo vệ lớp sơn khỏi sự mài mòn.\n\r\nChúng tôi sử dụng sản phẩm chăm sóc xe cao cấp để phục hồi và bảo vệ xe của bạn.\n\r\n- Rửa sạch xe,\n\r\n- Đánh bóng và bảo vệ lớp sơn,\n\r\n- Loại bỏ bụi bẩn và vết bẩn cứng đầu.\n\r\nĐặt lịch ngay để xe của bạn luôn trong trạng thái tốt nhất.', 200000, '00:40:00', 'uploads\\1732439798109.webp', 1),
-(49, 6, 'Đánh bóng xe Yamaha Exciter', 'Đánh bóng xe Yamaha Exciter giúp xe của bạn trở nên sáng bóng, như mới, và bảo vệ lớp sơn khỏi các tác nhân từ môi trường.\n\r\nDịch vụ này bao gồm việc sử dụng các loại chất đánh bóng chuyên dụng để phục hồi độ sáng bóng của xe.\n\r\n- Đánh bóng bề mặt sơn,\n\r\n- Loại bỏ vết trầy xước nhỏ,\n\r\n- Bảo vệ lớp sơn khỏi bụi bẩn và nước mưa.\n\r\nĐảm bảo xe của bạn luôn sáng bóng và như mới.', 180000, '00:30:00', 'uploads\\1732439798109.webp', 1),
-(50, 6, 'Chăm sóc nội thất xe Honda CRV', 'Dịch vụ chăm sóc nội thất xe Honda CRV giúp nội thất xe của bạn luôn sạch sẽ và thơm mát.\r\n\r\nChúng tôi làm sạch và bảo dưỡng ghế da, các bộ phận nội thất và khử mùi hiệu quả.\r\n\r\n- Làm sạch ghế da,\r\n\r\n- Bảo dưỡng các bộ phận nội thất,\r\n\r\n- Khử mùi hôi và tạo mùi thơm dễ chịu cho xe.\r\n\r\nGiúp xe của bạn luôn tươi mới và tạo không gian thoải mái cho bạn và gia đình.', 220000, '01:00:00', 'uploads\\1732439872989.webp', 1);
+(1, 1, 'Thay nhớt cho xe honda', 'Đảm bảo động cơ xe Honda của bạn luôn vận hành êm ái với dịch vụ thay nhớt tận nơi.\r\nChúng tôi sử dụng dầu nhớt chất lượng cao, được khuyến nghị bởi nhà sản xuất, giúp:\r\n- Tăng tuổi thọ động cơ,\r\n- Cải thiện hiệu suất vận hành,\r\n- Giảm nhiệt và ma sát trong quá trình hoạt động.\r\nHãy đặt lịch ngay để trải nghiệm dịch vụ tiện lợi và an toàn cho xe của bạn.', 100000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201496/repairshopp/uploads/hhadt6j4ykue0z0fjqok.webp', 1),
+(2, 2, 'Cấp cứu xe chết máy do ngập nước', 'Xe chết máy do ngập nước? Đừng lo lắng! Dịch vụ cứu hộ của chúng tôi sẽ giúp bạn xử lý sự cố nhanh chóng:\r\n- Hút nước ra khỏi động cơ và hệ thống xăng,\r\n- Kiểm tra và sửa chữa các linh kiện bị ảnh hưởng,\r\n- Khôi phục xe về trạng thái vận hành an toàn.\r\nKỹ thuật viên sẽ đến tận nơi, đảm bảo xử lý triệt để và tiết kiệm thời gian cho bạn.', 500000, '05:00:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201475/repairshopp/uploads/k2morc6bccefvuqb9kws.webp', 1),
+(7, 2, 'Thay lốp xe honda, wave alpha', 'Đừng để sự cố thủng lốp làm gián đoạn hành trình của bạn!\r\nChúng tôi cung cấp dịch vụ vá lốp tận nơi với:\r\n- Thiết bị hiện đại, đảm bảo không gây hư hại lốp,\r\n- Thời gian xử lý nhanh chóng, chỉ trong vài phút,\r\n- Phương pháp vá chuyên nghiệp, đảm bảo bền và an toàn khi di chuyển.\r\nLiên hệ ngay để có giải pháp cứu hộ xe nhanh chóng.', 80000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201506/repairshopp/uploads/hzhzy8z6zpgr2ddfifzt.webp', 1),
+(8, 4, 'Thay lốp xe honda, wave alpha', 'Dịch vụ thay lốp chuyên nghiệp giúp bạn nhanh chóng tiếp tục hành trình mà không lo sự cố lốp hỏng.\r\nChúng tôi thay lốp tại chỗ với:\r\n- Lốp chất lượng cao, phù hợp với nhiều dòng xe,\r\n- Quy trình thay lốp nhanh chóng, hiệu quả,\r\n- Sử dụng thiết bị hiện đại để bảo đảm lốp mới được gắn chính xác và an toàn.', 100000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201502/repairshopp/uploads/emovv56dw1eodnzt0rcx.webp', 1),
+(10, 4, 'Thay bánh xe honda', 'Khi bánh xe bị hư hỏng hoặc không còn khả năng vận hành tốt, dịch vụ thay bánh xe của chúng tôi sẽ giúp bạn nhanh chóng thay thế tại chỗ.\nChúng tôi cung cấp:\n- Bánh xe phù hợp với các dòng xe phổ biến,\n- Kỹ thuật viên chuyên nghiệp thay bánh xe nhanh chóng,\n- Đảm bảo an toàn và chất lượng cho bánh xe mới.', 200000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201503/repairshopp/uploads/vxnwgwp7jlshtn1jwf9y.webp', 1),
+(11, 4, 'Thay gương honda, wave alpha', 'Dịch vụ thay gương xe tận nơi giúp bạn khôi phục sự an toàn khi di chuyển.\r\nChúng tôi thay gương với:\r\n- Gương xe chính hãng, bền bỉ và rõ nét,\r\n- Lắp đặt gương xe nhanh chóng và chính xác,\r\n- Cam kết bảo vệ tầm nhìn của bạn khi lái xe.', 100000, '00:10:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201526/repairshopp/uploads/saulkejvvdb2cickip8q.webp', 1),
+(12, 4, 'Thay xích xe honda, wave alpha', 'Dịch vụ thay xích xe của chúng tôi sẽ giúp xe của bạn luôn vận hành mượt mà và an toàn.\r\nChúng tôi thay xích với:\r\n- Xích xe chất lượng cao,\r\n- Đảm bảo đúng tiêu chuẩn và phù hợp với dòng xe của bạn,\r\n- Quy trình thay xích nhanh chóng, không làm gián đoạn lịch trình của bạn.', 150000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201504/repairshopp/uploads/owgzc8ehl34zda82c9mt.webp', 1),
+(13, 4, 'Thay yên xe xe honda, wave alpha, dream', 'Dịch vụ thay yên xe giúp bạn thay thế yên xe cũ hoặc bị hỏng để tiếp tục hành trình thoải mái.\nChúng tôi thay yên xe với:\n- Yên xe phù hợp với nhiều loại xe,\n- Lắp đặt yên xe chính xác và chắc chắn,\n- Chất liệu yên xe thoải mái, chịu được thời gian sử dụng lâu dài.', 100000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201505/repairshopp/uploads/t1fdg92syaw7mogu9n0n.webp', 1),
+(14, 4, 'Thay phanh xe honda, wave alpha', 'Thay phanh là dịch vụ cần thiết để đảm bảo an toàn cho bạn khi lái xe.\nChúng tôi thay phanh với:\n- Phanh xe chất lượng cao,\n- Đảm bảo phanh xe hoạt động tốt, an toàn,\n- Quy trình thay phanh nhanh chóng và hiệu quả.', 120000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201482/repairshopp/uploads/lrx5fi1isaqoyj0dvjqs.webp', 1),
+(20, 1, 'Bảo dưỡng định kỳ xe honda, dream, wave alpha', 'Bảo dưỡng định kỳ giúp xe của bạn hoạt động ổn định và bền bỉ hơn.\nDịch vụ bảo dưỡng định kỳ bao gồm:\n- Kiểm tra toàn diện các bộ phận của xe,\n- Thay thế các linh kiện cần thiết,\n- Điều chỉnh và làm sạch các bộ phận của xe.\nHãy đặt lịch bảo dưỡng định kỳ để xe luôn hoạt động như mới.', 500000, '05:00:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201493/repairshopp/uploads/j0ueypwziy7cyfxpc35o.webp', 1),
+(21, 1, 'Bảo dưỡng xe honda', 'Bảo dưỡng xe Honda giúp bạn duy trì hiệu suất và tuổi thọ của xe Honda.\r\nChúng tôi cung cấp dịch vụ bảo dưỡng chuyên sâu cho xe Honda với:\r\n- Kiểm tra và thay thế nhớt động cơ,\r\n- Kiểm tra và thay thế bộ lọc gió, lọc dầu,\r\n- Điều chỉnh hệ thống phanh, lốp, và động cơ.\r\nXe Honda của bạn sẽ luôn sẵn sàng cho mọi chuyến đi.', 500000, '05:00:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201487/repairshopp/uploads/jzzvf64jadlzxn4t9qfx.webp', 1),
+(22, 4, 'Thay lốp xe wave alpha', 'Dịch vụ thay lốp xe Wave Alpha giúp bạn dễ dàng tiếp tục hành trình khi gặp sự cố với lốp xe.\r\nChúng tôi cung cấp:\r\n- Lốp chính hãng cho xe Wave Alpha,\r\n- Quy trình thay lốp nhanh chóng,\r\n- Thiết bị hiện đại để thay lốp chính xác và hiệu quả.', 100000, '01:00:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201485/repairshopp/uploads/gcvu5xvpjqjyn5qw65hj.webp', 1),
+(23, 4, 'Thay lốp xe dream', 'Thay lốp xe Dream là dịch vụ quan trọng giúp đảm bảo an toàn khi lái xe.\nChúng tôi thay lốp xe Dream với:\n- Lốp chính hãng, phù hợp với dòng xe Dream,\n- Thời gian thay lốp nhanh chóng,\n- Đảm bảo lốp mới được gắn đúng cách và an toàn.', 110000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201473/repairshopp/uploads/kz0mvphbsu1pkqh9xsyo.webp', 1),
+(25, 4, 'Thay bánh xe honda suzuki', 'Dịch vụ thay bánh xe Honda Suzuki giúp xe của bạn hoạt động tốt hơn sau khi gặp sự cố bánh xe.\r\nChúng tôi thay bánh xe với:\r\n- Bánh xe chất lượng cao, phù hợp với dòng xe Honda và Suzuki,\r\n- Kỹ thuật viên chuyên nghiệp thực hiện thay bánh xe tận nơi,\r\n- Đảm bảo sự ổn định và an toàn cho xe.', 100000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201483/repairshopp/uploads/no5g3dvm78qfe1rbiikc.webp', 1),
+(26, 2, 'Cấp cứu xe chết máy do ngập nước', 'Xe chết máy do ngập nước? Chúng tôi sẽ cứu hộ và xử lý sự cố ngay tại chỗ.\nDịch vụ của chúng tôi bao gồm:\n- Hút nước khỏi động cơ,\n- Kiểm tra và sửa chữa các bộ phận bị ảnh hưởng,\n- Khôi phục xe về trạng thái hoạt động tốt.\nĐội ngũ kỹ thuật viên sẽ đến tận nơi để giúp bạn.', 500000, '05:00:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201488/repairshopp/uploads/dgb8jkd96zx5jticxtbg.webp', 1),
+(36, 1, 'Thay dầu động cơ Yamaha Grande', 'Đảm bảo động cơ xe Yamaha Grande của bạn luôn vận hành êm ái và bền bỉ với dịch vụ thay dầu tận nơi.\r\n\r\nChúng tôi sử dụng dầu động cơ chính hãng giúp bảo vệ động cơ khỏi tình trạng mài mòn và tăng hiệu suất vận hành.\r\n\r\n- Tăng tuổi thọ động cơ,\r\n\r\n- Cải thiện hiệu suất vận hành,\r\n\r\n- Giảm nhiệt và ma sát trong quá trình hoạt động.\r\n\r\nĐặt lịch ngay để xe của bạn luôn hoạt động ổn định và tiết kiệm nhiên liệu.', 350000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201507/repairshopp/uploads/tpwkdylvpptqgdahgqi2.webp', 1),
+(37, 4, 'Thay bugi xe Honda SH', 'Bugi xe Honda SH là bộ phận quan trọng giúp xe khởi động dễ dàng và duy trì hiệu suất động cơ ổn định.\r\n\r\nDịch vụ thay bugi chính hãng sẽ giúp xe của bạn hoạt động mượt mà hơn và tiết kiệm nhiên liệu.\r\n\r\n- Cải thiện khả năng khởi động,\r\n\r\n- Giảm thiểu sự cố động cơ,\r\n\r\n- Tiết kiệm nhiên liệu.\r\n\r\nHãy đến và trải nghiệm dịch vụ thay bugi chất lượng cao ngay hôm nay.', 150000, '00:20:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201508/repairshopp/uploads/pbsnuk9lcqb0qq6hzy3r.webp', 1),
+(38, 2, 'Cứu hộ xe chết máy Yamaha Nouvo', 'Khi xe Yamaha Nouvo gặp sự cố chết máy giữa đường, chúng tôi sẽ đến tận nơi hỗ trợ.\r\n\r\nDịch vụ cứu hộ chuyên nghiệp bao gồm sửa chữa động cơ và kéo xe về trung tâm bảo dưỡng.\r\n\r\n- Sửa chữa động cơ tại chỗ,\r\n\r\n- Kéo xe về trung tâm,\r\n\r\n- Tiết kiệm thời gian và công sức.\r\n\r\nĐảm bảo mọi sự cố sẽ được giải quyết nhanh chóng, giúp bạn tiếp tục hành trình mà không gặp gián đoạn.', 250000, '00:45:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201508/repairshopp/uploads/uvuphwklbu2lce8dejsd.webp', 1),
+(39, 6, 'Rửa xe và bảo dưỡng sơn Honda Winner', 'Dịch vụ rửa xe chuyên nghiệp giúp xe Honda Winner của bạn luôn sạch sẽ.\r\n\r\nChúng tôi sử dụng các sản phẩm vệ sinh chất lượng cao và an toàn với bề mặt sơn xe.\r\n\r\n- Bảo vệ bề mặt sơn,\r\n\r\n- Duy trì độ bóng và sáng của xe,\r\n\r\n- Loại bỏ bụi bẩn và tác nhân gây hại từ môi trường.\r\n\r\nĐảm bảo xe của bạn không chỉ sạch mà còn được bảo vệ lâu dài.', 200000, '00:40:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201509/repairshopp/uploads/yspo1nupzpha64defzhb.webp', 1),
+(40, 5, 'Sửa chữa khẩn cấp xe Vespa LX', 'Khi xe Vespa LX gặp sự cố khẩn cấp, chúng tôi sẽ cử nhân viên đến sửa chữa tại chỗ.\r\n\r\nDịch vụ này bao gồm sửa chữa các vấn đề nhỏ như chết máy, lỗi hệ thống điện.\r\n\r\n- Sửa chữa động cơ và hệ thống điện tại chỗ,\r\n\r\n- Kéo xe về trung tâm nếu cần thiết,\r\n\r\n- Tiết kiệm thời gian và giúp bạn tiếp tục di chuyển nhanh chóng.\r\n\r\nChúng tôi cam kết sẽ giúp bạn giải quyết vấn đề một cách nhanh chóng và an toàn.', 300000, '01:00:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201511/repairshopp/uploads/f3yn76hvgwhcglnmjaun.webp', 1),
+(41, 3, 'Kiểm tra và sửa hệ thống đèn xe Lead', 'Hệ thống đèn chiếu sáng của xe Honda Lead rất quan trọng để đảm bảo an toàn khi di chuyển vào ban đêm.\r\n\r\nChúng tôi cung cấp dịch vụ kiểm tra và sửa chữa đèn xe, từ đèn pha đến đèn tín hiệu.\r\n\r\n- Kiểm tra và thay thế bóng đèn,\r\n\r\n- Sửa chữa các mạch điện liên quan đến đèn,\r\n\r\n- Đảm bảo hệ thống chiếu sáng hoạt động ổn định.\r\n\r\nHãy đến để đảm bảo ánh sáng rõ ràng và an toàn khi lái xe vào ban đêm.', 120000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201512/repairshopp/uploads/dwb9hreymfdydx7ncoq4.webp', 1),
+(42, 1, 'Thay dầu động cơ xe Piaggio', 'Dịch vụ thay dầu động cơ chính hãng cho xe Piaggio giúp bảo vệ động cơ khỏi sự mài mòn và tăng hiệu suất vận hành.\r\n\r\nChúng tôi sử dụng dầu chất lượng cao, giúp xe của bạn luôn hoạt động trơn tru và tiết kiệm nhiên liệu.\r\n\r\n- Tăng hiệu suất động cơ,\r\n\r\n- Giảm ma sát và nhiệt độ động cơ,\r\n\r\n- Bảo vệ động cơ lâu dài.\r\n\r\nĐặt lịch ngay để xe của bạn luôn sẵn sàng cho hành trình tiếp theo.', 400000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201513/repairshopp/uploads/fdabanyt67hph0w6y5g6.webp', 1),
+(43, 2, 'Cứu hộ xe chết máy xe Suzuki GSX', 'Chúng tôi cung cấp dịch vụ cứu hộ xe Suzuki GSX khi gặp sự cố chết máy, với đội ngũ chuyên nghiệp và thiết bị hỗ trợ sẵn sàng.\r\n\r\nDịch vụ này bao gồm sửa chữa tại chỗ và kéo xe về trung tâm bảo dưỡng.\r\n\r\n- Sửa chữa động cơ tại chỗ,\r\n\r\n- Kéo xe về trung tâm bảo dưỡng nếu cần thiết,\r\n\r\n- Hỗ trợ tận nơi giúp bạn tiếp tục hành trình nhanh chóng.\r\n\r\nĐảm bảo bạn sẽ không phải lo lắng về sự cố xe chết máy.', 500000, '01:00:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201514/repairshopp/uploads/dwjjceiaasy6mkdj1nhk.webp', 1),
+(44, 4, 'Thay má phanh Yamaha Janus', 'Má phanh là bộ phận quan trọng đảm bảo an toàn khi lái xe.\r\n\r\nDịch vụ thay má phanh cho xe Yamaha Janus giúp cải thiện hiệu quả phanh và tăng độ an toàn khi lái xe.\r\n\r\n- Cải thiện khả năng phanh,\r\n\r\n- Giảm tiếng ồn khi phanh,\r\n\r\n- Tăng độ bền của má phanh.\r\n\r\nChúng tôi sử dụng má phanh chính hãng, giúp bạn lái xe an toàn hơn.', 180000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201515/repairshopp/uploads/d1uozcrf4nmcut3xtxxx.webp', 1),
+(45, 5, 'Vá lốp xe Yamaha Mio tại chỗ', 'Dịch vụ vá lốp xe Yamaha Mio tại chỗ giúp bạn giải quyết vấn đề khi gặp sự cố về lốp.\r\n\r\nChúng tôi cung cấp dịch vụ vá lốp nhanh chóng và chất lượng, giúp bạn tiếp tục hành trình mà không phải lo lắng về sự cố lốp xe.\r\n\r\n- Vá lốp nhanh chóng,\r\n\r\n- Đảm bảo lốp bền bỉ và an toàn khi di chuyển,\r\n\r\n- Tiết kiệm thời gian cho bạn.\r\n\r\nHãy liên hệ với chúng tôi ngay để xử lý sự cố lốp xe của bạn.', 100000, '00:20:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201516/repairshopp/uploads/gheh8tpabz1u2o3rfh8a.webp', 1),
+(46, 6, 'Rửa xe và bảo dưỡng sơn cho xe Honda SH', 'Đảm bảo xe Honda SH của bạn luôn sạch sẽ và sáng bóng với dịch vụ rửa xe chuyên nghiệp.\r\n\r\nChúng tôi sử dụng các sản phẩm vệ sinh chất lượng cao và an toàn với bề mặt sơn, giúp xe của bạn duy trì độ bóng lâu dài.\r\n\r\n- Loại bỏ bụi bẩn và chất bẩn bám trên xe,\r\n\r\n- Bảo vệ bề mặt sơn khỏi các tác nhân gây hại,\r\n\r\n- Giúp xe luôn sáng bóng và mới mẻ.\r\n\r\nHãy để chúng tôi chăm sóc xe của bạn, giúp bạn tự tin hơn khi lái xe trên phố.', 150000, '00:40:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201517/repairshopp/uploads/scrxn9s8irz374edetf4.webp', 1),
+(47, 6, 'Làm bóng xe Honda CBR 150', 'Dịch vụ làm bóng xe Honda CBR 150 giúp xe của bạn luôn sáng bóng và bảo vệ bề mặt sơn khỏi các tác nhân từ môi trường.\r\n\r\nChúng tôi sử dụng các chất liệu đánh bóng cao cấp để bảo vệ và phục hồi vẻ đẹp của xe.\r\n\r\n- Làm bóng bề mặt sơn,\r\n\r\n- Bảo vệ sơn khỏi tia UV và nước mưa,\r\n\r\n- Tăng độ bóng và sáng cho xe.\r\n\r\nHãy để xe của bạn trở nên hoàn hảo hơn với dịch vụ làm bóng xe chất lượng cao của chúng tôi.', 250000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201518/repairshopp/uploads/qbvhssgbk7x8nbity85c.webp', 1),
+(48, 6, 'Làm đẹp và bảo dưỡng bề mặt xe Piaggio Liberty', 'Dịch vụ làm đẹp và bảo dưỡng bề mặt xe Piaggio Liberty giúp xe luôn sáng bóng và bảo vệ lớp sơn khỏi sự mài mòn.\n\r\nChúng tôi sử dụng sản phẩm chăm sóc xe cao cấp để phục hồi và bảo vệ xe của bạn.\n\r\n- Rửa sạch xe,\n\r\n- Đánh bóng và bảo vệ lớp sơn,\n\r\n- Loại bỏ bụi bẩn và vết bẩn cứng đầu.\n\r\nĐặt lịch ngay để xe của bạn luôn trong trạng thái tốt nhất.', 200000, '00:40:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201518/repairshopp/uploads/qbvhssgbk7x8nbity85c.webp', 1),
+(49, 6, 'Đánh bóng xe Yamaha Exciter', 'Đánh bóng xe Yamaha Exciter giúp xe của bạn trở nên sáng bóng, như mới, và bảo vệ lớp sơn khỏi các tác nhân từ môi trường.\n\r\nDịch vụ này bao gồm việc sử dụng các loại chất đánh bóng chuyên dụng để phục hồi độ sáng bóng của xe.\n\r\n- Đánh bóng bề mặt sơn,\n\r\n- Loại bỏ vết trầy xước nhỏ,\n\r\n- Bảo vệ lớp sơn khỏi bụi bẩn và nước mưa.\n\r\nĐảm bảo xe của bạn luôn sáng bóng và như mới.', 180000, '00:30:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201518/repairshopp/uploads/qbvhssgbk7x8nbity85c.webp', 1),
+(50, 6, 'Chăm sóc nội thất xe Honda CRV', 'Dịch vụ chăm sóc nội thất xe Honda CRV giúp nội thất xe của bạn luôn sạch sẽ và thơm mát.\r\n\r\nChúng tôi làm sạch và bảo dưỡng ghế da, các bộ phận nội thất và khử mùi hiệu quả.\r\n\r\n- Làm sạch ghế da,\r\n\r\n- Bảo dưỡng các bộ phận nội thất,\r\n\r\n- Khử mùi hôi và tạo mùi thơm dễ chịu cho xe.\r\n\r\nGiúp xe của bạn luôn tươi mới và tạo không gian thoải mái cho bạn và gia đình.', 220000, '01:00:00', 'https://res.cloudinary.com/dprojbz3k/image/upload/v1746201519/repairshopp/uploads/idpcmoc2wgiirjvnzhcq.webp', 1);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `services_items`
+-- Table structure for table `services_items`
 --
 
 CREATE TABLE `services_items` (
@@ -2005,7 +2005,7 @@ CREATE TABLE `services_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `services_items`
+-- Dumping data for table `services_items`
 --
 
 INSERT INTO `services_items` (`service_id`, `item_id`) VALUES
@@ -2050,7 +2050,7 @@ INSERT INTO `services_items` (`service_id`, `item_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `service_categories`
+-- Table structure for table `service_categories`
 --
 
 CREATE TABLE `service_categories` (
@@ -2060,7 +2060,7 @@ CREATE TABLE `service_categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `service_categories`
+-- Dumping data for table `service_categories`
 --
 
 INSERT INTO `service_categories` (`id`, `name`, `description`) VALUES
@@ -2074,7 +2074,7 @@ INSERT INTO `service_categories` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `service_motorcycles`
+-- Table structure for table `service_motorcycles`
 --
 
 CREATE TABLE `service_motorcycles` (
@@ -2083,7 +2083,7 @@ CREATE TABLE `service_motorcycles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `service_motorcycles`
+-- Dumping data for table `service_motorcycles`
 --
 
 INSERT INTO `service_motorcycles` (`service_id`, `motorcycle_id`) VALUES
@@ -2106,7 +2106,7 @@ INSERT INTO `service_motorcycles` (`service_id`, `motorcycle_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `service_stations`
+-- Table structure for table `service_stations`
 --
 
 CREATE TABLE `service_stations` (
@@ -2116,7 +2116,7 @@ CREATE TABLE `service_stations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `service_stations`
+-- Dumping data for table `service_stations`
 --
 
 INSERT INTO `service_stations` (`id`, `name`, `address_id`) VALUES
@@ -2129,7 +2129,7 @@ INSERT INTO `service_stations` (`id`, `name`, `address_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `staffs`
+-- Table structure for table `staffs`
 --
 
 CREATE TABLE `staffs` (
@@ -2148,7 +2148,7 @@ CREATE TABLE `staffs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `staffs`
+-- Dumping data for table `staffs`
 --
 
 INSERT INTO `staffs` (`id`, `username`, `password`, `firstname`, `lastname`, `birthday`, `image_url`, `email`, `phone`, `created_at`, `station_id`, `active`) VALUES
@@ -2163,7 +2163,7 @@ INSERT INTO `staffs` (`id`, `username`, `password`, `firstname`, `lastname`, `bi
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -2183,7 +2183,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `firstname`, `lastname`, `birthday`, `image_url`, `email`, `address_id`, `phone`, `role`, `created_at`, `active`) VALUES
@@ -2197,11 +2197,11 @@ INSERT INTO `users` (`id`, `username`, `password`, `firstname`, `lastname`, `bir
 (180, 'testtest', '$2b$10$uaaMp3ub2/DG9nzRwlQHz.f/cKmK/euluSqccrF23Z.kTuwh0eXoO', 'test', 'test', '2000-01-01', NULL, '', NULL, '0869352241', 'customer', '2024-12-09 10:22:34', 1);
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Indexes for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `bookings`
+-- Indexes for table `bookings`
 --
 ALTER TABLE `bookings`
   ADD PRIMARY KEY (`id`),
@@ -2212,51 +2212,51 @@ ALTER TABLE `bookings`
   ADD KEY `bookings_ibfk_4` (`staff_id`);
 
 --
--- Chỉ mục cho bảng `bookings_items`
+-- Indexes for table `bookings_items`
 --
 ALTER TABLE `bookings_items`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `booking_id` (`booking_id`,`item_id`);
 
 --
--- Chỉ mục cho bảng `bookings_items_temp`
+-- Indexes for table `bookings_items_temp`
 --
 ALTER TABLE `bookings_items_temp`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `goong_map_addresses`
+-- Indexes for table `goong_map_addresses`
 --
 ALTER TABLE `goong_map_addresses`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`);
 
 --
--- Chỉ mục cho bảng `inputs`
+-- Indexes for table `inputs`
 --
 ALTER TABLE `inputs`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `input_info`
+-- Indexes for table `input_info`
 --
 ALTER TABLE `input_info`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `invoices`
+-- Indexes for table `invoices`
 --
 ALTER TABLE `invoices`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `items`
+-- Indexes for table `items`
 --
 ALTER TABLE `items`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `motorcycles`
+-- Indexes for table `motorcycles`
 --
 ALTER TABLE `motorcycles`
   ADD PRIMARY KEY (`id`),
@@ -2264,38 +2264,38 @@ ALTER TABLE `motorcycles`
   ADD KEY `brand_id` (`brand_id`);
 
 --
--- Chỉ mục cho bảng `motorcycle_brands`
+-- Indexes for table `motorcycle_brands`
 --
 ALTER TABLE `motorcycle_brands`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`);
 
 --
--- Chỉ mục cho bảng `notifications`
+-- Indexes for table `notifications`
 --
 ALTER TABLE `notifications`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `outputs`
+-- Indexes for table `outputs`
 --
 ALTER TABLE `outputs`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `output_info`
+-- Indexes for table `output_info`
 --
 ALTER TABLE `output_info`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `payments`
+-- Indexes for table `payments`
 --
 ALTER TABLE `payments`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `services`
+-- Indexes for table `services`
 --
 ALTER TABLE `services`
   ADD PRIMARY KEY (`id`),
@@ -2303,27 +2303,27 @@ ALTER TABLE `services`
   ADD KEY `category_id` (`category_id`);
 
 --
--- Chỉ mục cho bảng `services_items`
+-- Indexes for table `services_items`
 --
 ALTER TABLE `services_items`
   ADD PRIMARY KEY (`service_id`,`item_id`);
 
 --
--- Chỉ mục cho bảng `service_categories`
+-- Indexes for table `service_categories`
 --
 ALTER TABLE `service_categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`);
 
 --
--- Chỉ mục cho bảng `service_motorcycles`
+-- Indexes for table `service_motorcycles`
 --
 ALTER TABLE `service_motorcycles`
   ADD PRIMARY KEY (`service_id`,`motorcycle_id`),
   ADD KEY `motorcycle_id` (`motorcycle_id`);
 
 --
--- Chỉ mục cho bảng `service_stations`
+-- Indexes for table `service_stations`
 --
 ALTER TABLE `service_stations`
   ADD PRIMARY KEY (`id`),
@@ -2331,7 +2331,7 @@ ALTER TABLE `service_stations`
   ADD KEY `address_id` (`address_id`);
 
 --
--- Chỉ mục cho bảng `staffs`
+-- Indexes for table `staffs`
 --
 ALTER TABLE `staffs`
   ADD PRIMARY KEY (`id`),
@@ -2339,7 +2339,7 @@ ALTER TABLE `staffs`
   ADD KEY `station_id` (`station_id`);
 
 --
--- Chỉ mục cho bảng `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -2347,129 +2347,129 @@ ALTER TABLE `users`
   ADD KEY `address_id` (`address_id`);
 
 --
--- AUTO_INCREMENT cho các bảng đã đổ
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT cho bảng `bookings`
+-- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=330;
 
 --
--- AUTO_INCREMENT cho bảng `bookings_items`
+-- AUTO_INCREMENT for table `bookings_items`
 --
 ALTER TABLE `bookings_items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=155;
 
 --
--- AUTO_INCREMENT cho bảng `bookings_items_temp`
+-- AUTO_INCREMENT for table `bookings_items_temp`
 --
 ALTER TABLE `bookings_items_temp`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
 
 --
--- AUTO_INCREMENT cho bảng `goong_map_addresses`
+-- AUTO_INCREMENT for table `goong_map_addresses`
 --
 ALTER TABLE `goong_map_addresses`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=346;
 
 --
--- AUTO_INCREMENT cho bảng `inputs`
+-- AUTO_INCREMENT for table `inputs`
 --
 ALTER TABLE `inputs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT cho bảng `input_info`
+-- AUTO_INCREMENT for table `input_info`
 --
 ALTER TABLE `input_info`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
--- AUTO_INCREMENT cho bảng `invoices`
+-- AUTO_INCREMENT for table `invoices`
 --
 ALTER TABLE `invoices`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=238;
 
 --
--- AUTO_INCREMENT cho bảng `items`
+-- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
   MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT cho bảng `motorcycles`
+-- AUTO_INCREMENT for table `motorcycles`
 --
 ALTER TABLE `motorcycles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT cho bảng `motorcycle_brands`
+-- AUTO_INCREMENT for table `motorcycle_brands`
 --
 ALTER TABLE `motorcycle_brands`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT cho bảng `notifications`
+-- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=491;
 
 --
--- AUTO_INCREMENT cho bảng `outputs`
+-- AUTO_INCREMENT for table `outputs`
 --
 ALTER TABLE `outputs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=178;
 
 --
--- AUTO_INCREMENT cho bảng `output_info`
+-- AUTO_INCREMENT for table `output_info`
 --
 ALTER TABLE `output_info`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
--- AUTO_INCREMENT cho bảng `payments`
+-- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=277;
 
 --
--- AUTO_INCREMENT cho bảng `services`
+-- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
--- AUTO_INCREMENT cho bảng `service_categories`
+-- AUTO_INCREMENT for table `service_categories`
 --
 ALTER TABLE `service_categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT cho bảng `service_stations`
+-- AUTO_INCREMENT for table `service_stations`
 --
 ALTER TABLE `service_stations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT cho bảng `staffs`
+-- AUTO_INCREMENT for table `staffs`
 --
 ALTER TABLE `staffs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
--- AUTO_INCREMENT cho bảng `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=181;
 
 --
--- Các ràng buộc cho các bảng đã đổ
+-- Constraints for dumped tables
 --
 
 --
--- Các ràng buộc cho bảng `bookings`
+-- Constraints for table `bookings`
 --
 ALTER TABLE `bookings`
   ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -2478,38 +2478,38 @@ ALTER TABLE `bookings`
   ADD CONSTRAINT `bookings_ibfk_4` FOREIGN KEY (`staff_id`) REFERENCES `staffs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Các ràng buộc cho bảng `motorcycles`
+-- Constraints for table `motorcycles`
 --
 ALTER TABLE `motorcycles`
   ADD CONSTRAINT `motorcycles_ibfk_1` FOREIGN KEY (`brand_id`) REFERENCES `motorcycle_brands` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Các ràng buộc cho bảng `services`
+-- Constraints for table `services`
 --
 ALTER TABLE `services`
   ADD CONSTRAINT `services_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `service_categories` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Các ràng buộc cho bảng `service_motorcycles`
+-- Constraints for table `service_motorcycles`
 --
 ALTER TABLE `service_motorcycles`
   ADD CONSTRAINT `service_motorcycles_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `service_motorcycles_ibfk_2` FOREIGN KEY (`motorcycle_id`) REFERENCES `motorcycles` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Các ràng buộc cho bảng `service_stations`
+-- Constraints for table `service_stations`
 --
 ALTER TABLE `service_stations`
   ADD CONSTRAINT `service_stations_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `goong_map_addresses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Các ràng buộc cho bảng `staffs`
+-- Constraints for table `staffs`
 --
 ALTER TABLE `staffs`
   ADD CONSTRAINT `staffs_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `service_stations` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Các ràng buộc cho bảng `users`
+-- Constraints for table `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`address_id`) REFERENCES `goong_map_addresses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
